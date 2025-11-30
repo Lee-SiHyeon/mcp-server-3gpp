@@ -251,7 +251,16 @@ server.registerTool(
             type: "text",
             text: `${causeType} Cause #${causeNumber} is not defined.\nPer ${spec}, undefined cause values are treated as #111 "${defaultCause.name}".\n\nDescription: ${defaultCause.description}`
           }
-        ]
+        ],
+        structuredContent: {
+          cause: {
+            number: 111,
+            name: defaultCause.name,
+            description: defaultCause.description,
+            spec: spec,
+            note: `Original cause #${causeNumber} is undefined`
+          }
+        }
       };
     }
     
@@ -264,7 +273,7 @@ server.registerTool(
     const relatedDocs = searchChunks(`#${causeNumber} ${cause.name}`, spec, 2);
     if (relatedDocs.length > 0) {
       additionalInfo = "\n\n📄 Related specification text:\n" + 
-        relatedDocs.map(r => r.content.substring(0, 400) + "...").join("\n\n");
+        relatedDocs.map(r => r.text.substring(0, 400) + "...").join("\n\n");
     }
     
     const output = {
@@ -305,7 +314,7 @@ server.registerTool(
       await loadChunks();
     }
     
-    const sources = [...new Set(chunksData.map(c => c.metadata?.source || "Unknown"))];
+    const sources = [...new Set(chunksData.map(c => c.spec || "Unknown"))];
     
     const specInfo = {
       "ts_124008": "TS 24.008 - 2G/3G NAS (MM/GMM/SM/CC)",
