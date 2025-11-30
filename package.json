@@ -1,0 +1,44 @@
+{
+  "name": "mcp-server-3gpp",
+  "version": "1.0.0",
+  "description": "MCP Server for searching 3GPP specification documents (LTE/5G NAS, EMM/5GMM causes)",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "mcp-server-3gpp": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "prepare-data": "node scripts/prepare-data.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "3gpp",
+    "lte",
+    "5g",
+    "nr",
+    "nas",
+    "emm",
+    "5gmm",
+    "telecom",
+    "ai",
+    "copilot"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_USERNAME/mcp-server-3gpp.git"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/mcp-server-3gpp#readme",
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/mcp-server-3gpp/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}
