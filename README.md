@@ -65,13 +65,33 @@ npm start
 ```
 
 ### Included Specs
-The package includes **pre-processed chunks** for core NAS specifications:
+The package includes **pre-processed chunks** for 14 specifications:
+
+**NAS Layer (4 specs)**
 - TS 24.008 (2G/3G NAS)
 - TS 24.301 (LTE NAS)  
 - TS 24.501 (5G NAS)
 - TS 36.300 (E-UTRA Architecture)
 
-**Total: 3,089 pre-built chunks, ~10MB**
+**PCT - Protocol Conformance Test (4 specs)**
+- TS 51.010-1 (2G Protocol)
+- TS 34.123-1 (3G Protocol)
+- TS 36.523-1 (4G Protocol)
+- TS 38.523-1 (5G Protocol)
+
+**USIM/USAT (2 specs)**
+- TS 31.121 (USIM)
+- TS 31.124 (USAT)
+
+**IMS (2 specs)**
+- TS 34.229-1 (4G IMS)
+- TS 34.229-5 (5G IMS)
+
+**Architecture (2 specs)**
+- TS 38.300 (5G NR)
+- TR 37.901 (Data Throughput)
+
+**Total: 32,386 pre-built chunks, ~97MB**
 
 ### Optional: Update Data
 
@@ -92,74 +112,81 @@ npm run prepare-data
 
 ### ✅ Pre-built Data Included
 
-This package includes **pre-processed 3GPP specification data** (chunks.json) so you can use it immediately after installation.
+This package includes **pre-processed 3GPP specification data** (chunks.json) with **14 specifications** and **32,386 chunks** (~97MB) so you can use it immediately after installation.
 
-### 📥 Update Data (Optional)
+### 📥 Add More Specifications (Optional)
 
-To regenerate data with the latest specifications:
+Want to add more specifications? Follow these steps:
 
-#### Automatic Setup (Recommended)
-
-```bash
-npm run setup
-```
-
-This will:
-1. Download 3GPP PDFs from official sources
-2. Extract text from PDFs (requires Python with PyMuPDF)
-3. Create searchable chunks
-
-#### Manual Setup
-
-#### Manual Setup
-
-**Step 1: Download PDFs**
-
-Download specifications from [3GPP Specifications](https://www.3gpp.org/specifications):
-
-**NAS Layer**
-- TS 24.008 (2G/3G NAS), TS 24.301 (LTE NAS), TS 24.501 (5G NAS)
-
-**RF (Radio Frequency)**
-- TS 51.010-1 (2G), TS 34.121 (3G), TS 36.521 (4G), TS 38.521 series (5G)
-
-**RCT (Radio Conformance Test)**
-- TS 34.123 (3G), TS 36.523 (4G), TS 38.523 (5G)
-
-**Protocol**
-- TS 31.121 (USIM), TS 31.124 (USAT)
-
-**IMS**
-- TS 34.229-1 (4G), TS 34.229-5 (5G)
-
-**RSE**
-- TS 36.124 (4G), TS 38.124 (5G)
-
-**Architecture**
-- TS 36.300 (E-UTRA), TS 38.300 (NR)
-
-Or use automatic download:
-```bash
-npm run download-pdfs
-```
-
-Place downloaded PDFs in the `raw/` folder.
-
-**Step 2: Process Data**
+#### Prerequisites
 
 ```bash
-# Install Python dependencies (for PDF extraction)
+# Install Python dependencies (required for PDF processing)
 pip install pymupdf
-
-# Run the data preparation script
-npm run prepare-data
 ```
 
-Or use the provided Python scripts:
+#### Option 1: Automatic Download (Recommended for PCT specs)
+
+Download additional PCT specifications automatically:
 
 ```bash
+# Download 2G/3G/4G/5G Protocol, USIM, USAT, IMS, Architecture specs
+python scripts/download_pct_specs.py
+```
+
+This will download:
+- **Protocol**: TS 51.010-1 (2G), TS 34.123-1 (3G), TS 36.523-1 (4G), TS 38.523-1 (5G)
+- **USIM/USAT**: TS 31.121, TS 31.124
+- **IMS**: TS 34.229-1, TS 34.229-5
+- **Architecture**: TS 38.300, TR 37.901
+
+#### Option 2: Manual Download
+
+Download specifications manually from:
+- [3GPP Official Site](https://www.3gpp.org/specifications)
+- [ETSI Standards](https://www.etsi.org/standards)
+
+Place PDFs in the `raw/` folder.
+
+#### Process PDFs and Update chunks.json
+
+After downloading PDFs:
+
+```bash
+# Step 1: Extract text from all PDFs in raw/ folder
 python scripts/extract_pdf.py
-python scripts/create_chunks.py
+
+# Step 2: Create chunks from extracted text
+python scripts/create_chunks_simple.py
+
+# Step 3: Copy to data folder
+# Windows:
+copy "extracted\chunks.json" "data\chunks.json"
+# Linux/Mac:
+cp extracted/chunks.json data/chunks.json
+```
+
+### Advanced: Customize Scripts
+
+All scripts are fully editable:
+
+- `scripts/download_pct_specs.py` - Modify to download different specs
+- `scripts/extract_pdf.py` - Adjust text extraction settings
+- `scripts/create_chunks_simple.py` - Change chunk size/overlap
+
+Example: Edit `download_pct_specs.py` to add new specifications:
+
+```python
+SPECS = [
+    {
+        'name': 'ts_your_spec',
+        'series': '12300_12399',  # ETSI series folder
+        'spec_num': '123001',     # Spec number
+        'version': '18.00.00_60', # Target version
+        'description': 'Your Spec Description'
+    },
+    # Add more specs...
+]
 ```
 
 ## Configuration
@@ -253,13 +280,17 @@ Once configured, you can ask your AI assistant:
 ```
 mcp-server-3gpp/
 ├── src/
-│   └── index.js        # MCP server implementation
+│   └── index.js                    # MCP server implementation
 ├── scripts/
-│   ├── extract_pdf.py  # PDF text extraction
-│   └── create_chunks.js # Text chunking
+│   ├── extract_pdf.py              # PDF text extraction (editable)
+│   ├── create_chunks_simple.py     # Text chunking (editable)
+│   ├── download_pct_specs.py       # Auto-download PCT specs (editable)
+│   ├── download-pdfs.js            # Download NAS specs
+│   └── postinstall.js              # Post-install setup
 ├── data/
-│   └── chunks.json     # Processed chunks (generated)
-├── raw/                # Place PDFs here (not included)
+│   └── chunks.json                 # Pre-built chunks (32,386 chunks, 97MB)
+├── raw/                            # Place PDFs here (optional)
+├── extracted/                      # Extracted text files (generated)
 ├── package.json
 └── README.md
 ```
