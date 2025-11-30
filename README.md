@@ -65,13 +65,18 @@ npm start
 ```
 
 ### Included Specs
-The package includes **pre-processed chunks** for 14 specifications:
+The package includes **pre-processed chunks** for 17 specifications:
 
 **NAS Layer (4 specs)**
 - TS 24.008 (2G/3G NAS)
 - TS 24.301 (LTE NAS)  
 - TS 24.501 (5G NAS)
 - TS 36.300 (E-UTRA Architecture)
+
+**RRC - Radio Resource Control (3 specs) 🆕**
+- TS 25.331 (3G UMTS RRC - SIB details)
+- TS 36.331 (4G LTE RRC - SIB details)
+- TS 38.331 (5G NR RRC - SIB details)
 
 **PCT - Protocol Conformance Test (4 specs)**
 - TS 51.010-1 (2G Protocol)
@@ -91,7 +96,7 @@ The package includes **pre-processed chunks** for 14 specifications:
 - TS 38.300 (5G NR)
 - TR 37.901 (Data Throughput)
 
-**Total: 32,386 pre-built chunks, ~97MB**
+**Total: 22,408 pre-built chunks, ~107MB**
 
 ### Optional: Update Data
 
@@ -112,7 +117,7 @@ npm run prepare-data
 
 ### ✅ Pre-built Data Included
 
-This package includes **pre-processed 3GPP specification data** (chunks.json) with **14 specifications** and **32,386 chunks** (~97MB) so you can use it immediately after installation.
+This package includes **pre-processed 3GPP specification data** (chunks.json) with **17 specifications** and **22,408 chunks** (~107MB) so you can use it immediately after installation.
 
 ### 📥 Add More Specifications (Optional)
 
@@ -125,20 +130,28 @@ Want to add more specifications? Follow these steps:
 pip install pymupdf
 ```
 
-#### Option 1: Automatic Download (Recommended for PCT specs)
+#### Option 1: Automatic Download
 
-Download additional PCT specifications automatically:
+Download additional specifications automatically:
 
 ```bash
-# Download 2G/3G/4G/5G Protocol, USIM, USAT, IMS, Architecture specs
+# Download PCT specs (Protocol, USIM, USAT, IMS, Architecture)
 python scripts/download_pct_specs.py
+
+# Download RRC specs (3G/4G/5G RRC with SIB details) 🆕
+python scripts/download_rrc_specs.py
 ```
 
-This will download:
+**PCT specs** include:
 - **Protocol**: TS 51.010-1 (2G), TS 34.123-1 (3G), TS 36.523-1 (4G), TS 38.523-1 (5G)
 - **USIM/USAT**: TS 31.121, TS 31.124
 - **IMS**: TS 34.229-1, TS 34.229-5
 - **Architecture**: TS 38.300, TR 37.901
+
+**RRC specs** include (for SIB details):
+- **TS 25.331** (3G UMTS RRC)
+- **TS 36.331** (4G LTE RRC)  
+- **TS 38.331** (5G NR RRC)
 
 #### Option 2: Manual Download
 
@@ -285,10 +298,11 @@ mcp-server-3gpp/
 │   ├── extract_pdf.py              # PDF text extraction (editable)
 │   ├── create_chunks_simple.py     # Text chunking (editable)
 │   ├── download_pct_specs.py       # Auto-download PCT specs (editable)
+│   ├── download_rrc_specs.py       # Auto-download RRC specs (editable) 🆕
 │   ├── download-pdfs.js            # Download NAS specs
 │   └── postinstall.js              # Post-install setup
 ├── data/
-│   └── chunks.json                 # Pre-built chunks (32,386 chunks, 97MB)
+│   └── chunks.json                 # Pre-built chunks (22,408 chunks, 107MB)
 ├── raw/                            # Place PDFs here (optional)
 ├── extracted/                      # Extracted text files (generated)
 ├── package.json
