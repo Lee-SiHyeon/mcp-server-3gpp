@@ -8,7 +8,14 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 
 - 📚 **Search 3GPP Documents**: Full-text search across 3GPP specifications
 - 📋 **EMM/5GMM Cause Lookup**: Quick reference for LTE and 5G NAS cause values
-- 🌐 **Supports Multiple Specs**: TS 24.008, TS 24.301, TS 24.501, TS 36.300
+- 🌐 **Comprehensive Specs Coverage**: 
+  - **NAS**: TS 24.008, 24.301, 24.501
+  - **RF**: TS 51.010-1, 34.121, 36.521, 38.521 series
+  - **RCT**: TS 34.123, 36.523, 38.523
+  - **Protocol**: TS 31.121 (USIM), 31.124 (USAT)
+  - **IMS**: TS 34.229 series
+  - **RSE**: TS 36.124, 38.124
+  - **Architecture**: TS 36.300, 38.300
 
 ## Available Tools
 
@@ -81,14 +88,33 @@ This will:
 
 **Step 1: Download PDFs**
 
-Download the following PDFs from [3GPP Specifications](https://www.3gpp.org/specifications):
+Download specifications from [3GPP Specifications](https://www.3gpp.org/specifications):
 
-| Spec | Description | Download |
-|------|-------------|----------|
-| TS 24.008 | 2G/3G NAS (MM/GMM/SM) | [Link](https://www.3gpp.org/DynaReport/24008.htm) |
-| TS 24.301 | LTE NAS (EMM/ESM) | [Link](https://www.3gpp.org/DynaReport/24301.htm) |
-| TS 24.501 | 5G NAS (5GMM/5GSM) | [Link](https://www.3gpp.org/DynaReport/24501.htm) |
-| TS 36.300 | E-UTRA Overall Description | [Link](https://www.3gpp.org/DynaReport/36300.htm) |
+**NAS Layer**
+- TS 24.008 (2G/3G NAS), TS 24.301 (LTE NAS), TS 24.501 (5G NAS)
+
+**RF (Radio Frequency)**
+- TS 51.010-1 (2G), TS 34.121 (3G), TS 36.521 (4G), TS 38.521 series (5G)
+
+**RCT (Radio Conformance Test)**
+- TS 34.123 (3G), TS 36.523 (4G), TS 38.523 (5G)
+
+**Protocol**
+- TS 31.121 (USIM), TS 31.124 (USAT)
+
+**IMS**
+- TS 34.229-1 (4G), TS 34.229-5 (5G)
+
+**RSE**
+- TS 36.124 (4G), TS 38.124 (5G)
+
+**Architecture**
+- TS 36.300 (E-UTRA), TS 38.300 (NR)
+
+Or use automatic download:
+```bash
+npm run download-pdfs
+```
 
 Place downloaded PDFs in the `raw/` folder.
 

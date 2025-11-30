@@ -1,7 +1,7 @@
 {
   "name": "mcp-server-3gpp",
   "version": "1.0.0",
-  "description": "MCP Server for searching 3GPP specification documents (LTE/5G NAS, EMM/5GMM causes)",
+  "description": "MCP Server for searching 3GPP specification documents - NAS, RF, RCT, Protocol, IMS, RSE specs for NAD team",
   "type": "module",
   "main": "src/index.js",
   "bin": {
@@ -24,6 +24,14 @@
     "nas",
     "emm",
     "5gmm",
+    "rf",
+    "rct",
+    "ims",
+    "rse",
+    "protocol",
+    "usim",
+    "usat",
+    "nad",
     "telecom",
     "ai",
     "copilot"
