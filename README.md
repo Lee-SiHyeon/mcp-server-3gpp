@@ -23,7 +23,6 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 ### Prerequisites
 
 - Node.js >= 18.0.0
-- 3GPP specification PDFs (see [Data Preparation](#data-preparation))
 
 ### Quick Start
 
@@ -35,18 +34,52 @@ cd mcp-server-3gpp
 # Install dependencies
 npm install
 
-# Prepare data (see Data Preparation section first)
-npm run prepare-data
-
+# The server is ready to use! Pre-built data is included.
 # Test the server
 npm start
 ```
 
+### Optional: Update Data
+
+If you want to regenerate data with the latest 3GPP specifications:
+
+```bash
+# Option 1: Automatic (downloads and processes PDFs)
+npm run setup
+
+# Option 2: Manual
+# Step 1: Download PDFs
+npm run download-pdfs
+# Step 2: Extract and chunk
+npm run prepare-data
+```
+
 ## Data Preparation
 
-Due to licensing, 3GPP specification PDFs are not included. You need to download and process them yourself.
+### ✅ Pre-built Data Included
 
-### Step 1: Download 3GPP Specifications
+This package includes **pre-processed 3GPP specification data** (chunks.json) so you can use it immediately after installation.
+
+### 📥 Update Data (Optional)
+
+To regenerate data with the latest specifications:
+
+#### Automatic Setup (Recommended)
+
+```bash
+npm run setup
+```
+
+This will:
+1. Download 3GPP PDFs from official sources
+2. Extract text from PDFs (requires Python with PyMuPDF)
+3. Create searchable chunks
+
+#### Manual Setup
+
+#### Manual Setup
+
+**Step 1: Download PDFs**
 
 Download the following PDFs from [3GPP Specifications](https://www.3gpp.org/specifications):
 
@@ -59,7 +92,7 @@ Download the following PDFs from [3GPP Specifications](https://www.3gpp.org/spec
 
 Place downloaded PDFs in the `raw/` folder.
 
-### Step 2: Extract and Chunk Text
+**Step 2: Process Data**
 
 ```bash
 # Install Python dependencies (for PDF extraction)

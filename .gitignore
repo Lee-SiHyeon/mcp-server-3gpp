@@ -1,9 +1,12 @@
 # Dependencies
 node_modules/
 
-# Data files (users must generate their own)
-data/chunks.json
+# Data files (users can regenerate if needed)
+# Uncomment the line below to exclude chunks.json from git
+# data/chunks.json
+
 raw/*.pdf
+raw/*.zip
 
 # OS files
 .DS_Store

@@ -9,7 +9,10 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "prepare-data": "node scripts/prepare-data.js"
+    "postinstall": "node scripts/postinstall.js",
+    "download-pdfs": "node scripts/download-pdfs.js",
+    "prepare-data": "node scripts/prepare-data.js",
+    "setup": "npm run download-pdfs && npm run prepare-data"
   },
   "keywords": [
     "mcp",
