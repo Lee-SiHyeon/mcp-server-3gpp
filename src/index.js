@@ -132,19 +132,19 @@ function searchChunks(query, specFilter = null, maxResults = 5) {
     .filter(chunk => {
       // 규격 필터 적용
       if (specFilter) {
-        const source = chunk.metadata?.source?.toLowerCase() || "";
-        if (!source.includes(specFilter.toLowerCase().replace(/\s+/g, "").replace("ts", ""))) {
+        const spec = chunk.spec?.toLowerCase() || "";
+        if (!spec.includes(specFilter.toLowerCase().replace(/\s+/g, "").replace("ts", ""))) {
           return false;
         }
       }
       
       // 키워드 검색
-      const content = chunk.content.toLowerCase();
-      return keywords.every(kw => content.includes(kw));
+      const text = chunk.text?.toLowerCase() || "";
+      return keywords.every(kw => text.includes(kw));
     })
     .map(chunk => {
-      const content = chunk.content.toLowerCase();
-      const score = keywords.reduce((acc, kw) => acc + (content.match(new RegExp(kw, "g")) || []).length, 0);
+      const text = chunk.text?.toLowerCase() || "";
+      const score = keywords.reduce((acc, kw) => acc + (text.match(new RegExp(kw, "g")) || []).length, 0);
       return { ...chunk, score };
     })
     .sort((a, b) => b.score - a.score)
@@ -196,12 +196,12 @@ server.registerTool(
     }
     
     const formattedResults = results.map((r, i) => {
-      const source = r.metadata?.source || "Unknown";
-      const preview = r.content.substring(0, 500) + (r.content.length > 500 ? "..." : "");
+      const source = r.spec || "Unknown";
+      const preview = r.text.substring(0, 500) + (r.text.length > 500 ? "..." : "");
       return `[${i + 1}] Source: ${source}\n${preview}`;
     }).join("\n\n---\n\n");
     
-    const output = { results: results.map(r => ({ source: r.metadata?.source || "Unknown", content: r.content })) };
+    const output = { results: results.map(r => ({ source: r.spec || "Unknown", content: r.text })) };
     return {
       content: [
         {
