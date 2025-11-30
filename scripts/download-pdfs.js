@@ -3,7 +3,8 @@
  * Downloads 3GPP specifications from official sources
  */
 
-import fs from "fs/promises";
+import fs from "fs";
+import fsPromises from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 import https from "https";
@@ -189,7 +190,7 @@ async function downloadFile(url, destPath) {
 async function downloadPDFs() {
   console.log("🔽 Downloading 3GPP specifications for NAD Team...\n");
   
-  await fs.mkdir(RAW_DIR, { recursive: true });
+  await fsPromises.mkdir(RAW_DIR, { recursive: true });
   
   // Group by category
   const categories = {};

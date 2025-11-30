@@ -8,14 +8,35 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 
 - 📚 **Search 3GPP Documents**: Full-text search across 3GPP specifications
 - 📋 **EMM/5GMM Cause Lookup**: Quick reference for LTE and 5G NAS cause values
-- 🌐 **Comprehensive Specs Coverage**: 
-  - **NAS**: TS 24.008, 24.301, 24.501
-  - **RF**: TS 51.010-1, 34.121, 36.521, 38.521 series
-  - **RCT**: TS 34.123, 36.523, 38.523
-  - **Protocol**: TS 31.121 (USIM), 31.124 (USAT)
-  - **IMS**: TS 34.229 series
-  - **RSE**: TS 36.124, 38.124
-  - **Architecture**: TS 36.300, 38.300
+- � **Pre-built Data Included**: Ready to use immediately after installation
+
+### ✅ Included Specifications (Pre-processed)
+
+- **TS 24.008** - 2G/3G NAS (MM/GMM/SM/CC)
+- **TS 24.301** - LTE NAS (EMM/ESM)
+- **TS 24.501** - 5G NAS (5GMM/5GSM)
+- **TS 36.300** - E-UTRA Overall Description
+
+### 📥 Additional Specifications (User can add)
+
+The MCP server architecture supports expanding to more specifications. Users can add:
+
+**PCT (Protocol Conformance Test)**
+- TS 51.010-1 (2G), TS 34.123-1 (3G), TS 36.523-1 (4G), TS 38.523-1 (5G)
+
+**Protocol**
+- TS 31.121 (USIM), TS 31.124 (USAT)
+
+**IMS**
+- TS 34.229-1 (4G IMS), TS 34.229-5 (5G IMS)
+
+**Architecture**
+- TS 38.300 (NR Overall), TR 37.901 (Data Throughput)
+
+**RF (if needed)**
+- TS 36.521, TS 38.521 series, etc.
+
+To add specifications: Download PDFs → Run `npm run setup`
 
 ## Available Tools
 
@@ -31,20 +52,26 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 
 - Node.js >= 18.0.0
 
-### Quick Start
+### Quick Start (Recommended)
 
 ```bash
-# Clone the repository
+# Clone and install
 git clone https://github.com/Lee-SiHyeon/mcp-server-3gpp.git
 cd mcp-server-3gpp
-
-# Install dependencies
 npm install
 
-# The server is ready to use! Pre-built data is included.
-# Test the server
+# ✅ Ready to use! Pre-built data for NAS specs included.
 npm start
 ```
+
+### Included Specs
+The package includes **pre-processed chunks** for core NAS specifications:
+- TS 24.008 (2G/3G NAS)
+- TS 24.301 (LTE NAS)  
+- TS 24.501 (5G NAS)
+- TS 36.300 (E-UTRA Architecture)
+
+**Total: 3,089 pre-built chunks, ~10MB**
 
 ### Optional: Update Data
 
