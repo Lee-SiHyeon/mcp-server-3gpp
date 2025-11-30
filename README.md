@@ -8,7 +8,9 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 
 - 📚 **Search 3GPP Documents**: Full-text search across 3GPP specifications
 - 📋 **EMM/5GMM Cause Lookup**: Quick reference for LTE and 5G NAS cause values
-- � **Pre-built Data Included**: Ready to use immediately after installation
+- 🎯 **Pre-built Data Included**: Ready to use immediately after installation
+- 🔄 **MCP SDK v1.0.0 Compatible**: Full support for structured responses
+- ✅ **Comprehensive Testing**: 13 test scenarios with validation tools
 
 ### ✅ Included Specifications (Pre-processed)
 
@@ -45,6 +47,24 @@ To add specifications: Download PDFs → Run `npm run setup`
 | `search_3gpp_docs` | Search 3GPP documents by keywords |
 | `get_emm_cause` | Get EMM cause (LTE) or 5GMM cause (5G) details |
 | `list_specs` | List available specifications |
+
+## Testing & Validation
+
+This package includes comprehensive testing tools:
+
+```bash
+# Run all SpecKit user story tests (13 scenarios)
+npm test
+
+# Validate data structure and MCP server
+npm run validate
+```
+
+**Test Coverage**:
+- ✅ 13 acceptance scenarios from SpecKit specs
+- ✅ All 3 MCP tools (search, get_emm_cause, list_specs)
+- ✅ Data structure validation (22,408 chunks)
+- ✅ EMM/5GMM cause lookup verification
 
 ## Installation
 
@@ -294,6 +314,36 @@ Once configured, you can ask your AI assistant:
 - *"Search for attach procedure in 3GPP docs"*
 - *"Explain 5GMM cause #7"*
 - *"Find information about tracking area update"*
+- *"List all available 3GPP specifications"*
+- *"Search for SIB information in RRC specs"*
+
+### Response Format
+
+All tools return **structured responses** compatible with MCP SDK v1.0.0:
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Human-readable response"
+    }
+  ],
+  "structuredContent": {
+    "results": [
+      {
+        "source": "ts_124301_v18.9.0_LTE_NAS",
+        "content": "Detailed specification text..."
+      }
+    ]
+  }
+}
+```
+
+This allows AI clients to:
+- Display formatted text to users
+- Process structured data programmatically
+- Integrate with automation workflows
 
 ## EMM/5GMM Cause Quick Reference
 
@@ -335,6 +385,8 @@ mcp-server-3gpp/
 │   └── postinstall.js              # Post-install setup
 ├── data/
 │   └── chunks.json                 # Pre-built chunks (22,408 chunks, 107MB)
+├── test_speckit_userstories.js     # Comprehensive test suite 🆕
+├── validate.js                     # Data & server validation 🆕
 ├── raw/                            # Place PDFs here (optional)
 ├── extracted/                      # Extracted text files (generated)
 ├── package.json

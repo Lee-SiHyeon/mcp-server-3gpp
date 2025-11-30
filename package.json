@@ -1,7 +1,7 @@
 {
   "name": "mcp-server-3gpp",
-  "version": "1.0.0",
-  "description": "MCP Server for searching 3GPP specification documents - NAS, RRC (SIB details), Protocol, IMS specs. Pre-built data requires Git LFS.",
+  "version": "1.1.0",
+  "description": "MCP Server for searching 3GPP specification documents - NAS, RRC (SIB details), Protocol, IMS specs. Includes comprehensive testing suite. Pre-built data (17 specs, 22,408 chunks) requires Git LFS.",
   "type": "module",
   "main": "src/index.js",
   "bin": {
@@ -12,7 +12,9 @@
     "postinstall": "node scripts/postinstall.js",
     "download-pdfs": "node scripts/download-pdfs.js",
     "prepare-data": "node scripts/prepare-data.js",
-    "setup": "npm run download-pdfs && npm run prepare-data"
+    "setup": "npm run download-pdfs && npm run prepare-data",
+    "test": "node test_speckit_userstories.js",
+    "validate": "node validate.js"
   },
   "keywords": [
     "mcp",
