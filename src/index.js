@@ -16,6 +16,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import { z } from "zod";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -159,23 +160,21 @@ const server = new McpServer({
 });
 
 // Tool: search_3gpp_docs
-server.tool(
+server.registerTool(
   "search_3gpp_docs",
-  "Search 3GPP specification documents (TS 24.008, TS 24.301, TS 24.501, TS 36.300) by keywords",
   {
-    query: {
-      type: "string",
-      description: "Search query (e.g., 'EMM cause reject', 'attach procedure', 'tracking area update')"
+    title: "Search 3GPP Documents",
+    description: "Search 3GPP specification documents (TS 24.008, TS 24.301, TS 24.501, TS 36.300) by keywords",
+    inputSchema: {
+      query: z.string().describe("Search query (e.g., 'EMM cause reject', 'attach procedure', 'tracking area update')"),
+      spec: z.string().optional().describe("Optional: Filter by specification (e.g., 'TS 24.301', 'TS 24.501')"),
+      maxResults: z.number().optional().describe("Maximum number of results to return (default: 5)")
     },
-    spec: {
-      type: "string",
-      description: "Optional: Filter by specification (e.g., 'TS 24.301', 'TS 24.501')",
-      optional: true
-    },
-    maxResults: {
-      type: "number",
-      description: "Maximum number of results to return (default: 5)",
-      optional: true
+    outputSchema: {
+      results: z.array(z.object({
+        source: z.string(),
+        content: z.string()
+      }))
     }
   },
   async ({ query, spec, maxResults = 5 }) => {
@@ -183,7 +182,7 @@ server.tool(
       await loadChunks();
     }
     
-    const results = searchChunks(query, spec, maxResults);
+    const results = searchChunks(query, spec || null, maxResults);
     
     if (results.length === 0) {
       return {
@@ -202,33 +201,41 @@ server.tool(
       return `[${i + 1}] Source: ${source}\n${preview}`;
     }).join("\n\n---\n\n");
     
+    const output = { results: results.map(r => ({ source: r.metadata?.source || "Unknown", content: r.content })) };
     return {
       content: [
         {
           type: "text",
           text: `Found ${results.length} results for "${query}"${spec ? ` in ${spec}` : ""}:\n\n${formattedResults}`
         }
-      ]
+      ],
+      structuredContent: output
     };
   }
 );
 
 // Tool: get_emm_cause
-server.tool(
+server.registerTool(
   "get_emm_cause",
-  "Get detailed information about EMM cause (LTE) or 5GMM cause (5G) values",
   {
-    causeNumber: {
-      type: "number",
-      description: "The cause number (e.g., 3, 7, 15, 22)"
+    title: "Get EMM/5GMM Cause",
+    description: "Get detailed information about EMM cause (LTE) or 5GMM cause (5G) values",
+    inputSchema: {
+      causeNumber: z.number().describe("The cause number (e.g., 3, 7, 15, 22)"),
+      network: z.enum(["lte", "5g"]).optional().describe("Network type: 'lte' for EMM cause (TS 24.301), '5g' for 5GMM cause (TS 24.501). Default: 'lte'")
     },
-    network: {
-      type: "string",
-      description: "Network type: 'lte' for EMM cause (TS 24.301), '5g' for 5GMM cause (TS 24.501). Default: 'lte'",
-      optional: true
+    outputSchema: {
+      cause: z.object({
+        number: z.number(),
+        name: z.string(),
+        description: z.string(),
+        spec: z.string()
+      })
     }
   },
-  async ({ causeNumber, network = "lte" }) => {
+  async (args) => {
+    const { causeNumber, network = "lte" } = args;
+    
     const causes = network === "5g" ? FIVEGMM_CAUSES : EMM_CAUSES;
     const causeType = network === "5g" ? "5GMM" : "EMM";
     const spec = network === "5g" ? "TS 24.501" : "TS 24.301";
@@ -260,22 +267,39 @@ server.tool(
         relatedDocs.map(r => r.content.substring(0, 400) + "...").join("\n\n");
     }
     
+    const output = {
+      cause: {
+        number: causeNumber,
+        name: cause.name,
+        description: cause.description,
+        spec: spec
+      }
+    };
+    
     return {
       content: [
         {
           type: "text",
           text: `## ${causeType} Cause #${causeNumber} (${spec})\n\n**Name:** ${cause.name}\n\n**Description:** ${cause.description}${additionalInfo}`
         }
-      ]
+      ],
+      structuredContent: output
     };
   }
 );
 
 // Tool: list_specs
-server.tool(
+server.registerTool(
   "list_specs",
-  "List available 3GPP specifications in the database",
-  {},
+  {
+    title: "List Specifications",
+    description: "List available 3GPP specifications in the database",
+    inputSchema: {},
+    outputSchema: {
+      specs: z.array(z.string()),
+      totalChunks: z.number()
+    }
+  },
   async () => {
     if (chunksData.length === 0) {
       await loadChunks();
@@ -295,13 +319,19 @@ server.tool(
       return `- ${specInfo[key] || s}`;
     }).join("\n");
     
+    const output = {
+      specs: sources,
+      totalChunks: chunksData.length
+    };
+    
     return {
       content: [
         {
           type: "text",
           text: `## Available 3GPP Specifications\n\nTotal chunks: ${chunksData.length}\n\n${specList}\n\n### Usage Examples:\n- search_3gpp_docs: "EMM cause reject"\n- get_emm_cause: causeNumber=3, network="lte"\n- get_emm_cause: causeNumber=7, network="5g"`
         }
-      ]
+      ],
+      structuredContent: output
     };
   }
 );
