@@ -24,3 +24,6 @@ npm-debug.log*
 # Environment
 .env
 .env.local
+
+# SpecKit (may contain credentials)
+.claude/

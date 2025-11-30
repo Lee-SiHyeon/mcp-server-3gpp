@@ -353,7 +353,67 @@ MIT License - see [LICENSE](LICENSE) file.
 
 This project is not affiliated with 3GPP. 3GPP specifications are copyrighted by ETSI and 3GPP partners. Users are responsible for complying with 3GPP's terms of use when downloading and using specification documents.
 
+## Developer Documentation
+
+### SpecKit (Spec-Driven Development)
+
+This project uses [SpecKit](https://github.com/github/spec-kit) for maintaining development context and collaboration.
+
+#### What is SpecKit?
+
+SpecKit is a **Spec-Driven Development** framework that helps developers and AI agents maintain shared context through structured specifications.
+
+**Key Principle**: Specifications come first, code follows.
+
+#### SpecKit Workflow
+
+```
+Constitution → Specify → Plan → Tasks → Implement
+```
+
+1. **Constitution** (`.specify/constitution.md`): Project principles, technical stack, historical decisions
+2. **Specs** (`.specify/specs/`): Feature specifications with user stories and acceptance criteria
+3. **Plans** (`.specify/plans/`): Technical implementation plans and architecture
+4. **Tasks** (`.specify/tasks/`): Granular task breakdowns with dependencies
+
+#### Using SpecKit
+
+If you have Claude Desktop or VS Code with the SpecKit extension:
+
+**Available Slash Commands**:
+- `/speckit-constitution` - View/update project constitution
+- `/speckit-specify` - Create feature specifications
+- `/speckit-plan` - Create implementation plans
+- `/speckit-tasks` - Break down tasks
+- `/speckit-implement` - Execute implementation
+- `/speckit-clarify` - Clarify ambiguous specifications
+- `/speckit-analyze` - Analyze consistency across specs
+- `/speckit-checklist` - Quality checklist
+- `/speckit-taskstoissues` - Convert tasks to GitHub Issues
+
+**Manual Access**:
+All SpecKit files are in `.specify/` directory and can be read/edited directly:
+```
+.specify/
+├── constitution.md          # Project overview
+├── specs/
+│   └── 001-3gpp-document-search.md
+├── plans/
+│   └── 001-implementation-plan.md
+├── tasks/
+│   └── 001-tasks.md
+└── templates/               # Templates for new features
+```
+
+#### Why SpecKit for this Project?
+
+- **Context Sharing**: NAD team and future developers have complete project history
+- **AI Collaboration**: AI agents understand design decisions and constraints
+- **Onboarding**: New contributors can read specs instead of reverse-engineering code
+- **Documentation**: Living documentation that evolves with code
+
 ## Related Projects
 
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 - [3GPP Specifications](https://www.3gpp.org/specifications)
+- [SpecKit - Spec-Driven Development](https://github.com/github/spec-kit)
