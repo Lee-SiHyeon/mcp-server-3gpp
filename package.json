@@ -1,7 +1,7 @@
 {
   "name": "mcp-server-3gpp",
   "version": "1.0.0",
-  "description": "MCP Server for searching 3GPP specification documents - NAS, RF, RCT, Protocol, IMS, RSE specs for NAD team",
+  "description": "MCP Server for searching 3GPP specification documents - NAS, RRC (SIB details), Protocol, IMS specs. Pre-built data requires Git LFS.",
   "type": "module",
   "main": "src/index.js",
   "bin": {

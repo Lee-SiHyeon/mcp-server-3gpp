@@ -51,18 +51,27 @@ To add specifications: Download PDFs → Run `npm run setup`
 ### Prerequisites
 
 - Node.js >= 18.0.0
+- **Git LFS** (for downloading pre-built data)
 
 ### Quick Start (Recommended)
 
 ```bash
+# Install Git LFS (if not already installed)
+git lfs install
+
 # Clone and install
 git clone https://github.com/Lee-SiHyeon/mcp-server-3gpp.git
 cd mcp-server-3gpp
 npm install
 
-# ✅ Ready to use! Pre-built data for NAS specs included.
+# If chunks.json is a pointer file, pull LFS data
+git lfs pull
+
+# ✅ Ready to use! Pre-built data with 17 specs included.
 npm start
 ```
+
+> **Note**: The pre-built `chunks.json` (107MB) is stored with Git LFS. If you don't have Git LFS installed, you can still use the MCP server for EMM/5GMM cause lookup, or generate data yourself using the scripts.
 
 ### Included Specs
 The package includes **pre-processed chunks** for 17 specifications:
@@ -115,9 +124,32 @@ npm run prepare-data
 
 ## Data Preparation
 
-### ✅ Pre-built Data Included
+### ✅ Pre-built Data Included (Git LFS)
 
-This package includes **pre-processed 3GPP specification data** (chunks.json) with **17 specifications** and **22,408 chunks** (~107MB) so you can use it immediately after installation.
+This package includes **pre-processed 3GPP specification data** (chunks.json) with **17 specifications** and **22,408 chunks** (~107MB).
+
+**Important**: The data file is stored using **Git LFS** (Large File Storage).
+
+#### If you have Git LFS installed:
+```bash
+git lfs pull  # Download the actual data file
+```
+
+#### If you don't have Git LFS:
+```bash
+# Option 1: Install Git LFS (recommended)
+# Windows: Download from https://git-lfs.github.com/
+# Mac: brew install git-lfs
+# Linux: sudo apt-get install git-lfs
+
+git lfs install
+git lfs pull
+
+# Option 2: Manual download
+# Download chunks.json from GitHub releases or generate it yourself (see below)
+```
+
+> **Without Git LFS**: The MCP server will still work for EMM/5GMM cause lookup. Full document search requires the data file.
 
 ### 📥 Add More Specifications (Optional)
 
