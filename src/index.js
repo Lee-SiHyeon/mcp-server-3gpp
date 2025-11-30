@@ -191,7 +191,8 @@ server.registerTool(
             type: "text",
             text: `No results found for "${query}"${spec ? ` in ${spec}` : ""}`
           }
-        ]
+        ],
+        structuredContent: { results: [] }
       };
     }
     
