@@ -29,11 +29,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YOUR_USERNAME/mcp-server-3gpp.git"
+    "url": "git+https://github.com/Lee-SiHyeon/mcp-server-3gpp.git"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/mcp-server-3gpp#readme",
+  "homepage": "https://github.com/Lee-SiHyeon/mcp-server-3gpp#readme",
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/mcp-server-3gpp/issues"
+    "url": "https://github.com/Lee-SiHyeon/mcp-server-3gpp/issues"
   },
   "engines": {
     "node": ">=18.0.0"

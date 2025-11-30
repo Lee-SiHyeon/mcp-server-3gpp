@@ -29,7 +29,7 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/mcp-server-3gpp.git
+git clone https://github.com/Lee-SiHyeon/mcp-server-3gpp.git
 cd mcp-server-3gpp
 
 # Install dependencies
