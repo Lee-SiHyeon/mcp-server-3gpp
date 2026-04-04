@@ -53,7 +53,6 @@ import { getSpecTocSchema, handleGetSpecToc } from "./tools/getSpecToc.js";
 import { getSectionSchema, handleGetSection } from "./tools/getSection.js";
 import { search3gppDocsSchema, handleSearch3gppDocs } from "./tools/search3gppDocs.js";
 import { searchRelatedSectionsSchema, handleSearchRelatedSections } from "./tools/searchRelatedSections.js";
-import { getEmmCauseSchema, handleGetEmmCause } from "./tools/getEmmCause.js";
 import { listSpecsSchema, handleListSpecs } from "./tools/listSpecs.js";
 import { getIngestGuideSchema, handleGetIngestGuide, GUIDES } from "./tools/getIngestGuide.js";
 
@@ -80,7 +79,6 @@ function registerAllTools() {
   registerTool(getSectionSchema.name, getSectionSchema, handleGetSection);
   registerTool(search3gppDocsSchema.name, search3gppDocsSchema, handleSearch3gppDocs);
   registerTool(searchRelatedSectionsSchema.name, searchRelatedSectionsSchema, handleSearchRelatedSections);
-  registerTool(getEmmCauseSchema.name, getEmmCauseSchema, handleGetEmmCause);
   registerTool(listSpecsSchema.name, listSpecsSchema, handleListSpecs);
   registerTool(getIngestGuideSchema.name, getIngestGuideSchema, handleGetIngestGuide);
 }
