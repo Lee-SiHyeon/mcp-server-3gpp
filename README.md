@@ -6,7 +6,7 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 
 ## Features
 
-- 📚 **Full-text search** across 188 specifications — 3GPP/ETSI + IETF RFC (89,987 indexed sections)
+- 📚 **Full-text search** across 207 specifications — 3GPP/ETSI + IETF RFC (93,279 indexed sections)
 - 🔍 **Hybrid search engine**: BM25/FTS5 keyword + optional semantic vector search
 - 📋 **EMM/5GMM Cause Lookup**: Quick reference for LTE and 5G NAS cause values
 - 🗂️ **Hierarchical TOC navigation**: Browse spec structure before fetching sections
@@ -15,7 +15,7 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 
 ## v2.0 Architecture
 
-SQLite + FTS5 + hybrid search. **188 specs, 89,987 sections** indexed (102 3GPP/ETSI + 86 IETF RFC).
+SQLite + FTS5 + hybrid search. **207 specs, 93,279 sections** indexed (114 3GPP/ETSI + 93 IETF RFC).
 
 The v2 corpus is built from extracted PDF text using a Python/Node pipeline:
 
@@ -30,10 +30,10 @@ See [docs/architecture.md](docs/architecture.md) for a full component breakdown.
 
 | Metric | Value |
 |--------|-------|
-| 3GPP/ETSI specs indexed | 102 |
-| IETF RFC specs indexed | 86 |
-| **Total specs** | **188** |
-| **Total sections** | **89,987** |
+| 3GPP/ETSI specs indexed | 114 |
+| IETF RFC specs indexed | 93 |
+| **Total specs** | **207** |
+| **Total sections** | **93,279** |
 | Full-text search | FTS5 (BM25 ranking) |
 | Semantic search | Optional (requires sqlite-vec) |
 
@@ -41,7 +41,7 @@ See [docs/architecture.md](docs/architecture.md) for a full component breakdown.
 
 | Tool | Description | Example Input |
 |------|-------------|---------------|
-| `get_spec_catalog` | Browse all 188 indexed specs with metadata | `{"filter": "24_301"}` |
+| `get_spec_catalog` | Browse all 207 indexed specs with metadata | `{"filter": "24_301"}` |
 | `get_spec_toc` | Get section hierarchy of a spec | `{"specId": "ts_24_301", "maxDepth": 3}` |
 | `get_section` | Fetch full content of a section | `{"sectionId": "ts_24_301:5.5.1.2.5"}` |
 | `search_3gpp_docs` | Hybrid keyword/semantic search | `{"query": "authentication", "spec": "ts_24_301"}` |
@@ -115,9 +115,9 @@ npm run rfc:load       # node src/ingest/loadRfcSections.js --all
 ```
 
 ### Included Specs
-The corpus includes **188 specifications** across three document families:
+The corpus includes **207 specifications** across three document families:
 
-**3GPP/ETSI (102 specs)** — NAS, RRC, conformance, USIM, IMS, SBI, security, radio
+**3GPP/ETSI (114 specs)** — NAS, RRC, conformance, USIM, IMS, SBI, security, radio
 - NAS: TS 24.008, 24.301, 24.501, 24.229 (IMS SIP)
 - RRC: TS 25.331, 36.331, 38.331
 - Conformance: TS 34.123-1, 36.523-1, 38.523-1, 51.010-1
@@ -139,7 +139,7 @@ The corpus includes **188 specifications** across three document families:
 - WebRTC: RFC 8825–8827, 8834, 8835
 - SCTP, RTP, SDP, STUN, TURN, XMPP, NETCONF, YANG, BGP, OSPF, MPLS, IPsec, IKEv2...
 
-**Total: 188 specs, 89,987 sections**
+**Total: 207 specs, 93,279 sections**
 
 ### Optional: Update Data
 
