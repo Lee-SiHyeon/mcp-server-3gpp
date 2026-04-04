@@ -18,6 +18,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import fs from "fs";
 import path from "path";
@@ -53,6 +55,7 @@ import { search3gppDocsSchema, handleSearch3gppDocs } from "./tools/search3gppDo
 import { searchRelatedSectionsSchema, handleSearchRelatedSections } from "./tools/searchRelatedSections.js";
 import { getEmmCauseSchema, handleGetEmmCause } from "./tools/getEmmCause.js";
 import { listSpecsSchema, handleListSpecs } from "./tools/listSpecs.js";
+import { getIngestGuideSchema, handleGetIngestGuide, GUIDES } from "./tools/getIngestGuide.js";
 
 // DB modules
 import { getConnection, closeConnection } from "./db/connection.js";
@@ -79,6 +82,7 @@ function registerAllTools() {
   registerTool(searchRelatedSectionsSchema.name, searchRelatedSectionsSchema, handleSearchRelatedSections);
   registerTool(getEmmCauseSchema.name, getEmmCauseSchema, handleGetEmmCause);
   registerTool(listSpecsSchema.name, listSpecsSchema, handleListSpecs);
+  registerTool(getIngestGuideSchema.name, getIngestGuideSchema, handleGetIngestGuide);
 }
 
 // ---------------------------------------------------------------------------
@@ -189,7 +193,7 @@ async function main() {
   // -------------------------------------------------------------------------
   const server = new Server(
     { name: "3gpp-doc-server", version },
-    { capabilities: { tools: {} } },
+    { capabilities: { tools: {}, resources: {} } },
   );
 
   // -- tools/list -----------------------------------------------------------
@@ -218,6 +222,34 @@ async function main() {
         isError: true,
       };
     }
+  });
+
+  // -- resources/list -------------------------------------------------------
+  const GUIDE_RESOURCES = [
+    { uri: "3gpp://guides/etsi",    name: "ETSI Download Guide",    description: "How to download 3GPP specs from the ETSI portal (URL patterns, CLI usage)", mimeType: "application/json" },
+    { uri: "3gpp://guides/rfc",     name: "RFC Download Guide",     description: "How to download IETF RFC documents and ingest them (priority RFC list included)", mimeType: "application/json" },
+    { uri: "3gpp://guides/autorag", name: "AutoRAG Pipeline Guide", description: "How to run the full extraction pipeline: PDF/TXT → JSONL → SQLite corpus", mimeType: "application/json" },
+  ];
+
+  server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+    resources: GUIDE_RESOURCES,
+  }));
+
+  // -- resources/read -------------------------------------------------------
+  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+    const { uri } = request.params;
+    const key = uri.replace("3gpp://guides/", "");
+    const guide = GUIDES[key];
+    if (!guide) {
+      throw new Error(`Unknown resource: ${uri}`);
+    }
+    return {
+      contents: [{
+        uri,
+        mimeType: "application/json",
+        text: JSON.stringify({ guide }, null, 2),
+      }],
+    };
   });
 
   // -------------------------------------------------------------------------
