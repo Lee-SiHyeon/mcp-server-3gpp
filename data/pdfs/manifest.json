@@ -1,0 +1,125 @@
+{
+  "downloaded_at": "2026-04-04T03:10:48Z",
+  "specs": [
+    {
+      "spec": "36.101",
+      "type": "ts",
+      "etsi_num": "136101",
+      "version": "19.4.0",
+      "url": "https://www.etsi.org/deliver/etsi_ts/136100_136199/136101/19.04.00_60/ts_136101v190400p.pdf",
+      "pdf_filename": "ts_36_101_v19.4.0.pdf",
+      "file_size_bytes": 12198074,
+      "status": "downloaded"
+    },
+    {
+      "spec": "36.104",
+      "type": "ts",
+      "etsi_num": "136104",
+      "version": "19.2.0",
+      "url": "https://www.etsi.org/deliver/etsi_ts/136100_136199/136104/19.02.00_60/ts_136104v190200p.pdf",
+      "pdf_filename": "ts_36_104_v19.2.0.pdf",
+      "file_size_bytes": 2412867,
+      "status": "downloaded"
+    },
+    {
+      "spec": "36.133",
+      "type": "ts",
+      "etsi_num": "136133",
+      "version": "19.3.0",
+      "url": "https://www.etsi.org/deliver/etsi_ts/136100_136199/136133/19.03.00_60/ts_136133v190300p.pdf",
+      "pdf_filename": "ts_36_133_v19.3.0.pdf",
+      "file_size_bytes": 25230792,
+      "status": "downloaded"
+    },
+    {
+      "spec": "36.201",
+      "type": "ts",
+      "etsi_num": "136201",
+      "version": "19.0.0",
+      "url": "https://www.etsi.org/deliver/etsi_ts/136200_136299/136201/19.00.00_60/ts_136201v190000p.pdf",
+      "pdf_filename": "ts_36_201_v19.0.0.pdf",
+      "file_size_bytes": 178168,
+      "status": "downloaded"
+    },
+    {
+      "spec": "36.211",
+      "type": "ts",
+      "etsi_num": "136211",
+      "version": "19.2.0",
+      "url": "https://www.etsi.org/deliver/etsi_ts/136200_136299/136211/19.02.00_60/ts_136211v190200p.pdf",
+      "pdf_filename": "ts_36_211_v19.2.0.pdf",
+      "file_size_bytes": 2982907,
+      "status": "downloaded"
+    },
+    {
+      "spec": "36.212",
+      "type": "ts",
+      "etsi_num": "136212",
+      "version": "19.3.0",
+      "url": "https://www.etsi.org/deliver/etsi_ts/136200_136299/136212/19.03.00_60/ts_136212v190300p.pdf",
+      "pdf_filename": "ts_36_212_v19.3.0.pdf",
+      "file_size_bytes": 2333473,
+      "status": "downloaded"
+    },
+    {
+      "spec": "36.213",
+      "type": "ts",
+      "etsi_num": "136213",
+      "version": "19.2.0",
+      "url": "https://www.etsi.org/deliver/etsi_ts/136200_136299/136213/19.02.00_60/ts_136213v190200p.pdf",
+      "pdf_filename": "ts_36_213_v19.2.0.pdf",
+      "file_size_bytes": 5578180,
+      "status": "downloaded"
+    },
+    {
+      "spec": "36.300",
+      "type": "ts",
+      "etsi_num": "136300",
+      "version": "19.1.0",
+      "url": "",
+      "pdf_filename": "ts_36_300_v19.1.0.pdf",
+      "file_size_bytes": 4381409,
+      "status": "already_exists"
+    },
+    {
+      "spec": "36.401",
+      "type": "ts",
+      "etsi_num": "136401",
+      "version": "19.0.0",
+      "url": "https://www.etsi.org/deliver/etsi_ts/136400_136499/136401/19.00.00_60/ts_136401v190000p.pdf",
+      "pdf_filename": "ts_36_401_v19.0.0.pdf",
+      "file_size_bytes": 192207,
+      "status": "downloaded"
+    },
+    {
+      "spec": "36.413",
+      "type": "ts",
+      "etsi_num": "136413",
+      "version": "19.1.0",
+      "url": "https://www.etsi.org/deliver/etsi_ts/136400_136499/136413/19.01.00_60/ts_136413v190100p.pdf",
+      "pdf_filename": "ts_36_413_v19.1.0.pdf",
+      "file_size_bytes": 1921011,
+      "status": "downloaded"
+    },
+    {
+      "spec": "36.423",
+      "type": "ts",
+      "etsi_num": "136423",
+      "version": "19.1.0",
+      "url": "https://www.etsi.org/deliver/etsi_ts/136400_136499/136423/19.01.00_60/ts_136423v190100p.pdf",
+      "pdf_filename": "ts_36_423_v19.1.0.pdf",
+      "file_size_bytes": 2351037,
+      "status": "downloaded"
+    },
+    {
+      "spec": "36.425",
+      "type": "ts",
+      "etsi_num": "136425",
+      "version": "19.0.0",
+      "url": "https://www.etsi.org/deliver/etsi_ts/136400_136499/136425/19.00.00_60/ts_136425v190000p.pdf",
+      "pdf_filename": "ts_36_425_v19.0.0.pdf",
+      "file_size_bytes": 137869,
+      "status": "downloaded"
+    }
+  ]
+}
