@@ -1,0 +1,10 @@
+{
+  "rfc_number": 6733,
+  "title": "Diameter Base Protocol",
+  "abstract": "The Diameter base protocol is intended to provide an Authentication, Authorization, and Accounting (AAA) framework for applications such as network access or IP mobility in both local and roaming situations.  This document specifies the message format, transport, error reporting, accounting, and security services used by all Diameter applications.  The Diameter base protocol as defined in this document obsoletes RFC 3588 and RFC 5719, and it must be supported by all new Diameter implementations. [STANDARDS-TRACK]",
+  "pages": 152,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:32:09Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc6733.txt",
+  "category": "Diameter"
+}

@@ -1,0 +1,10 @@
+{
+  "rfc_number": 3261,
+  "title": "SIP: Session Initiation Protocol",
+  "abstract": "This document describes Session Initiation Protocol (SIP), an application-layer control (signaling) protocol for creating, modifying, and terminating sessions with one or more participants.  These sessions include Internet telephone calls, multimedia distribution, and multimedia conferences. [STANDARDS-TRACK]",
+  "pages": 269,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:24:33Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc3261.txt",
+  "category": "SIP"
+}

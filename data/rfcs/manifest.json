@@ -1,0 +1,32 @@
+{
+  "3261": {
+    "rfc_number": 3261,
+    "title": "SIP: Session Initiation Protocol",
+    "abstract": "This document describes Session Initiation Protocol (SIP), an application-layer control (signaling) protocol for creating, modifying, and terminating sessions with one or more participants.  These sessions include Internet telephone calls, multimedia distribution, and multimedia conferences. [STANDARDS-TRACK]",
+    "pages": 269,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:24:33Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3261.txt",
+    "category": "SIP"
+  },
+  "6733": {
+    "rfc_number": 6733,
+    "title": "Diameter Base Protocol",
+    "abstract": "The Diameter base protocol is intended to provide an Authentication, Authorization, and Accounting (AAA) framework for applications such as network access or IP mobility in both local and roaming situations.  This document specifies the message format, transport, error reporting, accounting, and security services used by all Diameter applications.  The Diameter base protocol as defined in this document obsoletes RFC 3588 and RFC 5719, and it must be supported by all new Diameter implementations. [STANDARDS-TRACK]",
+    "pages": 152,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:32:09Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6733.txt",
+    "category": "Diameter"
+  },
+  "8446": {
+    "rfc_number": 8446,
+    "title": "The Transport Layer Security (TLS) Protocol Version 1.3",
+    "abstract": "This document specifies version 1.3 of the Transport Layer Security (TLS) protocol. TLS allows client/server applications to communicate over the Internet in a way that is designed to prevent eavesdropping, tampering, and message forgery.\n\n This document updates RFCs 5705 and 6066, and obsoletes RFCs 5077, 5246, and 6961. This document also specifies new requirements for TLS 1.2 implementations.",
+    "pages": 160,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-03-07T08:26:41Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc8446.txt",
+    "category": "TLS"
+  }
+}
