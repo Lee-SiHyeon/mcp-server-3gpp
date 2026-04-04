@@ -28,9 +28,9 @@ npm-debug.log*
 # SpecKit (may contain credentials)
 .claude/
 
-# Intermediate extraction data (generated, not committed)
-data/intermediate/*.jsonl
-data/corpus/*.db
+# Intermediate extraction data (tracked via Git LFS)
+# data/intermediate/*.jsonl  # tracked by LFS
+# data/corpus/*.db            # tracked by LFS
 data/corpus/*.db-shm
 data/corpus/*.db-wal
 data/pdfs/*.pdf
