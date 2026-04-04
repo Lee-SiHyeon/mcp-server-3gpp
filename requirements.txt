@@ -1,0 +1,19 @@
+# Python dependencies for mcp-server-3gpp pipeline scripts
+#
+# Node.js (npm install) handles the MCP server itself.
+# These packages are only needed to run the corpus build pipeline:
+#   scripts/download_etsi_specs.py   — PDF download from ETSI
+#   scripts/download_rfc.py          — RFC download from IETF
+#   scripts/extract_pdf_structure.py — PDF section extraction
+#   scripts/extract_rfc_structure.py — RFC text parsing
+#   scripts/build_section_spans.py   — Section boundary detection
+#   scripts/extract_cross_refs.js    — Run with: node scripts/extract_cross_refs.js
+#
+# Install:
+#   pip install -r requirements.txt
+
+# PDF parsing (required for 3GPP/ETSI spec extraction)
+PyMuPDF>=1.24.0
+
+# HTTP downloads (optional — urllib is used by default, requests as fallback)
+requests>=2.31.0
