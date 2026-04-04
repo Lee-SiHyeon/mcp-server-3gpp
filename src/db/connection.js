@@ -22,7 +22,7 @@ const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 
 /** Default database location. */
-const DEFAULT_DB_PATH = path.resolve(PROJECT_ROOT, 'data', '3gpp.db');
+const DEFAULT_DB_PATH = path.resolve(PROJECT_ROOT, 'data', 'corpus', '3gpp.db');
 
 /** @type {import('better-sqlite3').Database | null} */
 let _db = null;
