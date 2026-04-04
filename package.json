@@ -13,11 +13,16 @@
     "download-pdfs": "node scripts/download-pdfs.js",
     "prepare-data": "node scripts/prepare-data.js",
     "setup": "npm run download-pdfs && npm run prepare-data",
-    "test": "node test_speckit_userstories.js",
+    "test": "node --test test/*.test.js",
+    "test:legacy": "node test_speckit_userstories.js",
     "validate": "node validate.js",
+    "benchmark": "node scripts/benchmark.js",
     "corpus:migrate": "node scripts/migrate_legacy_json_to_sqlite.js",
     "corpus:build": "node scripts/build_corpus.js",
-    "corpus:rebuild": "node scripts/build_corpus.js --rebuild"
+    "corpus:rebuild": "node scripts/build_corpus.js --rebuild",
+    "corpus:download": "python scripts/download_etsi_specs.py --latest-only",
+    "corpus:extract": "python scripts/extract_all.py",
+    "corpus:full": "npm run corpus:download && npm run corpus:extract && npm run corpus:build"
   },
   "keywords": [
     "mcp",
