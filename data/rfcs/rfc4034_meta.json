@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4034,
+  "title": "Resource Records for the DNS Security Extensions",
+  "abstract": "This document is part of a family of documents that describe the DNS Security Extensions (DNSSEC). The DNS Security Extensions are a collection of resource records and protocol modifications that provide source authentication for the DNS. This document defines the public key (DNSKEY), delegation signer (DS), resource record digital signature (RRSIG), and authenticated denial of existence (NSEC) resource records. The purpose and format of each resource record is described in detail, and an example of each resource record is given.\n\n This document obsoletes RFC 2535 and incorporates changes from all updates to RFC 2535. [STANDARDS-TRACK]",
+  "pages": 29,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:26:05Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4034.txt",
+  "category": "DNSSEC"
+}

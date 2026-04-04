@@ -1,0 +1,10 @@
+{
+  "rfc_number": 9000,
+  "title": "QUIC: A UDP-Based Multiplexed and Secure Transport",
+  "abstract": "This document defines the core of the QUIC transport protocol.  QUIC provides applications with flow-controlled streams for structured communication, low-latency connection establishment, and network path migration.  QUIC includes security measures that ensure confidentiality, integrity, and availability in a range of deployment circumstances.  Accompanying documents describe the integration of TLS for key negotiation, loss detection, and an exemplary congestion control algorithm.",
+  "pages": 151,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2022-02-19T08:46:51Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc9000.txt",
+  "category": "QUIC"
+}

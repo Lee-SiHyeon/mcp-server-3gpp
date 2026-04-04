@@ -1,0 +1,10 @@
+{
+  "rfc_number": 8834,
+  "title": "Media Transport and Use of RTP in WebRTC",
+  "abstract": "The framework for Web Real-Time Communication (WebRTC) provides support for direct interactive rich communication using audio, video, text, collaboration, games, etc.  between two peers' web browsers.  This memo describes the media transport aspects of the WebRTC framework.  It specifies how the Real-time Transport Protocol (RTP) is used in the WebRTC context and gives requirements for which RTP features, profiles, and extensions need to be supported.",
+  "pages": 39,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2021-01-18T23:32:35Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc8834.txt",
+  "category": "WebRTC"
+}

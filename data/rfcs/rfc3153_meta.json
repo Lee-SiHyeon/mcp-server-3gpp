@@ -1,0 +1,10 @@
+{
+  "rfc_number": 3153,
+  "title": "PPP Multiplexing",
+  "abstract": "This document describes a method to reduce the PPP (Point-to-Point Protocol) framing overhead used to transport small packets over slow links. [STANDARDS-TRACK]",
+  "pages": 9,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2013-03-02T16:57:18Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc3153.txt",
+  "category": "GTP-U-Extension"
+}

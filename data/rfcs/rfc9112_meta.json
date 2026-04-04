@@ -1,0 +1,10 @@
+{
+  "rfc_number": 9112,
+  "title": "HTTP/1.1",
+  "abstract": "The Hypertext Transfer Protocol (HTTP) is a stateless application-level protocol for distributed, collaborative, hypertext information systems. This document specifies the HTTP/1.1 message syntax, message parsing, connection management, and related security concerns.\n\n This document obsoletes portions of RFC 7230.",
+  "pages": 46,
+  "std_level": "/api/v1/name/stdlevelname/std/",
+  "date": "2024-01-04T08:18:03Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc9112.txt",
+  "category": "HTTP"
+}

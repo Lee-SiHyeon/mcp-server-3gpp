@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4252,
+  "title": "The Secure Shell (SSH) Authentication Protocol",
+  "abstract": "The Secure Shell Protocol (SSH) is a protocol for secure remote login and other secure network services over an insecure network.  This document describes the SSH authentication protocol framework and public key, password, and host-based client authentication methods.  Additional authentication methods are described in separate documents.  The SSH authentication protocol runs on top of the SSH transport layer protocol and provides a single authenticated tunnel for the SSH connection protocol. [STANDARDS-TRACK]",
+  "pages": 17,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2023-07-29T07:15:33Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4252.txt",
+  "category": "SSH"
+}

@@ -1,0 +1,10 @@
+{
+  "rfc_number": 9113,
+  "title": "HTTP/2",
+  "abstract": "This specification describes an optimized expression of the semantics of the Hypertext Transfer Protocol (HTTP), referred to as HTTP version 2 (HTTP/2). HTTP/2 enables a more efficient use of network resources and a reduced latency by introducing field compression and allowing multiple concurrent exchanges on the same connection.\n\n This document obsoletes RFCs 7540 and 8740.",
+  "pages": 78,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2022-07-08T07:15:50Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc9113.txt",
+  "category": "HTTP/2"
+}

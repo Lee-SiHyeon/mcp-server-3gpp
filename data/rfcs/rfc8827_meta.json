@@ -1,0 +1,10 @@
+{
+  "rfc_number": 8827,
+  "title": "WebRTC Security Architecture",
+  "abstract": "This document defines the security architecture for WebRTC, a protocol suite intended for use with real-time applications that can be deployed in browsers -- \"real-time communication on the Web\".",
+  "pages": 35,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2021-01-18T23:57:48Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc8827.txt",
+  "category": "WebRTC"
+}

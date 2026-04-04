@@ -1,0 +1,10 @@
+{
+  "rfc_number": 7519,
+  "title": "JSON Web Token (JWT)",
+  "abstract": "JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be transferred between two parties.  The claims in a JWT are encoded as a JSON object that is used as the payload of a JSON Web Signature (JWS) structure or as the plaintext of a JSON Web Encryption (JWE) structure, enabling the claims to be digitally signed or integrity protected with a Message Authentication Code (MAC) and/or encrypted.",
+  "pages": 30,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2025-04-04T07:08:57Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc7519.txt",
+  "category": "JWT"
+}

@@ -1,0 +1,10 @@
+{
+  "rfc_number": 6121,
+  "title": "Extensible Messaging and Presence Protocol (XMPP): Instant Messaging and Presence",
+  "abstract": "This document defines extensions to core features of the Extensible Messaging and Presence Protocol (XMPP) that provide basic instant messaging (IM) and presence functionality in conformance with the requirements in RFC 2779.  This document obsoletes RFC 3921. [STANDARDS-TRACK]",
+  "pages": 114,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2015-10-14T20:52:08Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc6121.txt",
+  "category": "XMPP"
+}

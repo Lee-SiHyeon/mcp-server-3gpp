@@ -1,0 +1,10 @@
+{
+  "rfc_number": 3412,
+  "title": "Message Processing and Dispatching for the Simple Network Management Protocol (SNMP)",
+  "abstract": "This document describes the Message Processing and Dispatching for Simple Network Management Protocol (SNMP) messages within the SNMP architecture.  It defines the procedures for dispatching potentially multiple versions of SNMP messages to the proper SNMP Message Processing Models, and for dispatching PDUs to SNMP applications.  This document also describes one Message Processing Model - the SNMPv3 Message Processing Model.  This document obsoletes RFC 2572. [STANDARDS-TRACK]",
+  "pages": 43,
+  "std_level": "/api/v1/name/stdlevelname/std/",
+  "date": "2024-01-13T08:15:29Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc3412.txt",
+  "category": "SNMP"
+}

@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4254,
+  "title": "The Secure Shell (SSH) Connection Protocol",
+  "abstract": "Secure Shell (SSH) is a protocol for secure remote login and other secure network services over an insecure network.\n\n This document describes the SSH Connection Protocol. It provides interactive login sessions, remote execution of commands, forwarded TCP/IP connections, and forwarded X11 connections. All of these channels are multiplexed into a single encrypted tunnel.\n\n The SSH Connection Protocol has been designed to run on top of the SSH transport layer and user authentication protocols. [STANDARDS-TRACK]",
+  "pages": 24,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:26:35Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4254.txt",
+  "category": "SSH"
+}

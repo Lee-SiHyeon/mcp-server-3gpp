@@ -1,0 +1,10 @@
+{
+  "rfc_number": 3411,
+  "title": "An Architecture for Describing Simple Network Management Protocol (SNMP) Management Frameworks",
+  "abstract": "This document describes an architecture for describing Simple Network Management Protocol (SNMP) Management Frameworks.  The architecture is designed to be modular to allow the evolution of the SNMP protocol standards over time.  The major portions of the architecture are an SNMP engine containing a Message Processing Subsystem, a Security Subsystem and an Access Control Subsystem, and possibly multiple SNMP applications which provide specific functional processing of management data.  This document obsoletes RFC 2571. [STANDARDS-TRACK]",
+  "pages": 64,
+  "std_level": "/api/v1/name/stdlevelname/std/",
+  "date": "2024-05-29T07:06:03Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc3411.txt",
+  "category": "SNMP"
+}

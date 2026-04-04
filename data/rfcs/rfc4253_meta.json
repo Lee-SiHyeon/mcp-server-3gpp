@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4253,
+  "title": "The Secure Shell (SSH) Transport Layer Protocol",
+  "abstract": "The Secure Shell (SSH) is a protocol for secure remote login and other secure network services over an insecure network.\n\n This document describes the SSH transport layer protocol, which typically runs on top of TCP/IP. The protocol can be used as a basis for a number of secure network services. It provides strong encryption, server authentication, and integrity protection. It may also provide compression.\n\n Key exchange method, public key algorithm, symmetric encryption algorithm, message authentication algorithm, and hash algorithm are all negotiated.\n\n This document also describes the Diffie-Hellman key exchange method and the minimal set of algorithms that are needed to implement the SSH transport layer protocol. [STANDARDS-TRACK]",
+  "pages": 32,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:26:34Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4253.txt",
+  "category": "SSH"
+}

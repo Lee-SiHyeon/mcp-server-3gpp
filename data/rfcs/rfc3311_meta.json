@@ -1,0 +1,10 @@
+{
+  "rfc_number": 3311,
+  "title": "The Session Initiation Protocol (SIP) UPDATE Method",
+  "abstract": "This specification defines the new UPDATE method for the Session\r\nInitiation Protocol (SIP). UPDATE allows a client to update\r\nparameters of a session (such as the set of media streams and their\r\ncodecs) but has no impact on the state of a dialog. In that sense, it\r\nis like a re-INVITE, but can be sent before the initial INVITE has\r\ncompleted. This makes it very useful for updating session parameters\r\nwithin early dialogs.\r\n\r\n",
+  "pages": 13,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2015-10-14T20:50:27Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc3311.txt",
+  "category": "SIP"
+}

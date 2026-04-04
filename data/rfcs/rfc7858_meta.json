@@ -1,0 +1,10 @@
+{
+  "rfc_number": 7858,
+  "title": "Specification for DNS over Transport Layer Security (TLS)",
+  "abstract": "This document describes the use of Transport Layer Security (TLS) to provide privacy for DNS. Encryption provided by TLS eliminates opportunities for eavesdropping and on-path tampering with DNS queries in the network, such as discussed in RFC 7626. In addition, this document specifies two usage profiles for DNS over TLS and provides advice on performance considerations to minimize overhead from using TCP and TLS with DNS.\n\n This document focuses on securing stub-to-recursive traffic, as per the charter of the DPRIVE Working Group. It does not prevent future applications of the protocol to recursive-to-authoritative traffic.",
+  "pages": 19,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2018-12-20T08:30:26Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc7858.txt",
+  "category": "DNS/TLS"
+}

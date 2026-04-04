@@ -1,0 +1,10 @@
+{
+  "rfc_number": 6096,
+  "title": "Stream Control Transmission Protocol (SCTP) Chunk Flags Registration",
+  "abstract": "This document defines the procedure for registering chunk flags with the Internet Assigned Numbers Authority (IANA) for the Stream Control Transmission Protocol (SCTP).  It updates RFC 4960 and also defines the IANA registry for contents for currently defined chunk types.  It does not change SCTP in any other way. [STANDARDS-TRACK]",
+  "pages": 8,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2015-10-14T20:52:17Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc6096.txt",
+  "category": "SCTP"
+}

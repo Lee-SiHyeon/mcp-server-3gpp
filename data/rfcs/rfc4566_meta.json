@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4566,
+  "title": "SDP: Session Description Protocol",
+  "abstract": "This memo defines the Session Description Protocol (SDP).  SDP is intended for describing multimedia sessions for the purposes of session announcement, session invitation, and other forms of multimedia session initiation. [STANDARDS-TRACK]",
+  "pages": 49,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:27:15Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4566.txt",
+  "category": "SDP"
+}

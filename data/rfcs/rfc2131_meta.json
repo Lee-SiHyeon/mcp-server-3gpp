@@ -1,0 +1,10 @@
+{
+  "rfc_number": 2131,
+  "title": "Dynamic Host Configuration Protocol",
+  "abstract": "The Dynamic Host Configuration Protocol (DHCP) provides a framework for passing configuration information to hosts on a TCPIP network.  DHCP is based on the Bootstrap Protocol (BOOTP), adding the capability of automatic allocation of reusable network addresses and additional configuration options. [STANDARDS-TRACK]",
+  "pages": 45,
+  "std_level": "/api/v1/name/stdlevelname/ds/",
+  "date": "2020-01-21T08:22:51Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc2131.txt",
+  "category": "DHCPv4"
+}

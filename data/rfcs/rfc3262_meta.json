@@ -1,0 +1,10 @@
+{
+  "rfc_number": 3262,
+  "title": "Reliability of Provisional Responses in Session Initiation Protocol (SIP)",
+  "abstract": "This document specifies an extension to the Session Initiation Protocol (SIP) providing reliable provisional response messages.  This extension uses the option tag 100rel and defines the Provisional Response ACKnowledgement (PRACK) method. [STANDARDS-TRACK]",
+  "pages": 14,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:24:34Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc3262.txt",
+  "category": "SIP"
+}

@@ -1,0 +1,10 @@
+{
+  "rfc_number": 9002,
+  "title": "QUIC Loss Detection and Congestion Control",
+  "abstract": "This document describes loss detection and congestion control mechanisms for QUIC.",
+  "pages": 42,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2023-06-14T07:16:13Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc9002.txt",
+  "category": "QUIC"
+}

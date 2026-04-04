@@ -1,0 +1,10 @@
+{
+  "rfc_number": 3031,
+  "title": "Multiprotocol Label Switching Architecture",
+  "abstract": "This document specifies the architecture for Multiprotocol Label Switching (MPLS). [STANDARDS-TRACK]",
+  "pages": 61,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:24:08Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc3031.txt",
+  "category": "MPLS"
+}

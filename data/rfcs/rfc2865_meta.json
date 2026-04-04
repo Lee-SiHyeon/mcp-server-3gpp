@@ -1,0 +1,10 @@
+{
+  "rfc_number": 2865,
+  "title": "Remote Authentication Dial In User Service (RADIUS)",
+  "abstract": "This document describes a protocol for carrying authentication, authorization, and configuration information between a Network Access Server which desires to authenticate its links and a shared Authentication Server. [STANDARDS-TRACK]",
+  "pages": 76,
+  "std_level": "/api/v1/name/stdlevelname/ds/",
+  "date": "2020-01-21T08:23:53Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc2865.txt",
+  "category": "RADIUS"
+}

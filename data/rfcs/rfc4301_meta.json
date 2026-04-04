@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4301,
+  "title": "Security Architecture for the Internet Protocol",
+  "abstract": "This document describes an updated version of the \"Security Architecture for IP\", which is designed to provide security services for traffic at the IP layer.  This document obsoletes RFC 2401 (November 1998). [STANDARDS-TRACK]",
+  "pages": 101,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:26:42Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4301.txt",
+  "category": "IPsec"
+}

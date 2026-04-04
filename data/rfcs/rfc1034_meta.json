@@ -1,0 +1,10 @@
+{
+  "rfc_number": 1034,
+  "title": "Domain names - concepts and facilities",
+  "abstract": "This RFC is the revised basic definition of The Domain Name System.  It obsoletes RFC-882.  This memo describes the domain style names and their used for host address look up and electronic mail forwarding.  It discusses the clients and servers in the domain name system and the protocol used between them.",
+  "pages": 55,
+  "std_level": "/api/v1/name/stdlevelname/std/",
+  "date": "2020-01-21T08:22:03Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc1034.txt",
+  "category": "DNS"
+}

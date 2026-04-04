@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4443,
+  "title": "Internet Control Message Protocol (ICMPv6) for the Internet Protocol Version 6 (IPv6) Specification",
+  "abstract": "This document describes the format of a set of control messages used in ICMPv6 (Internet Control Message Protocol).  ICMPv6 is the Internet Control Message Protocol for Internet Protocol version 6 (IPv6). [STANDARDS-TRACK]",
+  "pages": 24,
+  "std_level": "/api/v1/name/stdlevelname/std/",
+  "date": "2017-07-14T07:15:29Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4443.txt",
+  "category": "ICMPv6"
+}

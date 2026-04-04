@@ -1,0 +1,10 @@
+{
+  "rfc_number": 9001,
+  "title": "Using TLS to Secure QUIC",
+  "abstract": "This document describes how Transport Layer Security (TLS) is used to secure QUIC.",
+  "pages": 52,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2024-01-30T08:17:19Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc9001.txt",
+  "category": "QUIC"
+}

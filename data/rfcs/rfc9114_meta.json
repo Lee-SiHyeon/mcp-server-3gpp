@@ -1,0 +1,10 @@
+{
+  "rfc_number": 9114,
+  "title": "HTTP/3",
+  "abstract": "The QUIC transport protocol has several features that are desirable in a transport for HTTP, such as stream multiplexing, per-stream flow control, and low-latency connection establishment.  This document describes a mapping of HTTP semantics over QUIC.  This document also identifies HTTP/2 features that are subsumed by QUIC and describes how HTTP/2 extensions can be ported to HTTP/3.",
+  "pages": 57,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2022-09-28T05:15:18Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc9114.txt",
+  "category": "HTTP/3"
+}

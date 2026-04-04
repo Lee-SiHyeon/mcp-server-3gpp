@@ -28,5 +28,905 @@
     "date": "2020-03-07T08:26:41Z",
     "url": "https://www.rfc-editor.org/rfc/rfc8446.txt",
     "category": "TLS"
+  },
+  "1034": {
+    "rfc_number": 1034,
+    "title": "Domain names - concepts and facilities",
+    "abstract": "This RFC is the revised basic definition of The Domain Name System.  It obsoletes RFC-882.  This memo describes the domain style names and their used for host address look up and electronic mail forwarding.  It discusses the clients and servers in the domain name system and the protocol used between them.",
+    "pages": 55,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2020-01-21T08:22:03Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc1034.txt",
+    "category": "DNS"
+  },
+  "1035": {
+    "rfc_number": 1035,
+    "title": "Domain names - implementation and specification",
+    "abstract": "This RFC is the revised specification of the protocol and format used in the implementation of the Domain Name System.  It obsoletes RFC-883.  This memo documents the details of the domain name client - server communication.",
+    "pages": 55,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2020-01-21T08:22:04Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc1035.txt",
+    "category": "DNS"
+  },
+  "2131": {
+    "rfc_number": 2131,
+    "title": "Dynamic Host Configuration Protocol",
+    "abstract": "The Dynamic Host Configuration Protocol (DHCP) provides a framework for passing configuration information to hosts on a TCPIP network.  DHCP is based on the Bootstrap Protocol (BOOTP), adding the capability of automatic allocation of reusable network addresses and additional configuration options. [STANDARDS-TRACK]",
+    "pages": 45,
+    "std_level": "/api/v1/name/stdlevelname/ds/",
+    "date": "2020-01-21T08:22:51Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc2131.txt",
+    "category": "DHCPv4"
+  },
+  "2132": {
+    "rfc_number": 2132,
+    "title": "DHCP Options and BOOTP Vendor Extensions",
+    "abstract": "This document specifies the current set of DHCP options.  Future options will be specified in separate RFCs.  The current list of valid options is also available in ftp://ftp.isi.edu/in-notes/iana/assignments. [STANDARDS-TRACK]",
+    "pages": 34,
+    "std_level": "/api/v1/name/stdlevelname/ds/",
+    "date": "2020-01-21T08:22:52Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc2132.txt",
+    "category": "DHCPv4"
+  },
+  "2328": {
+    "rfc_number": 2328,
+    "title": "OSPF Version 2",
+    "abstract": "This memo documents version 2 of the OSPF protocol.  OSPF is a link- state routing protocol. [STANDARDS-TRACK]",
+    "pages": 244,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2020-01-21T08:23:08Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc2328.txt",
+    "category": "OSPF"
+  },
+  "2865": {
+    "rfc_number": 2865,
+    "title": "Remote Authentication Dial In User Service (RADIUS)",
+    "abstract": "This document describes a protocol for carrying authentication, authorization, and configuration information between a Network Access Server which desires to authenticate its links and a shared Authentication Server. [STANDARDS-TRACK]",
+    "pages": 76,
+    "std_level": "/api/v1/name/stdlevelname/ds/",
+    "date": "2020-01-21T08:23:53Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc2865.txt",
+    "category": "RADIUS"
+  },
+  "2866": {
+    "rfc_number": 2866,
+    "title": "RADIUS Accounting",
+    "abstract": "This document describes a protocol for carrying accounting information between a Network Access Server and a shared Accounting Server.  This memo provides information for the Internet community.",
+    "pages": 28,
+    "std_level": "/api/v1/name/stdlevelname/inf/",
+    "date": "2020-01-21T08:23:53Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc2866.txt",
+    "category": "RADIUS"
+  },
+  "3031": {
+    "rfc_number": 3031,
+    "title": "Multiprotocol Label Switching Architecture",
+    "abstract": "This document specifies the architecture for Multiprotocol Label Switching (MPLS). [STANDARDS-TRACK]",
+    "pages": 61,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:24:08Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3031.txt",
+    "category": "MPLS"
+  },
+  "3032": {
+    "rfc_number": 3032,
+    "title": "MPLS Label Stack Encoding",
+    "abstract": "This document specifies the encoding to be used by an LSR in order to transmit labeled packets on Point-to-Point Protocol (PPP) data links, on LAN data links, and possibly on other data links as well.  This document also specifies rules and procedures for processing the various fields of the label stack encoding. [STANDARDS-TRACK]",
+    "pages": 23,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:24:09Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3032.txt",
+    "category": "MPLS"
+  },
+  "3153": {
+    "rfc_number": 3153,
+    "title": "PPP Multiplexing",
+    "abstract": "This document describes a method to reduce the PPP (Point-to-Point Protocol) framing overhead used to transport small packets over slow links. [STANDARDS-TRACK]",
+    "pages": 9,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2013-03-02T16:57:18Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3153.txt",
+    "category": "GTP-U-Extension"
+  },
+  "3162": {
+    "rfc_number": 3162,
+    "title": "RADIUS and IPv6",
+    "abstract": "This document specifies the operation of RADIUS (Remote Authentication Dial In User Service) when run over IPv6 as well as the RADIUS attributes used to support IPv6 network access. [STANDARDS-TRACK]",
+    "pages": 12,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2013-03-02T16:57:18Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3162.txt",
+    "category": "RADIUS"
+  },
+  "3262": {
+    "rfc_number": 3262,
+    "title": "Reliability of Provisional Responses in Session Initiation Protocol (SIP)",
+    "abstract": "This document specifies an extension to the Session Initiation Protocol (SIP) providing reliable provisional response messages.  This extension uses the option tag 100rel and defines the Provisional Response ACKnowledgement (PRACK) method. [STANDARDS-TRACK]",
+    "pages": 14,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:24:34Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3262.txt",
+    "category": "SIP"
+  },
+  "3263": {
+    "rfc_number": 3263,
+    "title": "Session Initiation Protocol (SIP): Locating SIP Servers",
+    "abstract": "The Session Initiation Protocol (SIP) uses DNS procedures to allow a client to resolve a SIP Uniform Resource Identifier (URI) into the IP address, port, and transport protocol of the next hop to contact.  It also uses DNS to allow a server to send a response to a backup client if the primary client has failed.  This document describes those DNS procedures in detail. [STANDARDS-TRACK]",
+    "pages": 17,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-12-07T21:01:55Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3263.txt",
+    "category": "SIP"
+  },
+  "3264": {
+    "rfc_number": 3264,
+    "title": "An Offer/Answer Model with Session Description Protocol (SDP)",
+    "abstract": "This document defines a mechanism by which two entities can make use of the Session Description Protocol (SDP) to arrive at a common view of a multimedia session between them.  In the model, one participant offers the other a description of the desired session from their perspective, and the other participant answers with the desired session from their perspective.  This offer/answer model is most useful in unicast sessions where information from both participants is needed for the complete view of the session.  The offer/answer model is used by protocols like the Session Initiation Protocol (SIP). [STANDARDS-TRACK]",
+    "pages": 25,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:24:35Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3264.txt",
+    "category": "SIP"
+  },
+  "3265": {
+    "rfc_number": 3265,
+    "title": "Session Initiation Protocol (SIP)-Specific Event Notification",
+    "abstract": "This document describes an extension to the Session Initiation Protocol (SIP).  The purpose of this extension is to provide an extensible framework by which SIP nodes can request notification from remote nodes indicating that certain events have occurred. [STANDARDS-TRACK]",
+    "pages": 38,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:24:35Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3265.txt",
+    "category": "SIP"
+  },
+  "3311": {
+    "rfc_number": 3311,
+    "title": "The Session Initiation Protocol (SIP) UPDATE Method",
+    "abstract": "This specification defines the new UPDATE method for the Session\r\nInitiation Protocol (SIP). UPDATE allows a client to update\r\nparameters of a session (such as the set of media streams and their\r\ncodecs) but has no impact on the state of a dialog. In that sense, it\r\nis like a re-INVITE, but can be sent before the initial INVITE has\r\ncompleted. This makes it very useful for updating session parameters\r\nwithin early dialogs.\r\n\r\n",
+    "pages": 13,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-10-14T20:50:27Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3311.txt",
+    "category": "SIP"
+  },
+  "3411": {
+    "rfc_number": 3411,
+    "title": "An Architecture for Describing Simple Network Management Protocol (SNMP) Management Frameworks",
+    "abstract": "This document describes an architecture for describing Simple Network Management Protocol (SNMP) Management Frameworks.  The architecture is designed to be modular to allow the evolution of the SNMP protocol standards over time.  The major portions of the architecture are an SNMP engine containing a Message Processing Subsystem, a Security Subsystem and an Access Control Subsystem, and possibly multiple SNMP applications which provide specific functional processing of management data.  This document obsoletes RFC 2571. [STANDARDS-TRACK]",
+    "pages": 64,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2024-05-29T07:06:03Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3411.txt",
+    "category": "SNMP"
+  },
+  "3412": {
+    "rfc_number": 3412,
+    "title": "Message Processing and Dispatching for the Simple Network Management Protocol (SNMP)",
+    "abstract": "This document describes the Message Processing and Dispatching for Simple Network Management Protocol (SNMP) messages within the SNMP architecture.  It defines the procedures for dispatching potentially multiple versions of SNMP messages to the proper SNMP Message Processing Models, and for dispatching PDUs to SNMP applications.  This document also describes one Message Processing Model - the SNMPv3 Message Processing Model.  This document obsoletes RFC 2572. [STANDARDS-TRACK]",
+    "pages": 43,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2024-01-13T08:15:29Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3412.txt",
+    "category": "SNMP"
+  },
+  "3428": {
+    "rfc_number": 3428,
+    "title": "Session Initiation Protocol (SIP) Extension for Instant Messaging",
+    "abstract": "Instant Messaging (IM) refers to the transfer of messages between users in near real-time.  These messages are usually, but not required to be, short.  IMs are often used in a conversational mode, that is, the transfer of messages back and forth is fast enough for participants to maintain an interactive conversation.  This document proposes the MESSAGE method, an extension to the Session Initiation Protocol (SIP) that allows the transfer of Instant Messages.  Since the MESSAGE request is an extension to SIP, it inherits all the request routing and security features of that protocol.  MESSAGE requests carry the content in the form of MIME body parts.  MESSAGE requests do not themselves initiate a SIP dialog; under normal usage each Instant Message stands alone, much like pager messages.  MESSAGE requests may be sent in the context of a dialog initiated by some other SIP request. [STANDARDS-TRACK]",
+    "pages": 18,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-10-14T20:50:23Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3428.txt",
+    "category": "SIP/IM"
+  },
+  "3489": {
+    "rfc_number": 3489,
+    "title": "STUN - Simple Traversal of User Datagram Protocol (UDP) Through Network Address Translators (NATs)",
+    "abstract": "Simple Traversal of User Datagram Protocol (UDP) Through Network Address Translators (NATs) (STUN) is a lightweight protocol that allows applications to discover the presence and types of NATs and firewalls between them and the public Internet.  It also provides the ability for applications to determine the public Internet Protocol (IP) addresses allocated to them by the NAT.  STUN works with many existing NATs, and does not require any special behavior from them.  As a result, it allows a wide variety of applications to work through existing NAT infrastructure. [STANDARDS-TRACK]",
+    "pages": 47,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-10-14T20:50:30Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3489.txt",
+    "category": "STUN"
+  },
+  "3515": {
+    "rfc_number": 3515,
+    "title": "The Session Initiation Protocol (SIP) Refer Method",
+    "abstract": "This document defines the REFER method.  This Session Initiation Protocol (SIP) extension requests that the recipient REFER to a resource provided in the request.  It provides a mechanism allowing the party sending the REFER to be notified of the outcome of the referenced request.  This can be used to enable many applications, including call transfer.  In addition to the REFER method, this document defines the refer event package and the Refer-To request header. [STANDARDS-TRACK]",
+    "pages": 23,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2024-03-30T07:06:05Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3515.txt",
+    "category": "SIP"
+  },
+  "3550": {
+    "rfc_number": 3550,
+    "title": "RTP: A Transport Protocol for Real-Time Applications",
+    "abstract": "This memorandum describes RTP, the real-time transport protocol.  RTP provides end-to-end network transport functions suitable for applications transmitting real-time data, such as audio, video or simulation data, over multicast or unicast network services.  RTP does not address resource reservation and does not guarantee quality-of- service for real-time services.  The data transport is augmented by a control protocol (RTCP) to allow monitoring of the data delivery in a manner scalable to large multicast networks, and to provide minimal control and identification functionality.  RTP and RTCP are designed to be independent of the underlying transport and network layers.  The protocol supports the use of RTP-level translators and mixers.  Most of the text in this memorandum is identical to RFC 1889 which it obsoletes.  There are no changes in the packet formats on the wire, only changes to the rules and algorithms governing how the protocol is used.  The biggest change is an enhancement to the scalable timer algorithm for calculating when to send RTCP packets in order to minimize transmission in excess of the intended rate when many participants join a session simultaneously. [STANDARDS-TRACK]",
+    "pages": 104,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2015-10-14T20:49:52Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3550.txt",
+    "category": "RTP"
+  },
+  "3551": {
+    "rfc_number": 3551,
+    "title": "RTP Profile for Audio and Video Conferences with Minimal Control",
+    "abstract": "This document describes a profile called \"RTP/AVP\" for the use of the real-time transport protocol (RTP), version 2, and the associated control protocol, RTCP, within audio and video multiparticipant conferences with minimal control.  It provides interpretations of generic fields within the RTP specification suitable for audio and video conferences.  In particular, this document defines a set of default mappings from payload type numbers to encodings.  This document also describes how audio and video data may be carried within RTP.  It defines a set of standard encodings and their names when used within RTP.  The descriptions provide pointers to reference implementations and the detailed standards.  This document is meant as an aid for implementors of audio, video and other real-time multimedia applications.  This memorandum obsoletes RFC 1890.  It is mostly backwards-compatible except for functions removed because two interoperable implementations were not found.  The additions to RFC 1890 codify existing practice in the use of payload formats under this profile and include new payload formats defined since RFC 1890 was published. [STANDARDS-TRACK]",
+    "pages": 44,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2013-03-02T16:57:49Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3551.txt",
+    "category": "RTP"
+  },
+  "3588": {
+    "rfc_number": 3588,
+    "title": "Diameter Base Protocol",
+    "abstract": "The Diameter base protocol is intended to provide an Authentication, Authorization and Accounting (AAA) framework for applications such as network access or IP mobility.  Diameter is also intended to work in both local Authentication, Authorization & Accounting and roaming situations.  This document specifies the message format, transport, error reporting, accounting and security services to be used by all Diameter applications.  The Diameter base application needs to be supported by all Diameter implementations. [STANDARDS-TRACK]",
+    "pages": 147,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:25:19Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc3588.txt",
+    "category": "Diameter"
+  },
+  "4005": {
+    "rfc_number": 4005,
+    "title": "Diameter Network Access Server Application",
+    "abstract": "This document describes the Diameter protocol application used for Authentication, Authorization, and Accounting (AAA) services in the Network Access Server (NAS) environment. When combined with the Diameter Base protocol, Transport Profile, and Extensible Authentication Protocol specifications, this application specification satisfies typical network access services requirements.\n\n Initial deployments of the Diameter protocol are expected to include legacy systems. Therefore, this application has been carefully designed to ease the burden of protocol conversion between RADIUS and Diameter. This is achieved by including the RADIUS attribute space to eliminate the need to perform many attribute translations.\n\n The interactions between Diameter applications and RADIUS specified in this document are to be applied to all Diameter applications. In this sense, this document extends the Base Diameter protocol. [STANDARDS-TRACK]",
+    "pages": 85,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2018-12-20T08:19:49Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4005.txt",
+    "category": "Diameter"
+  },
+  "4006": {
+    "rfc_number": 4006,
+    "title": "Diameter Credit-Control Application",
+    "abstract": "This document specifies a Diameter application that can be used to implement real-time credit-control for a variety of end user services such as network access, Session Initiation Protocol (SIP) services, messaging services, and download services. [STANDARDS-TRACK]",
+    "pages": 114,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-10-14T20:50:45Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4006.txt",
+    "category": "Diameter"
+  },
+  "4033": {
+    "rfc_number": 4033,
+    "title": "DNS Security Introduction and Requirements",
+    "abstract": "The Domain Name System Security Extensions (DNSSEC) add data origin authentication and data integrity to the Domain Name System.  This document introduces these extensions and describes their capabilities and limitations.  This document also discusses the services that the DNS security extensions do and do not provide.  Last, this document describes the interrelationships between the documents that collectively describe DNSSEC. [STANDARDS-TRACK]",
+    "pages": 21,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:26:04Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4033.txt",
+    "category": "DNSSEC"
+  },
+  "4034": {
+    "rfc_number": 4034,
+    "title": "Resource Records for the DNS Security Extensions",
+    "abstract": "This document is part of a family of documents that describe the DNS Security Extensions (DNSSEC). The DNS Security Extensions are a collection of resource records and protocol modifications that provide source authentication for the DNS. This document defines the public key (DNSKEY), delegation signer (DS), resource record digital signature (RRSIG), and authenticated denial of existence (NSEC) resource records. The purpose and format of each resource record is described in detail, and an example of each resource record is given.\n\n This document obsoletes RFC 2535 and incorporates changes from all updates to RFC 2535. [STANDARDS-TRACK]",
+    "pages": 29,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:26:05Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4034.txt",
+    "category": "DNSSEC"
+  },
+  "4035": {
+    "rfc_number": 4035,
+    "title": "Protocol Modifications for the DNS Security Extensions",
+    "abstract": "This document is part of a family of documents that describe the DNS Security Extensions (DNSSEC). The DNS Security Extensions are a collection of new resource records and protocol modifications that add data origin authentication and data integrity to the DNS. This document describes the DNSSEC protocol modifications. This document defines the concept of a signed zone, along with the requirements for serving and resolving by using DNSSEC. These techniques allow a security-aware resolver to authenticate both DNS resource records and authoritative DNS error indications.\n\n This document obsoletes RFC 2535 and incorporates changes from all updates to RFC 2535. [STANDARDS-TRACK]",
+    "pages": 53,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:26:06Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4035.txt",
+    "category": "DNSSEC"
+  },
+  "4072": {
+    "rfc_number": 4072,
+    "title": "Diameter Extensible Authentication Protocol (EAP) Application",
+    "abstract": "The Extensible Authentication Protocol (EAP) provides a standard mechanism for support of various authentication methods.  This document defines the Command-Codes and AVPs necessary to carry EAP packets between a Network Access Server (NAS) and a back-end authentication server. [STANDARDS-TRACK]",
+    "pages": 33,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-10-14T20:50:33Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4072.txt",
+    "category": "Diameter"
+  },
+  "4251": {
+    "rfc_number": 4251,
+    "title": "The Secure Shell (SSH) Protocol Architecture",
+    "abstract": "The Secure Shell (SSH) Protocol is a protocol for secure remote login and other secure network services over an insecure network.  This document describes the architecture of the SSH protocol, as well as the notation and terminology used in SSH protocol documents.  It also discusses the SSH algorithm naming system that allows local extensions.  The SSH protocol consists of three major components: The Transport Layer Protocol provides server authentication, confidentiality, and integrity with perfect forward secrecy.  The User Authentication Protocol authenticates the client to the server.  The Connection Protocol multiplexes the encrypted tunnel into several logical channels.  Details of these protocols are described in separate documents. [STANDARDS-TRACK]",
+    "pages": 30,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-10-14T20:49:52Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4251.txt",
+    "category": "SSH"
+  },
+  "4252": {
+    "rfc_number": 4252,
+    "title": "The Secure Shell (SSH) Authentication Protocol",
+    "abstract": "The Secure Shell Protocol (SSH) is a protocol for secure remote login and other secure network services over an insecure network.  This document describes the SSH authentication protocol framework and public key, password, and host-based client authentication methods.  Additional authentication methods are described in separate documents.  The SSH authentication protocol runs on top of the SSH transport layer protocol and provides a single authenticated tunnel for the SSH connection protocol. [STANDARDS-TRACK]",
+    "pages": 17,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2023-07-29T07:15:33Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4252.txt",
+    "category": "SSH"
+  },
+  "4253": {
+    "rfc_number": 4253,
+    "title": "The Secure Shell (SSH) Transport Layer Protocol",
+    "abstract": "The Secure Shell (SSH) is a protocol for secure remote login and other secure network services over an insecure network.\n\n This document describes the SSH transport layer protocol, which typically runs on top of TCP/IP. The protocol can be used as a basis for a number of secure network services. It provides strong encryption, server authentication, and integrity protection. It may also provide compression.\n\n Key exchange method, public key algorithm, symmetric encryption algorithm, message authentication algorithm, and hash algorithm are all negotiated.\n\n This document also describes the Diffie-Hellman key exchange method and the minimal set of algorithms that are needed to implement the SSH transport layer protocol. [STANDARDS-TRACK]",
+    "pages": 32,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:26:34Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4253.txt",
+    "category": "SSH"
+  },
+  "4254": {
+    "rfc_number": 4254,
+    "title": "The Secure Shell (SSH) Connection Protocol",
+    "abstract": "Secure Shell (SSH) is a protocol for secure remote login and other secure network services over an insecure network.\n\n This document describes the SSH Connection Protocol. It provides interactive login sessions, remote execution of commands, forwarded TCP/IP connections, and forwarded X11 connections. All of these channels are multiplexed into a single encrypted tunnel.\n\n The SSH Connection Protocol has been designed to run on top of the SSH transport layer and user authentication protocols. [STANDARDS-TRACK]",
+    "pages": 24,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:26:35Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4254.txt",
+    "category": "SSH"
+  },
+  "4271": {
+    "rfc_number": 4271,
+    "title": "A Border Gateway Protocol 4 (BGP-4)",
+    "abstract": "This document discusses the Border Gateway Protocol (BGP), which is an inter-Autonomous System routing protocol.\n\n The primary function of a BGP speaking system is to exchange network reachability information with other BGP systems. This network reachability information includes information on the list of Autonomous Systems (ASes) that reachability information traverses. This information is sufficient for constructing a graph of AS connectivity for this reachability from which routing loops may be pruned, and, at the AS level, some policy decisions may be enforced.\n\n BGP-4 provides a set of mechanisms for supporting Classless Inter-Domain Routing (CIDR). These mechanisms include support for advertising a set of destinations as an IP prefix, and eliminating the concept of network \"class\" within BGP. BGP-4 also introduces mechanisms that allow aggregation of routes, including aggregation of AS paths.\n\n This document obsoletes RFC 1771. [STANDARDS-TRACK]",
+    "pages": 104,
+    "std_level": "/api/v1/name/stdlevelname/ds/",
+    "date": "2020-01-21T08:26:37Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4271.txt",
+    "category": "BGP"
+  },
+  "4291": {
+    "rfc_number": 4291,
+    "title": "IP Version 6 Addressing Architecture",
+    "abstract": "This specification defines the addressing architecture of the IP Version 6 (IPv6) protocol. The document includes the IPv6 addressing model, text representations of IPv6 addresses, definition of IPv6 unicast addresses, anycast addresses, and multicast addresses, and an IPv6 node's required addresses.\n\n This document obsoletes RFC 3513, \"IP Version 6 Addressing Architecture\". [STANDARDS-TRACK]",
+    "pages": 25,
+    "std_level": "/api/v1/name/stdlevelname/ds/",
+    "date": "2020-01-21T08:26:39Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4291.txt",
+    "category": "IPv6-Addressing"
+  },
+  "4301": {
+    "rfc_number": 4301,
+    "title": "Security Architecture for the Internet Protocol",
+    "abstract": "This document describes an updated version of the \"Security Architecture for IP\", which is designed to provide security services for traffic at the IP layer.  This document obsoletes RFC 2401 (November 1998). [STANDARDS-TRACK]",
+    "pages": 101,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:26:42Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4301.txt",
+    "category": "IPsec"
+  },
+  "4303": {
+    "rfc_number": 4303,
+    "title": "IP Encapsulating Security Payload (ESP)",
+    "abstract": "This document describes an updated version of the Encapsulating Security Payload (ESP) protocol, which is designed to provide a mix of security services in IPv4 and IPv6.  ESP is used to provide confidentiality, data origin authentication, connectionless integrity, an anti-replay service (a form of partial sequence integrity), and limited traffic flow confidentiality.  This document obsoletes RFC 2406 (November 1998). [STANDARDS-TRACK]",
+    "pages": 44,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:26:43Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4303.txt",
+    "category": "IPsec/ESP"
+  },
+  "4443": {
+    "rfc_number": 4443,
+    "title": "Internet Control Message Protocol (ICMPv6) for the Internet Protocol Version 6 (IPv6) Specification",
+    "abstract": "This document describes the format of a set of control messages used in ICMPv6 (Internet Control Message Protocol).  ICMPv6 is the Internet Control Message Protocol for Internet Protocol version 6 (IPv6). [STANDARDS-TRACK]",
+    "pages": 24,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2017-07-14T07:15:29Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4443.txt",
+    "category": "ICMPv6"
+  },
+  "4566": {
+    "rfc_number": 4566,
+    "title": "SDP: Session Description Protocol",
+    "abstract": "This memo defines the Session Description Protocol (SDP).  SDP is intended for describing multimedia sessions for the purposes of session announcement, session invitation, and other forms of multimedia session initiation. [STANDARDS-TRACK]",
+    "pages": 49,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:27:15Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4566.txt",
+    "category": "SDP"
+  },
+  "4760": {
+    "rfc_number": 4760,
+    "title": "Multiprotocol Extensions for BGP-4",
+    "abstract": "This document defines extensions to BGP-4 to enable it to carry routing information for multiple Network Layer protocols (e.g., IPv6, IPX, L3VPN, etc.).  The extensions are backward compatible - a router that supports the extensions can interoperate with a router that doesn't support the extensions. [STANDARDS-TRACK]",
+    "pages": 12,
+    "std_level": "/api/v1/name/stdlevelname/ds/",
+    "date": "2020-01-21T08:27:49Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4760.txt",
+    "category": "BGP-MultiProtocol"
+  },
+  "4787": {
+    "rfc_number": 4787,
+    "title": "Network Address Translation (NAT) Behavioral Requirements for Unicast UDP",
+    "abstract": "This document defines basic terminology for describing different types of Network Address Translation (NAT) behavior when handling Unicast UDP and also defines a set of requirements that would allow many applications, such as multimedia communications or online gaming, to work consistently.  Developing NATs that meet this set of requirements will greatly increase the likelihood that these applications will function properly.  This document specifies an Internet Best Current Practices for the Internet Community, and requests discussion and suggestions for improvements.",
+    "pages": 29,
+    "std_level": "/api/v1/name/stdlevelname/bcp/",
+    "date": "2015-10-14T20:51:09Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4787.txt",
+    "category": "NAT-UDP"
+  },
+  "4960": {
+    "rfc_number": 4960,
+    "title": "Stream Control Transmission Protocol",
+    "abstract": "This document obsoletes RFC 2960 and RFC 3309. It describes the Stream Control Transmission Protocol (SCTP). SCTP is designed to transport Public Switched Telephone Network (PSTN) signaling messages over IP networks, but is capable of broader applications.\n\n SCTP is a reliable transport protocol operating on top of a connectionless packet network such as IP. It offers the following services to its users:\n\n -- acknowledged error-free non-duplicated transfer of user data,\n\n -- data fragmentation to conform to discovered path MTU size,\n\n -- sequenced delivery of user messages within multiple streams, with an option for order-of-arrival delivery of individual user messages,\n\n -- optional bundling of multiple user messages into a single SCTP packet, and\n\n -- network-level fault tolerance through supporting of multi-homing at either or both ends of an association.\n\n The design of SCTP includes appropriate congestion avoidance behavior and resistance to flooding and masquerade attacks. [STANDARDS-TRACK]",
+    "pages": 152,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:28:17Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc4960.txt",
+    "category": "SCTP"
+  },
+  "5036": {
+    "rfc_number": 5036,
+    "title": "LDP Specification",
+    "abstract": "The architecture for Multiprotocol Label Switching (MPLS) is described in RFC 3031.  A fundamental concept in MPLS is that two Label Switching Routers (LSRs) must agree on the meaning of the labels used to forward traffic between and through them.  This common understanding is achieved by using a set of procedures, called a label distribution protocol, by which one LSR informs another of label bindings it has made.  This document defines a set of such procedures called LDP (for Label Distribution Protocol) by which LSRs distribute labels to support MPLS forwarding along normally routed paths. [STANDARDS-TRACK]",
+    "pages": 135,
+    "std_level": "/api/v1/name/stdlevelname/ds/",
+    "date": "2020-01-21T08:28:28Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc5036.txt",
+    "category": "LDP"
+  },
+  "5080": {
+    "rfc_number": 5080,
+    "title": "Common Remote Authentication Dial In User Service (RADIUS) Implementation Issues and Suggested Fixes",
+    "abstract": "This document describes common issues seen in Remote Authentication Dial In User Service (RADIUS) implementations and suggests some fixes.  Where applicable, ambiguities and errors in previous RADIUS specifications are clarified. [STANDARDS-TRACK]",
+    "pages": 28,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-10-14T20:51:19Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc5080.txt",
+    "category": "RADIUS"
+  },
+  "5246": {
+    "rfc_number": 5246,
+    "title": "The Transport Layer Security (TLS) Protocol Version 1.2",
+    "abstract": "This document specifies Version 1.2 of the Transport Layer Security (TLS) protocol.  The TLS protocol provides communications security over the Internet.  The protocol allows client/server applications to communicate in a way that is designed to prevent eavesdropping, tampering, or message forgery. [STANDARDS-TRACK]",
+    "pages": 104,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:28:58Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc5246.txt",
+    "category": "TLS"
+  },
+  "5340": {
+    "rfc_number": 5340,
+    "title": "OSPF for IPv6",
+    "abstract": "This document describes the modifications to OSPF to support version 6 of the Internet Protocol (IPv6). The fundamental mechanisms of OSPF (flooding, Designated Router (DR) election, area support, Short Path First (SPF) calculations, etc.) remain unchanged. However, some changes have been necessary, either due to changes in protocol semantics between IPv4 and IPv6, or simply to handle the increased address size of IPv6. These modifications will necessitate incrementing the protocol version from version 2 to version 3. OSPF for IPv6 is also referred to as OSPF version 3 (OSPFv3).\n\n Changes between OSPF for IPv4, OSPF Version 2, and OSPF for IPv6 as described herein include the following. Addressing semantics have been removed from OSPF packets and the basic Link State Advertisements (LSAs). New LSAs have been created to carry IPv6 addresses and prefixes. OSPF now runs on a per-link basis rather than on a per-IP-subnet basis. Flooding scope for LSAs has been generalized. Authentication has been removed from the OSPF protocol and instead relies on IPv6's Authentication Header and Encapsulating Security Payload (ESP).\n\n Even with larger IPv6 addresses, most packets in OSPF for IPv6 are almost as compact as those in OSPF for IPv4. Most fields and packet- size limitations present in OSPF for IPv4 have been relaxed. In addition, option handling has been made more flexible.\n\n All of OSPF for IPv4's optional capabilities, including demand circuit support and Not-So-Stubby Areas (NSSAs), are also supported in OSPF for IPv6. [STANDARDS-TRACK]",
+    "pages": 94,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:29:15Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc5340.txt",
+    "category": "OSPFv3"
+  },
+  "5382": {
+    "rfc_number": 5382,
+    "title": "NAT Behavioral Requirements for TCP",
+    "abstract": "This document defines a set of requirements for NATs that handle TCP that would allow many applications, such as peer-to-peer applications and online games to work consistently.  Developing NATs that meet this set of requirements will greatly increase the likelihood that these applications will function properly.  This document specifies an Internet Best Current Practices for the Internet Community, and requests discussion and suggestions for improvements.",
+    "pages": 31,
+    "std_level": "/api/v1/name/stdlevelname/bcp/",
+    "date": "2015-10-14T20:51:17Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc5382.txt",
+    "category": "NAT-TCP"
+  },
+  "5389": {
+    "rfc_number": 5389,
+    "title": "Session Traversal Utilities for NAT (STUN)",
+    "abstract": "Session Traversal Utilities for NAT (STUN) is a protocol that serves as a tool for other protocols in dealing with Network Address Translator (NAT) traversal. It can be used by an endpoint to determine the IP address and port allocated to it by a NAT. It can also be used to check connectivity between two endpoints, and as a keep-alive protocol to maintain NAT bindings. STUN works with many existing NATs, and does not require any special behavior from them.\n\n STUN is not a NAT traversal solution by itself. Rather, it is a tool to be used in the context of a NAT traversal solution. This is an important change from the previous version of this specification (RFC 3489), which presented STUN as a complete solution.\n\n This document obsoletes RFC 3489. [STANDARDS-TRACK]",
+    "pages": 51,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-02-22T08:29:23Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc5389.txt",
+    "category": "STUN"
+  },
+  "5766": {
+    "rfc_number": 5766,
+    "title": "Traversal Using Relays around NAT (TURN): Relay Extensions to Session Traversal Utilities for NAT (STUN)",
+    "abstract": "If a host is located behind a NAT, then in certain situations it can be impossible for that host to communicate directly with other hosts (peers).  In these situations, it is necessary for the host to use the services of an intermediate node that acts as a communication relay.  This specification defines a protocol, called TURN (Traversal Using Relays around NAT), that allows the host to control the operation of the relay and to exchange packets with its peers using the relay.  TURN differs from some other relay control protocols in that it allows a client to communicate with multiple peers using a single relay address. [STANDARDS-TRACK]",
+    "pages": 67,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:30:18Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc5766.txt",
+    "category": "TURN"
+  },
+  "5779": {
+    "rfc_number": 5779,
+    "title": "Diameter Proxy Mobile IPv6: Mobile Access Gateway and Local Mobility Anchor Interaction with Diameter Server",
+    "abstract": "This specification defines Authentication, Authorization, and Accounting (AAA) interactions between Proxy Mobile IPv6 entities (both Mobile Access Gateway and Local Mobility Anchor) and a AAA server within a Proxy Mobile IPv6 Domain.  These AAA interactions are primarily used to download and update mobile node specific policy profile information between Proxy Mobile IPv6 entities and a remote policy store. [STANDARDS-TRACK]",
+    "pages": 20,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-10-14T20:51:47Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc5779.txt",
+    "category": "Diameter"
+  },
+  "5905": {
+    "rfc_number": 5905,
+    "title": "Network Time Protocol Version 4: Protocol and Algorithms Specification",
+    "abstract": "The Network Time Protocol (NTP) is widely used to synchronize computer clocks in the Internet.  This document describes NTP version 4 (NTPv4), which is backwards compatible with NTP version 3 (NTPv3), described in RFC 1305, as well as previous versions of the protocol.  NTPv4 includes a modified protocol header to accommodate the Internet Protocol version 6 address family.  NTPv4 includes fundamental improvements in the mitigation and discipline algorithms that extend the potential accuracy to the tens of microseconds with modern workstations and fast LANs.  It includes a dynamic server discovery scheme, so that in many cases, specific server configuration is not required.  It corrects certain errors in the NTPv3 design and implementation and includes an optional extension mechanism.",
+    "pages": 110,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2025-03-01T08:07:56Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc5905.txt",
+    "category": "NTP"
+  },
+  "5944": {
+    "rfc_number": 5944,
+    "title": "IP Mobility Support for IPv4, Revised",
+    "abstract": "This document specifies protocol enhancements that allow transparent routing of IP datagrams to mobile nodes in the Internet.  Each mobile node is always identified by its home address, regardless of its current point of attachment to the Internet.  While situated away from its home, a mobile node is also associated with a care-of address, which provides information about its current point of attachment to the Internet.  The protocol provides for registering the care-of address with a home agent.  The home agent sends datagrams destined for the mobile node through a tunnel to the care-of address.  After arriving at the end of the tunnel, each datagram is then delivered to the mobile node. [STANDARDS-TRACK]",
+    "pages": 100,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:30:45Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc5944.txt",
+    "category": "MIPv4"
+  },
+  "6096": {
+    "rfc_number": 6096,
+    "title": "Stream Control Transmission Protocol (SCTP) Chunk Flags Registration",
+    "abstract": "This document defines the procedure for registering chunk flags with the Internet Assigned Numbers Authority (IANA) for the Stream Control Transmission Protocol (SCTP).  It updates RFC 4960 and also defines the IANA registry for contents for currently defined chunk types.  It does not change SCTP in any other way. [STANDARDS-TRACK]",
+    "pages": 8,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-10-14T20:52:17Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6096.txt",
+    "category": "SCTP"
+  },
+  "6120": {
+    "rfc_number": 6120,
+    "title": "Extensible Messaging and Presence Protocol (XMPP): Core",
+    "abstract": "The Extensible Messaging and Presence Protocol (XMPP) is an application profile of the Extensible Markup Language (XML) that enables the near-real-time exchange of structured yet extensible data between any two or more network entities.  This document defines XMPP's core protocol methods: setup and teardown of XML streams, channel encryption, authentication, error handling, and communication primitives for messaging, network availability (\"presence\"), and request-response interactions.  This document obsoletes RFC 3920. [STANDARDS-TRACK]",
+    "pages": 211,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-10-14T20:52:08Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6120.txt",
+    "category": "XMPP"
+  },
+  "6121": {
+    "rfc_number": 6121,
+    "title": "Extensible Messaging and Presence Protocol (XMPP): Instant Messaging and Presence",
+    "abstract": "This document defines extensions to core features of the Extensible Messaging and Presence Protocol (XMPP) that provide basic instant messaging (IM) and presence functionality in conformance with the requirements in RFC 2779.  This document obsoletes RFC 3921. [STANDARDS-TRACK]",
+    "pages": 114,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-10-14T20:52:08Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6121.txt",
+    "category": "XMPP"
+  },
+  "6241": {
+    "rfc_number": 6241,
+    "title": "Network Configuration Protocol (NETCONF)",
+    "abstract": "The Network Configuration Protocol (NETCONF) defined in this document provides mechanisms to install, manipulate, and delete the configuration of network devices.  It uses an Extensible Markup Language (XML)-based data encoding for the configuration data as well as the protocol messages.  The NETCONF protocol operations are realized as remote procedure calls (RPCs).  This document obsoletes RFC 4741. [STANDARDS-TRACK]",
+    "pages": 113,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:31:23Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6241.txt",
+    "category": "NETCONF"
+  },
+  "6242": {
+    "rfc_number": 6242,
+    "title": "Using the NETCONF Protocol over Secure Shell (SSH)",
+    "abstract": "This document describes a method for invoking and running the Network Configuration Protocol (NETCONF) within a Secure Shell (SSH) session as an SSH subsystem.  This document obsoletes RFC 4742. [STANDARDS-TRACK]",
+    "pages": 11,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2025-09-14T07:18:38Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6242.txt",
+    "category": "NETCONF"
+  },
+  "6275": {
+    "rfc_number": 6275,
+    "title": "Mobility Support in IPv6",
+    "abstract": "This document specifies Mobile IPv6, a protocol that allows nodes to remain reachable while moving around in the IPv6 Internet.  Each mobile node is always identified by its home address, regardless of its current point of attachment to the Internet.  While situated away from its home, a mobile node is also associated with a care-of address, which provides information about the mobile node's current location.  IPv6 packets addressed to a mobile node's home address are transparently routed to its care-of address.  The protocol enables IPv6 nodes to cache the binding of a mobile node's home address with its care-of address, and to then send any packets destined for the mobile node directly to it at this care-of address.  To support this operation, Mobile IPv6 defines a new IPv6 protocol and a new destination option.  All IPv6 nodes, whether mobile or stationary, can communicate with mobile nodes.  This document obsoletes RFC 3775. [STANDARDS-TRACK]",
+    "pages": 169,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:31:27Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6275.txt",
+    "category": "MIPv6"
+  },
+  "6749": {
+    "rfc_number": 6749,
+    "title": "The OAuth 2.0 Authorization Framework",
+    "abstract": "The OAuth 2.0 authorization framework enables a third-party application to obtain limited access to an HTTP service, either on behalf of a resource owner by orchestrating an approval interaction between the resource owner and the HTTP service, or by allowing the third-party application to obtain access on its own behalf.  This specification replaces and obsoletes the OAuth 1.0 protocol described in RFC 5849. [STANDARDS-TRACK]",
+    "pages": 76,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:32:11Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6749.txt",
+    "category": "OAuth"
+  },
+  "6750": {
+    "rfc_number": 6750,
+    "title": "The OAuth 2.0 Authorization Framework: Bearer Token Usage",
+    "abstract": "This specification describes how to use bearer tokens in HTTP requests to access OAuth 2.0 protected resources.  Any party in possession of a bearer token (a \"bearer\") can use it to get access to the associated resources (without demonstrating possession of a cryptographic key).  To prevent misuse, bearer tokens need to be protected from disclosure in storage and in transport. [STANDARDS-TRACK]",
+    "pages": 18,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2018-04-27T07:18:01Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6750.txt",
+    "category": "OAuth"
+  },
+  "7296": {
+    "rfc_number": 7296,
+    "title": "Internet Key Exchange Protocol Version 2 (IKEv2)",
+    "abstract": "This document describes version 2 of the Internet Key Exchange (IKE) protocol.  IKE is a component of IPsec used for performing mutual authentication and establishing and maintaining Security Associations (SAs).  This document obsoletes RFC 5996, and includes all of the errata for it.  It advances IKEv2 to be an Internet Standard.",
+    "pages": 142,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2021-09-02T07:36:45Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc7296.txt",
+    "category": "IKEv2"
+  },
+  "7519": {
+    "rfc_number": 7519,
+    "title": "JSON Web Token (JWT)",
+    "abstract": "JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be transferred between two parties.  The claims in a JWT are encoded as a JSON object that is used as the payload of a JSON Web Signature (JWS) structure or as the plaintext of a JSON Web Encryption (JWE) structure, enabling the claims to be digitally signed or integrity protected with a Message Authentication Code (MAC) and/or encrypted.",
+    "pages": 30,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2025-04-04T07:08:57Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc7519.txt",
+    "category": "JWT"
+  },
+  "7540": {
+    "rfc_number": 7540,
+    "title": "Hypertext Transfer Protocol Version 2 (HTTP/2)",
+    "abstract": "This specification describes an optimized expression of the semantics of the Hypertext Transfer Protocol (HTTP), referred to as HTTP version 2 (HTTP/2). HTTP/2 enables a more efficient use of network resources and a reduced perception of latency by introducing header field compression and allowing multiple concurrent exchanges on the same connection. It also introduces unsolicited push of representations from servers to clients.\n\n This specification is an alternative to, but does not obsolete, the HTTP/1.1 message syntax. HTTP's existing semantics remain unchanged.",
+    "pages": 96,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:33:31Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc7540.txt",
+    "category": "HTTP/2"
+  },
+  "7826": {
+    "rfc_number": 7826,
+    "title": "Real-Time Streaming Protocol Version 2.0",
+    "abstract": "This memorandum defines the Real-Time Streaming Protocol (RTSP) version 2.0, which obsoletes RTSP version 1.0 defined in RFC 2326.\n\n RTSP is an application-layer protocol for the setup and control of the delivery of data with real-time properties. RTSP provides an extensible framework to enable controlled, on-demand delivery of real-time data, such as audio and video. Sources of data can include both live data feeds and stored clips. This protocol is intended to control multiple data delivery sessions; provide a means for choosing delivery channels such as UDP, multicast UDP, and TCP; and provide a means for choosing delivery mechanisms based upon RTP (RFC 3550).",
+    "pages": 318,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2025-04-05T07:09:22Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc7826.txt",
+    "category": "RTSP"
+  },
+  "7858": {
+    "rfc_number": 7858,
+    "title": "Specification for DNS over Transport Layer Security (TLS)",
+    "abstract": "This document describes the use of Transport Layer Security (TLS) to provide privacy for DNS. Encryption provided by TLS eliminates opportunities for eavesdropping and on-path tampering with DNS queries in the network, such as discussed in RFC 7626. In addition, this document specifies two usage profiles for DNS over TLS and provides advice on performance considerations to minimize overhead from using TCP and TLS with DNS.\n\n This document focuses on securing stub-to-recursive traffic, as per the charter of the DPRIVE Working Group. It does not prevent future applications of the protocol to recursive-to-authoritative traffic.",
+    "pages": 19,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2018-12-20T08:30:26Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc7858.txt",
+    "category": "DNS/TLS"
+  },
+  "7950": {
+    "rfc_number": 7950,
+    "title": "The YANG 1.1 Data Modeling Language",
+    "abstract": "YANG is a data modeling language used to model configuration data, state data, Remote Procedure Calls, and notifications for network management protocols.  This document describes the syntax and semantics of version 1.1 of the YANG language.  YANG version 1.1 is a maintenance release of the YANG language, addressing ambiguities and defects in the original specification.  There are a small number of backward incompatibilities from YANG version 1.  This document also specifies the YANG mappings to the Network Configuration Protocol (NETCONF).",
+    "pages": 217,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-01-21T08:34:04Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc7950.txt",
+    "category": "YANG"
+  },
+  "8200": {
+    "rfc_number": 8200,
+    "title": "Internet Protocol, Version 6 (IPv6) Specification",
+    "abstract": "This document specifies version 6 of the Internet Protocol (IPv6).  It obsoletes RFC 2460.",
+    "pages": 42,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2020-02-04T08:24:14Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc8200.txt",
+    "category": "IPv6"
+  },
+  "8341": {
+    "rfc_number": 8341,
+    "title": "Network Configuration Access Control Model",
+    "abstract": "The standardization of network configuration interfaces for use with the Network Configuration Protocol (NETCONF) or the RESTCONF protocol requires a structured and secure operating environment that promotes human usability and multi-vendor interoperability. There is a need for standard mechanisms to restrict NETCONF or RESTCONF protocol access for particular users to a preconfigured subset of all available NETCONF or RESTCONF protocol operations and content. This document defines such an access control model.\n\n This document obsoletes RFC 6536.",
+    "pages": 58,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2025-02-21T08:08:49Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc8341.txt",
+    "category": "NETCONF-YANG"
+  },
+  "8415": {
+    "rfc_number": 8415,
+    "title": "Dynamic Host Configuration Protocol for IPv6 (DHCPv6)",
+    "abstract": "This document describes the Dynamic Host Configuration Protocol for IPv6 (DHCPv6): an extensible mechanism for configuring nodes with network configuration parameters, IP addresses, and prefixes. Parameters can be provided statelessly, or in combination with stateful assignment of one or more IPv6 addresses and/or IPv6 prefixes. DHCPv6 can operate either in place of or in addition to stateless address autoconfiguration (SLAAC).\n\n This document updates the text from RFC 3315 (the original DHCPv6 specification) and incorporates prefix delegation (RFC 3633), stateless DHCPv6 (RFC 3736), an option to specify an upper bound for how long a client should wait before refreshing information (RFC 4242), a mechanism for throttling DHCPv6 clients when DHCPv6 service is not available (RFC 7083), and relay agent handling of unknown messages (RFC 7283). In addition, this document clarifies the interactions between models of operation (RFC 7550). As such, this document obsoletes RFC 3315, RFC 3633, RFC 3736, RFC 4242, RFC 7083, RFC 7283, and RFC 7550.",
+    "pages": 154,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-05-22T07:27:35Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc8415.txt",
+    "category": "DHCPv6"
+  },
+  "8484": {
+    "rfc_number": 8484,
+    "title": "DNS Queries over HTTPS (DoH)",
+    "abstract": "This document defines a protocol for sending DNS queries and getting DNS responses over HTTPS.  Each DNS query-response pair is mapped into an HTTP exchange.",
+    "pages": 21,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2019-01-16T03:42:23Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc8484.txt",
+    "category": "DNS/HTTPS"
+  },
+  "8693": {
+    "rfc_number": 8693,
+    "title": "OAuth 2.0 Token Exchange",
+    "abstract": "This specification defines a protocol for an HTTP- and JSON-based Security Token Service (STS) by defining how to request and obtain security tokens from OAuth 2.0 authorization servers, including security tokens employing impersonation and delegation.",
+    "pages": 27,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2023-05-10T07:16:15Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc8693.txt",
+    "category": "OAuth"
+  },
+  "8825": {
+    "rfc_number": 8825,
+    "title": "Overview: Real-Time Protocols for Browser-Based Applications",
+    "abstract": "This document gives an overview and context of a protocol suite intended for use with real-time applications that can be deployed in browsers -- \"real-time communication on the Web\".\n\n It intends to serve as a starting and coordination point to make sure that (1) all the parts that are needed to achieve this goal are findable and (2) the parts that belong in the Internet protocol suite are fully specified and on the right publication track.\n\n This document is an applicability statement -- it does not itself specify any protocol, but it specifies which other specifications implementations are supposed to follow to be compliant with Web Real-Time Communication (WebRTC).",
+    "pages": 17,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2021-01-18T21:40:04Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc8825.txt",
+    "category": "WebRTC"
+  },
+  "8826": {
+    "rfc_number": 8826,
+    "title": "Security Considerations for WebRTC",
+    "abstract": "WebRTC is a protocol suite for use with real-time applications that can be deployed in browsers -- \"real-time communication on the Web\".  This document defines the WebRTC threat model and analyzes the security threats of WebRTC in that model.",
+    "pages": 21,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2021-01-18T21:40:09Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc8826.txt",
+    "category": "WebRTC"
+  },
+  "8827": {
+    "rfc_number": 8827,
+    "title": "WebRTC Security Architecture",
+    "abstract": "This document defines the security architecture for WebRTC, a protocol suite intended for use with real-time applications that can be deployed in browsers -- \"real-time communication on the Web\".",
+    "pages": 35,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2021-01-18T23:57:48Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc8827.txt",
+    "category": "WebRTC"
+  },
+  "8834": {
+    "rfc_number": 8834,
+    "title": "Media Transport and Use of RTP in WebRTC",
+    "abstract": "The framework for Web Real-Time Communication (WebRTC) provides support for direct interactive rich communication using audio, video, text, collaboration, games, etc.  between two peers' web browsers.  This memo describes the media transport aspects of the WebRTC framework.  It specifies how the Real-time Transport Protocol (RTP) is used in the WebRTC context and gives requirements for which RTP features, profiles, and extensions need to be supported.",
+    "pages": 39,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2021-01-18T23:32:35Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc8834.txt",
+    "category": "WebRTC"
+  },
+  "8835": {
+    "rfc_number": 8835,
+    "title": "Transports for WebRTC",
+    "abstract": "This document describes the data transport protocols used by Web Real-Time Communication (WebRTC), including the protocols used for interaction with intermediate boxes such as firewalls, relays, and NAT boxes.",
+    "pages": 13,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2021-01-18T23:32:37Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc8835.txt",
+    "category": "WebRTC"
+  },
+  "9000": {
+    "rfc_number": 9000,
+    "title": "QUIC: A UDP-Based Multiplexed and Secure Transport",
+    "abstract": "This document defines the core of the QUIC transport protocol.  QUIC provides applications with flow-controlled streams for structured communication, low-latency connection establishment, and network path migration.  QUIC includes security measures that ensure confidentiality, integrity, and availability in a range of deployment circumstances.  Accompanying documents describe the integration of TLS for key negotiation, loss detection, and an exemplary congestion control algorithm.",
+    "pages": 151,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2022-02-19T08:46:51Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc9000.txt",
+    "category": "QUIC"
+  },
+  "9001": {
+    "rfc_number": 9001,
+    "title": "Using TLS to Secure QUIC",
+    "abstract": "This document describes how Transport Layer Security (TLS) is used to secure QUIC.",
+    "pages": 52,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2024-01-30T08:17:19Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc9001.txt",
+    "category": "QUIC"
+  },
+  "9002": {
+    "rfc_number": 9002,
+    "title": "QUIC Loss Detection and Congestion Control",
+    "abstract": "This document describes loss detection and congestion control mechanisms for QUIC.",
+    "pages": 42,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2023-06-14T07:16:13Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc9002.txt",
+    "category": "QUIC"
+  },
+  "9068": {
+    "rfc_number": 9068,
+    "title": "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens",
+    "abstract": "This specification defines a profile for issuing OAuth 2.0 access tokens in JSON Web Token (JWT) format.  Authorization servers and resource servers from different vendors can leverage this profile to issue and consume access tokens in an interoperable manner.",
+    "pages": 15,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2026-03-05T07:19:00Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc9068.txt",
+    "category": "OAuth"
+  },
+  "9110": {
+    "rfc_number": 9110,
+    "title": "HTTP Semantics",
+    "abstract": "The Hypertext Transfer Protocol (HTTP) is a stateless application-level protocol for distributed, collaborative, hypertext information systems. This document describes the overall architecture of HTTP, establishes common terminology, and defines aspects of the protocol that are shared by all versions. In this definition are core protocol elements, extensibility mechanisms, and the \"http\" and \"https\" Uniform Resource Identifier (URI) schemes.\n\n This document updates RFC 3864 and obsoletes RFCs 2818, 7231, 7232, 7233, 7235, 7538, 7615, 7694, and portions of 7230.",
+    "pages": 194,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2022-11-02T05:15:17Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc9110.txt",
+    "category": "HTTP"
+  },
+  "9112": {
+    "rfc_number": 9112,
+    "title": "HTTP/1.1",
+    "abstract": "The Hypertext Transfer Protocol (HTTP) is a stateless application-level protocol for distributed, collaborative, hypertext information systems. This document specifies the HTTP/1.1 message syntax, message parsing, connection management, and related security concerns.\n\n This document obsoletes portions of RFC 7230.",
+    "pages": 46,
+    "std_level": "/api/v1/name/stdlevelname/std/",
+    "date": "2024-01-04T08:18:03Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc9112.txt",
+    "category": "HTTP"
+  },
+  "9113": {
+    "rfc_number": 9113,
+    "title": "HTTP/2",
+    "abstract": "This specification describes an optimized expression of the semantics of the Hypertext Transfer Protocol (HTTP), referred to as HTTP version 2 (HTTP/2). HTTP/2 enables a more efficient use of network resources and a reduced latency by introducing field compression and allowing multiple concurrent exchanges on the same connection.\n\n This document obsoletes RFCs 7540 and 8740.",
+    "pages": 78,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2022-07-08T07:15:50Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc9113.txt",
+    "category": "HTTP/2"
+  },
+  "9114": {
+    "rfc_number": 9114,
+    "title": "HTTP/3",
+    "abstract": "The QUIC transport protocol has several features that are desirable in a transport for HTTP, such as stream multiplexing, per-stream flow control, and low-latency connection establishment.  This document describes a mapping of HTTP semantics over QUIC.  This document also identifies HTTP/2 features that are subsumed by QUIC and describes how HTTP/2 extensions can be ported to HTTP/3.",
+    "pages": 57,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2022-09-28T05:15:18Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc9114.txt",
+    "category": "HTTP/3"
+  },
+  "9147": {
+    "rfc_number": 9147,
+    "title": "The Datagram Transport Layer Security (DTLS) Protocol Version 1.3",
+    "abstract": "This document specifies version 1.3 of the Datagram Transport Layer Security (DTLS) protocol. DTLS 1.3 allows client/server applications to communicate over the Internet in a way that is designed to prevent eavesdropping, tampering, and message forgery.\n\n The DTLS 1.3 protocol is based on the Transport Layer Security (TLS) 1.3 protocol and provides equivalent security guarantees with the exception of order protection / non-replayability. Datagram semantics of the underlying transport are preserved by the DTLS protocol.\n\n This document obsoletes RFC 6347.",
+    "pages": 61,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2024-09-14T07:09:35Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc9147.txt",
+    "category": "DTLS"
+  },
+  "6052": {
+    "rfc_number": 6052,
+    "title": "IPv6 Addressing of IPv4/IPv6 Translators",
+    "abstract": "This document discusses the algorithmic translation of an IPv6 address to a corresponding IPv4 address, and vice versa, using only statically configured information.  It defines a well-known prefix for use in algorithmic translations, while allowing organizations to also use network-specific prefixes when appropriate.  Algorithmic translation is used in IPv4/IPv6 translators, as well as other types of proxies and gateways (e.g., for DNS) used in IPv4/IPv6 scenarios. [STANDARDS-TRACK]",
+    "pages": 18,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2020-07-29T07:31:24Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6052.txt",
+    "category": "IPv6-prefix"
+  },
+  "6146": {
+    "rfc_number": 6146,
+    "title": "Stateful NAT64: Network Address and Protocol Translation from IPv6 Clients to IPv4 Servers",
+    "abstract": "This document describes stateful NAT64 translation, which allows IPv6-only clients to contact IPv4 servers using unicast UDP, TCP, or ICMP.  One or more public IPv4 addresses assigned to a NAT64 translator are shared among several IPv6-only clients.  When stateful NAT64 is used in conjunction with DNS64, no changes are usually required in the IPv6 client or the IPv4 server.",
+    "pages": 45,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2025-01-16T08:08:40Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6146.txt",
+    "category": "NAT64"
+  },
+  "6147": {
+    "rfc_number": 6147,
+    "title": "DNS64: DNS Extensions for Network Address Translation from IPv6 Clients to IPv4 Servers",
+    "abstract": "DNS64 is a mechanism for synthesizing AAAA records from A records.  DNS64 is used with an IPv6/IPv4 translator to enable client-server communication between an IPv6-only client and an IPv4-only server, without requiring any changes to either the IPv6 or the IPv4 node, for the class of applications that work through NATs.  This document specifies DNS64, and provides suggestions on how it should be deployed in conjunction with IPv6/IPv4 translators. [STANDARDS-TRACK]",
+    "pages": 32,
+    "std_level": "/api/v1/name/stdlevelname/ps/",
+    "date": "2015-10-14T20:52:02Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6147.txt",
+    "category": "DNS64"
+  },
+  "6877": {
+    "rfc_number": 6877,
+    "title": "464XLAT: Combination of Stateful and Stateless Translation",
+    "abstract": "This document describes an architecture (464XLAT) for providing limited IPv4 connectivity across an IPv6-only network by combining existing and well-known stateful protocol translation (as described in RFC 6146) in the core and stateless protocol translation (as described in RFC 6145) at the edge.  464XLAT is a simple and scalable technique to quickly deploy limited IPv4 access service to IPv6-only edge networks without encapsulation.",
+    "pages": 14,
+    "std_level": "/api/v1/name/stdlevelname/inf/",
+    "date": "2015-10-14T20:52:39Z",
+    "url": "https://www.rfc-editor.org/rfc/rfc6877.txt",
+    "category": "464XLAT"
   }
 }

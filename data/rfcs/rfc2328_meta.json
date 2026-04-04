@@ -1,0 +1,10 @@
+{
+  "rfc_number": 2328,
+  "title": "OSPF Version 2",
+  "abstract": "This memo documents version 2 of the OSPF protocol.  OSPF is a link- state routing protocol. [STANDARDS-TRACK]",
+  "pages": 244,
+  "std_level": "/api/v1/name/stdlevelname/std/",
+  "date": "2020-01-21T08:23:08Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc2328.txt",
+  "category": "OSPF"
+}

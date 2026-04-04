@@ -1,0 +1,10 @@
+{
+  "rfc_number": 6120,
+  "title": "Extensible Messaging and Presence Protocol (XMPP): Core",
+  "abstract": "The Extensible Messaging and Presence Protocol (XMPP) is an application profile of the Extensible Markup Language (XML) that enables the near-real-time exchange of structured yet extensible data between any two or more network entities.  This document defines XMPP's core protocol methods: setup and teardown of XML streams, channel encryption, authentication, error handling, and communication primitives for messaging, network availability (\"presence\"), and request-response interactions.  This document obsoletes RFC 3920. [STANDARDS-TRACK]",
+  "pages": 211,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2015-10-14T20:52:08Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc6120.txt",
+  "category": "XMPP"
+}

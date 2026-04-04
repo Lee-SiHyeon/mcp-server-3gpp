@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4291,
+  "title": "IP Version 6 Addressing Architecture",
+  "abstract": "This specification defines the addressing architecture of the IP Version 6 (IPv6) protocol. The document includes the IPv6 addressing model, text representations of IPv6 addresses, definition of IPv6 unicast addresses, anycast addresses, and multicast addresses, and an IPv6 node's required addresses.\n\n This document obsoletes RFC 3513, \"IP Version 6 Addressing Architecture\". [STANDARDS-TRACK]",
+  "pages": 25,
+  "std_level": "/api/v1/name/stdlevelname/ds/",
+  "date": "2020-01-21T08:26:39Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4291.txt",
+  "category": "IPv6-Addressing"
+}

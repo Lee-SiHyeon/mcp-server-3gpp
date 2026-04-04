@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4033,
+  "title": "DNS Security Introduction and Requirements",
+  "abstract": "The Domain Name System Security Extensions (DNSSEC) add data origin authentication and data integrity to the Domain Name System.  This document introduces these extensions and describes their capabilities and limitations.  This document also discusses the services that the DNS security extensions do and do not provide.  Last, this document describes the interrelationships between the documents that collectively describe DNSSEC. [STANDARDS-TRACK]",
+  "pages": 21,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:26:04Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4033.txt",
+  "category": "DNSSEC"
+}

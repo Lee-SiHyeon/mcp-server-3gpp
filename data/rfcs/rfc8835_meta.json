@@ -1,0 +1,10 @@
+{
+  "rfc_number": 8835,
+  "title": "Transports for WebRTC",
+  "abstract": "This document describes the data transport protocols used by Web Real-Time Communication (WebRTC), including the protocols used for interaction with intermediate boxes such as firewalls, relays, and NAT boxes.",
+  "pages": 13,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2021-01-18T23:32:37Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc8835.txt",
+  "category": "WebRTC"
+}

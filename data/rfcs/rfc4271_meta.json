@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4271,
+  "title": "A Border Gateway Protocol 4 (BGP-4)",
+  "abstract": "This document discusses the Border Gateway Protocol (BGP), which is an inter-Autonomous System routing protocol.\n\n The primary function of a BGP speaking system is to exchange network reachability information with other BGP systems. This network reachability information includes information on the list of Autonomous Systems (ASes) that reachability information traverses. This information is sufficient for constructing a graph of AS connectivity for this reachability from which routing loops may be pruned, and, at the AS level, some policy decisions may be enforced.\n\n BGP-4 provides a set of mechanisms for supporting Classless Inter-Domain Routing (CIDR). These mechanisms include support for advertising a set of destinations as an IP prefix, and eliminating the concept of network \"class\" within BGP. BGP-4 also introduces mechanisms that allow aggregation of routes, including aggregation of AS paths.\n\n This document obsoletes RFC 1771. [STANDARDS-TRACK]",
+  "pages": 104,
+  "std_level": "/api/v1/name/stdlevelname/ds/",
+  "date": "2020-01-21T08:26:37Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4271.txt",
+  "category": "BGP"
+}

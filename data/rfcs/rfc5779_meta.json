@@ -1,0 +1,10 @@
+{
+  "rfc_number": 5779,
+  "title": "Diameter Proxy Mobile IPv6: Mobile Access Gateway and Local Mobility Anchor Interaction with Diameter Server",
+  "abstract": "This specification defines Authentication, Authorization, and Accounting (AAA) interactions between Proxy Mobile IPv6 entities (both Mobile Access Gateway and Local Mobility Anchor) and a AAA server within a Proxy Mobile IPv6 Domain.  These AAA interactions are primarily used to download and update mobile node specific policy profile information between Proxy Mobile IPv6 entities and a remote policy store. [STANDARDS-TRACK]",
+  "pages": 20,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2015-10-14T20:51:47Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc5779.txt",
+  "category": "Diameter"
+}

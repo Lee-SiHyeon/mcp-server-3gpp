@@ -1,0 +1,10 @@
+{
+  "rfc_number": 6242,
+  "title": "Using the NETCONF Protocol over Secure Shell (SSH)",
+  "abstract": "This document describes a method for invoking and running the Network Configuration Protocol (NETCONF) within a Secure Shell (SSH) session as an SSH subsystem.  This document obsoletes RFC 4742. [STANDARDS-TRACK]",
+  "pages": 11,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2025-09-14T07:18:38Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc6242.txt",
+  "category": "NETCONF"
+}

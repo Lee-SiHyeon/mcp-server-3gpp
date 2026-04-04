@@ -1,0 +1,10 @@
+{
+  "rfc_number": 3265,
+  "title": "Session Initiation Protocol (SIP)-Specific Event Notification",
+  "abstract": "This document describes an extension to the Session Initiation Protocol (SIP).  The purpose of this extension is to provide an extensible framework by which SIP nodes can request notification from remote nodes indicating that certain events have occurred. [STANDARDS-TRACK]",
+  "pages": 38,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:24:35Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc3265.txt",
+  "category": "SIP"
+}

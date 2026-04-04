@@ -1,0 +1,10 @@
+{
+  "rfc_number": 6877,
+  "title": "464XLAT: Combination of Stateful and Stateless Translation",
+  "abstract": "This document describes an architecture (464XLAT) for providing limited IPv4 connectivity across an IPv6-only network by combining existing and well-known stateful protocol translation (as described in RFC 6146) in the core and stateless protocol translation (as described in RFC 6145) at the edge.  464XLAT is a simple and scalable technique to quickly deploy limited IPv4 access service to IPv6-only edge networks without encapsulation.",
+  "pages": 14,
+  "std_level": "/api/v1/name/stdlevelname/inf/",
+  "date": "2015-10-14T20:52:39Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc6877.txt",
+  "category": "464XLAT"
+}

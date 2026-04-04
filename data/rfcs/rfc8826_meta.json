@@ -1,0 +1,10 @@
+{
+  "rfc_number": 8826,
+  "title": "Security Considerations for WebRTC",
+  "abstract": "WebRTC is a protocol suite for use with real-time applications that can be deployed in browsers -- \"real-time communication on the Web\".  This document defines the WebRTC threat model and analyzes the security threats of WebRTC in that model.",
+  "pages": 21,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2021-01-18T21:40:09Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc8826.txt",
+  "category": "WebRTC"
+}

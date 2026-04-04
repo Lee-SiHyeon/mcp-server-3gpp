@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4035,
+  "title": "Protocol Modifications for the DNS Security Extensions",
+  "abstract": "This document is part of a family of documents that describe the DNS Security Extensions (DNSSEC). The DNS Security Extensions are a collection of new resource records and protocol modifications that add data origin authentication and data integrity to the DNS. This document describes the DNSSEC protocol modifications. This document defines the concept of a signed zone, along with the requirements for serving and resolving by using DNSSEC. These techniques allow a security-aware resolver to authenticate both DNS resource records and authoritative DNS error indications.\n\n This document obsoletes RFC 2535 and incorporates changes from all updates to RFC 2535. [STANDARDS-TRACK]",
+  "pages": 53,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:26:06Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4035.txt",
+  "category": "DNSSEC"
+}

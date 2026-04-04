@@ -1,0 +1,10 @@
+{
+  "rfc_number": 9068,
+  "title": "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens",
+  "abstract": "This specification defines a profile for issuing OAuth 2.0 access tokens in JSON Web Token (JWT) format.  Authorization servers and resource servers from different vendors can leverage this profile to issue and consume access tokens in an interoperable manner.",
+  "pages": 15,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2026-03-05T07:19:00Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc9068.txt",
+  "category": "OAuth"
+}

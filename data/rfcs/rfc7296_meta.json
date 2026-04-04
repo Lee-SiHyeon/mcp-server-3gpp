@@ -1,0 +1,10 @@
+{
+  "rfc_number": 7296,
+  "title": "Internet Key Exchange Protocol Version 2 (IKEv2)",
+  "abstract": "This document describes version 2 of the Internet Key Exchange (IKE) protocol.  IKE is a component of IPsec used for performing mutual authentication and establishing and maintaining Security Associations (SAs).  This document obsoletes RFC 5996, and includes all of the errata for it.  It advances IKEv2 to be an Internet Standard.",
+  "pages": 142,
+  "std_level": "/api/v1/name/stdlevelname/std/",
+  "date": "2021-09-02T07:36:45Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc7296.txt",
+  "category": "IKEv2"
+}

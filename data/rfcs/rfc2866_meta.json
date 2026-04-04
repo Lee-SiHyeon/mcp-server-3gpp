@@ -1,0 +1,10 @@
+{
+  "rfc_number": 2866,
+  "title": "RADIUS Accounting",
+  "abstract": "This document describes a protocol for carrying accounting information between a Network Access Server and a shared Accounting Server.  This memo provides information for the Internet community.",
+  "pages": 28,
+  "std_level": "/api/v1/name/stdlevelname/inf/",
+  "date": "2020-01-21T08:23:53Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc2866.txt",
+  "category": "RADIUS"
+}

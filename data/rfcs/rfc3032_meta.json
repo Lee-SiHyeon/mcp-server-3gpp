@@ -1,0 +1,10 @@
+{
+  "rfc_number": 3032,
+  "title": "MPLS Label Stack Encoding",
+  "abstract": "This document specifies the encoding to be used by an LSR in order to transmit labeled packets on Point-to-Point Protocol (PPP) data links, on LAN data links, and possibly on other data links as well.  This document also specifies rules and procedures for processing the various fields of the label stack encoding. [STANDARDS-TRACK]",
+  "pages": 23,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:24:09Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc3032.txt",
+  "category": "MPLS"
+}

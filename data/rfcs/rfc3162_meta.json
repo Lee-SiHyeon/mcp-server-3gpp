@@ -1,0 +1,10 @@
+{
+  "rfc_number": 3162,
+  "title": "RADIUS and IPv6",
+  "abstract": "This document specifies the operation of RADIUS (Remote Authentication Dial In User Service) when run over IPv6 as well as the RADIUS attributes used to support IPv6 network access. [STANDARDS-TRACK]",
+  "pages": 12,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2013-03-02T16:57:18Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc3162.txt",
+  "category": "RADIUS"
+}

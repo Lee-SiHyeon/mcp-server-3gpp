@@ -1,0 +1,10 @@
+{
+  "rfc_number": 8693,
+  "title": "OAuth 2.0 Token Exchange",
+  "abstract": "This specification defines a protocol for an HTTP- and JSON-based Security Token Service (STS) by defining how to request and obtain security tokens from OAuth 2.0 authorization servers, including security tokens employing impersonation and delegation.",
+  "pages": 27,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2023-05-10T07:16:15Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc8693.txt",
+  "category": "OAuth"
+}

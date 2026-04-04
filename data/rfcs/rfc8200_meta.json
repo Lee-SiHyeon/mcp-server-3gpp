@@ -1,0 +1,10 @@
+{
+  "rfc_number": 8200,
+  "title": "Internet Protocol, Version 6 (IPv6) Specification",
+  "abstract": "This document specifies version 6 of the Internet Protocol (IPv6).  It obsoletes RFC 2460.",
+  "pages": 42,
+  "std_level": "/api/v1/name/stdlevelname/std/",
+  "date": "2020-02-04T08:24:14Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc8200.txt",
+  "category": "IPv6"
+}

@@ -1,0 +1,10 @@
+{
+  "rfc_number": 5080,
+  "title": "Common Remote Authentication Dial In User Service (RADIUS) Implementation Issues and Suggested Fixes",
+  "abstract": "This document describes common issues seen in Remote Authentication Dial In User Service (RADIUS) implementations and suggests some fixes.  Where applicable, ambiguities and errors in previous RADIUS specifications are clarified. [STANDARDS-TRACK]",
+  "pages": 28,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2015-10-14T20:51:19Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc5080.txt",
+  "category": "RADIUS"
+}

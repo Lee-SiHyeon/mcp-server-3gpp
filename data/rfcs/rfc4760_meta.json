@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4760,
+  "title": "Multiprotocol Extensions for BGP-4",
+  "abstract": "This document defines extensions to BGP-4 to enable it to carry routing information for multiple Network Layer protocols (e.g., IPv6, IPX, L3VPN, etc.).  The extensions are backward compatible - a router that supports the extensions can interoperate with a router that doesn't support the extensions. [STANDARDS-TRACK]",
+  "pages": 12,
+  "std_level": "/api/v1/name/stdlevelname/ds/",
+  "date": "2020-01-21T08:27:49Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4760.txt",
+  "category": "BGP-MultiProtocol"
+}

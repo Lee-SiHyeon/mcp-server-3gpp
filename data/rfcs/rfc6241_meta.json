@@ -1,0 +1,10 @@
+{
+  "rfc_number": 6241,
+  "title": "Network Configuration Protocol (NETCONF)",
+  "abstract": "The Network Configuration Protocol (NETCONF) defined in this document provides mechanisms to install, manipulate, and delete the configuration of network devices.  It uses an Extensible Markup Language (XML)-based data encoding for the configuration data as well as the protocol messages.  The NETCONF protocol operations are realized as remote procedure calls (RPCs).  This document obsoletes RFC 4741. [STANDARDS-TRACK]",
+  "pages": 113,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2020-01-21T08:31:23Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc6241.txt",
+  "category": "NETCONF"
+}

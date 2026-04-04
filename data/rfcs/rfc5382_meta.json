@@ -1,0 +1,10 @@
+{
+  "rfc_number": 5382,
+  "title": "NAT Behavioral Requirements for TCP",
+  "abstract": "This document defines a set of requirements for NATs that handle TCP that would allow many applications, such as peer-to-peer applications and online games to work consistently.  Developing NATs that meet this set of requirements will greatly increase the likelihood that these applications will function properly.  This document specifies an Internet Best Current Practices for the Internet Community, and requests discussion and suggestions for improvements.",
+  "pages": 31,
+  "std_level": "/api/v1/name/stdlevelname/bcp/",
+  "date": "2015-10-14T20:51:17Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc5382.txt",
+  "category": "NAT-TCP"
+}

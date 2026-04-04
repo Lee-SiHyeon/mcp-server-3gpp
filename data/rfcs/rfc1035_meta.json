@@ -1,0 +1,10 @@
+{
+  "rfc_number": 1035,
+  "title": "Domain names - implementation and specification",
+  "abstract": "This RFC is the revised specification of the protocol and format used in the implementation of the Domain Name System.  It obsoletes RFC-883.  This memo documents the details of the domain name client - server communication.",
+  "pages": 55,
+  "std_level": "/api/v1/name/stdlevelname/std/",
+  "date": "2020-01-21T08:22:04Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc1035.txt",
+  "category": "DNS"
+}

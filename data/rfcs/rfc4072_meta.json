@@ -1,0 +1,10 @@
+{
+  "rfc_number": 4072,
+  "title": "Diameter Extensible Authentication Protocol (EAP) Application",
+  "abstract": "The Extensible Authentication Protocol (EAP) provides a standard mechanism for support of various authentication methods.  This document defines the Command-Codes and AVPs necessary to carry EAP packets between a Network Access Server (NAS) and a back-end authentication server. [STANDARDS-TRACK]",
+  "pages": 33,
+  "std_level": "/api/v1/name/stdlevelname/ps/",
+  "date": "2015-10-14T20:50:33Z",
+  "url": "https://www.rfc-editor.org/rfc/rfc4072.txt",
+  "category": "Diameter"
+}
