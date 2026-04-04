@@ -6,92 +6,107 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 
 ## Features
 
-- 📚 **Search 3GPP Documents**: Full-text search across 3GPP specifications
+- 📚 **Full-text search** across 26 3GPP specifications (31,777 indexed sections)
+- 🔍 **Hybrid search engine**: BM25/FTS5 keyword + optional semantic vector search
 - 📋 **EMM/5GMM Cause Lookup**: Quick reference for LTE and 5G NAS cause values
-- 🎯 **Pre-built Data Included**: Ready to use immediately after installation
+- 🗂️ **Hierarchical TOC navigation**: Browse spec structure before fetching sections
 - 🔄 **MCP SDK v1.0.0 Compatible**: Full support for structured responses
-- ✅ **Comprehensive Testing**: 13 test scenarios with validation tools
+- ✅ **Comprehensive Test Suite**: `node:test` unit + integration tests
 
-### ✅ Included Specifications (Pre-processed)
+## v2.0 Architecture
 
-- **TS 24.008** - 2G/3G NAS (MM/GMM/SM/CC)
-- **TS 24.301** - LTE NAS (EMM/ESM)
-- **TS 24.501** - 5G NAS (5GMM/5GSM)
-- **TS 36.300** - E-UTRA Overall Description
+SQLite + FTS5 + hybrid search. **26 specs, 31,777 sections** indexed.
 
-### 📥 Additional Specifications (User can add)
+The v2 corpus is built from extracted PDF text using a Python/Node pipeline:
 
-The MCP server architecture supports expanding to more specifications. Users can add:
+```
+PDFs → extract_all.py → sections JSONL → build_corpus.js → 3gpp.db (SQLite)
+                                                               └─ FTS5 index
+```
 
-**PCT (Protocol Conformance Test)**
-- TS 51.010-1 (2G), TS 34.123-1 (3G), TS 36.523-1 (4G), TS 38.523-1 (5G)
+See [docs/architecture.md](docs/architecture.md) for a full component breakdown.
 
-**Protocol**
-- TS 31.121 (USIM), TS 31.124 (USAT)
+## Corpus Stats
 
-**IMS**
-- TS 34.229-1 (4G IMS), TS 34.229-5 (5G IMS)
-
-**Architecture**
-- TS 38.300 (NR Overall), TR 37.901 (Data Throughput)
-
-**RF (if needed)**
-- TS 36.521, TS 38.521 series, etc.
-
-To add specifications: Download PDFs → Run `npm run setup`
+| Metric | Value |
+|--------|-------|
+| Specifications indexed | 26 |
+| Total sections | 31,777 |
+| Full-text search | FTS5 (BM25 ranking) |
+| Semantic search | Optional (requires sqlite-vec) |
 
 ## Available Tools
 
-| Tool | Description |
-|------|-------------|
-| `search_3gpp_docs` | Search 3GPP documents by keywords |
-| `get_emm_cause` | Get EMM cause (LTE) or 5GMM cause (5G) details |
-| `list_specs` | List available specifications |
+| Tool | Description | Example Input |
+|------|-------------|---------------|
+| `get_spec_catalog` | Browse all 26 indexed specs with metadata | `{"filter": "24_301"}` |
+| `get_spec_toc` | Get section hierarchy of a spec | `{"specId": "ts_24_301", "maxDepth": 3}` |
+| `get_section` | Fetch full content of a section | `{"sectionId": "ts_24_301:5.5.1.2.5"}` |
+| `search_3gpp_docs` | Hybrid keyword/semantic search | `{"query": "authentication", "spec": "ts_24_301"}` |
+| `search_related_sections` | Find conceptually related sections | `{"sectionId": "ts_24_301:5.5"}` |
+| `get_emm_cause` | Lookup EMM/5GMM cause codes | `{"cause": 17}` |
+| `list_specs` | List available specs (simple) | `{}` |
 
-## Testing & Validation
-
-This package includes comprehensive testing tools:
+## Testing
 
 ```bash
-# Run all SpecKit user story tests (13 scenarios)
+# Run the full test suite (node:test, no external frameworks)
 npm test
+
+# Run legacy SpecKit user story tests
+npm run test:legacy
 
 # Validate data structure and MCP server
 npm run validate
 ```
 
 **Test Coverage**:
-- ✅ 13 acceptance scenarios from SpecKit specs
-- ✅ All 3 MCP tools (search, get_emm_cause, list_specs)
-- ✅ Data structure validation (22,408 chunks)
-- ✅ EMM/5GMM cause lookup verification
+- ✅ `test/search.test.js` — hybridSearch keyword/filter/edge-case tests
+- ✅ `test/ingest.test.js` — sectionNormalizer pure-function unit tests
+- ✅ `test/tools.test.js` — MCP tool handler tests + graceful degradation scenarios
 
 ## Installation
 
 ### Prerequisites
 
 - Node.js >= 18.0.0
-- **Git LFS** (for downloading pre-built data)
+- Python 3.8+ with `pdfplumber` (for corpus building)
 
-### Quick Start (Recommended)
+### Quick Start (with pre-built DB)
 
 ```bash
-# Install Git LFS (if not already installed)
-git lfs install
-
-# Clone and install
 git clone https://github.com/Lee-SiHyeon/mcp-server-3gpp.git
 cd mcp-server-3gpp
 npm install
 
-# If chunks.json is a pointer file, pull LFS data
-git lfs pull
-
-# ✅ Ready to use! Pre-built data with 17 specs included.
+# Start the MCP server (requires data/corpus/3gpp.db)
 npm start
 ```
 
-> **Note**: The pre-built `chunks.json` (107MB) is stored with Git LFS. If you don't have Git LFS installed, you can still use the MCP server for EMM/5GMM cause lookup, or generate data yourself using the scripts.
+### Building the Corpus
+
+If you don't have `data/corpus/3gpp.db`, build it from scratch:
+
+```bash
+# Full pipeline: download PDFs → extract sections → build SQLite DB
+npm run corpus:full
+
+# Or run each step individually:
+npm run corpus:download   # python scripts/download_etsi_specs.py --latest-only
+npm run corpus:extract    # python scripts/extract_all.py
+npm run corpus:build      # node scripts/build_corpus.js
+
+# Rebuild an existing DB (re-indexes everything)
+npm run corpus:rebuild
+```
+
+### Downloading ETSI Specs (Python)
+
+```bash
+python scripts/download_etsi_specs.py --latest-only
+```
+
+This downloads the latest spec PDFs from the ETSI portal to `raw/`.
 
 ### Included Specs
 The package includes **pre-processed chunks** for 17 specifications:
