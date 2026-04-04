@@ -67,6 +67,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "better-sqlite3": "^11.8.1",
+    "sqlite-vec": "^0.1.9",
     "zod": "^4.1.13"
   }
 }

@@ -11,6 +11,7 @@
  */
 
 import Database from 'better-sqlite3';
+import * as sqliteVec from 'sqlite-vec';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -70,7 +71,7 @@ export function initDatabase(dbPath) {
   const features = { vectorSearch: false, ftsSearch: true };
 
   try {
-    db.loadExtension('vec0');
+    sqliteVec.load(db);
 
     // Extension loaded — create the vector table if it doesn't already exist.
     db.exec(`

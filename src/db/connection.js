@@ -12,6 +12,7 @@
  */
 
 import Database from 'better-sqlite3';
+import * as sqliteVec from 'sqlite-vec';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -57,6 +58,13 @@ export function getConnection(dbPath) {
   // Performance pragmas — match what schema.js applies.
   _db.pragma('journal_mode = WAL');
   _db.pragma('busy_timeout = 5000');
+
+  // Load sqlite-vec extension for optional vector search support.
+  try {
+    sqliteVec.load(_db);
+  } catch {
+    // sqlite-vec not available — vector search will be disabled.
+  }
 
   return _db;
 }
