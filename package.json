@@ -14,7 +14,10 @@
     "prepare-data": "node scripts/prepare-data.js",
     "setup": "npm run download-pdfs && npm run prepare-data",
     "test": "node test_speckit_userstories.js",
-    "validate": "node validate.js"
+    "validate": "node validate.js",
+    "corpus:migrate": "node scripts/migrate_legacy_json_to_sqlite.js",
+    "corpus:build": "node scripts/build_corpus.js",
+    "corpus:rebuild": "node scripts/build_corpus.js --rebuild"
   },
   "keywords": [
     "mcp",
@@ -53,6 +56,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
+    "better-sqlite3": "^11.8.1",
     "zod": "^4.1.13"
   }
 }

@@ -27,3 +27,13 @@ npm-debug.log*
 
 # SpecKit (may contain credentials)
 .claude/
+
+# Intermediate extraction data (generated, not committed)
+data/intermediate/*.jsonl
+data/corpus/*.db
+data/corpus/*.db-shm
+data/corpus/*.db-wal
+data/pdfs/*.pdf
+data/pdfs/manifest.json
+__pycache__/
+scripts/__pycache__/
