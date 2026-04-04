@@ -1,7 +1,7 @@
 {
   "name": "mcp-server-3gpp",
   "version": "1.1.0",
-  "description": "MCP Server for searching 3GPP specification documents - NAS, RRC (SIB details), Protocol, IMS specs. Includes comprehensive testing suite. Pre-built data (17 specs, 22,408 chunks) requires Git LFS.",
+  "description": "MCP Server for 3GPP and IETF RFC specification search — 207 specs, 66,109 sections, hybrid BM25+vector search, cross-spec reference graph. Pre-built SQLite corpus via Git LFS.",
   "type": "module",
   "main": "src/index.js",
   "bin": {
