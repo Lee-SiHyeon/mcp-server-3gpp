@@ -6,7 +6,7 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 
 ## Features
 
-- 📚 **Full-text search** across 26 3GPP specifications (31,777 indexed sections)
+- 📚 **Full-text search** across 188 specifications — 3GPP/ETSI + IETF RFC (89,987 indexed sections)
 - 🔍 **Hybrid search engine**: BM25/FTS5 keyword + optional semantic vector search
 - 📋 **EMM/5GMM Cause Lookup**: Quick reference for LTE and 5G NAS cause values
 - 🗂️ **Hierarchical TOC navigation**: Browse spec structure before fetching sections
@@ -15,7 +15,7 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 
 ## v2.0 Architecture
 
-SQLite + FTS5 + hybrid search. **26 specs, 31,777 sections** indexed.
+SQLite + FTS5 + hybrid search. **188 specs, 89,987 sections** indexed (102 3GPP/ETSI + 86 IETF RFC).
 
 The v2 corpus is built from extracted PDF text using a Python/Node pipeline:
 
@@ -30,8 +30,10 @@ See [docs/architecture.md](docs/architecture.md) for a full component breakdown.
 
 | Metric | Value |
 |--------|-------|
-| Specifications indexed | 26 |
-| Total sections | 31,777 |
+| 3GPP/ETSI specs indexed | 102 |
+| IETF RFC specs indexed | 86 |
+| **Total specs** | **188** |
+| **Total sections** | **89,987** |
 | Full-text search | FTS5 (BM25 ranking) |
 | Semantic search | Optional (requires sqlite-vec) |
 
@@ -39,7 +41,7 @@ See [docs/architecture.md](docs/architecture.md) for a full component breakdown.
 
 | Tool | Description | Example Input |
 |------|-------------|---------------|
-| `get_spec_catalog` | Browse all 26 indexed specs with metadata | `{"filter": "24_301"}` |
+| `get_spec_catalog` | Browse all 188 indexed specs with metadata | `{"filter": "24_301"}` |
 | `get_spec_toc` | Get section hierarchy of a spec | `{"specId": "ts_24_301", "maxDepth": 3}` |
 | `get_section` | Fetch full content of a section | `{"sectionId": "ts_24_301:5.5.1.2.5"}` |
 | `search_3gpp_docs` | Hybrid keyword/semantic search | `{"query": "authentication", "spec": "ts_24_301"}` |
@@ -92,55 +94,52 @@ If you don't have `data/corpus/3gpp.db`, build it from scratch:
 npm run corpus:full
 
 # Or run each step individually:
-npm run corpus:download   # python scripts/download_etsi_specs.py --latest-only
-npm run corpus:extract    # python scripts/extract_all.py
+npm run corpus:download   # python3 scripts/download_etsi_specs.py --latest-only
+npm run corpus:extract    # python3 scripts/extract_all.py
 npm run corpus:build      # node scripts/build_corpus.js
 
 # Rebuild an existing DB (re-indexes everything)
 npm run corpus:rebuild
 ```
 
-### Downloading ETSI Specs (Python)
+### Adding RFC Documents
 
 ```bash
-python scripts/download_etsi_specs.py --latest-only
+# Full RFC pipeline (download + extract + load all 89 priority RFCs)
+npm run rfc:all
+
+# Or step by step:
+npm run rfc:download   # python3 scripts/download_rfc.py --all
+npm run rfc:extract    # python3 scripts/extract_rfc_structure.py --all
+npm run rfc:load       # node src/ingest/loadRfcSections.js --all
 ```
 
-This downloads the latest spec PDFs from the ETSI portal to `raw/`.
-
 ### Included Specs
-The package includes **pre-processed chunks** for 17 specifications:
+The corpus includes **188 specifications** across three document families:
 
-**NAS Layer (4 specs)**
-- TS 24.008 (2G/3G NAS)
-- TS 24.301 (LTE NAS)  
-- TS 24.501 (5G NAS)
-- TS 36.300 (E-UTRA Architecture)
+**3GPP/ETSI (102 specs)** — NAS, RRC, conformance, USIM, IMS, SBI, security, radio
+- NAS: TS 24.008, 24.301, 24.501, 24.229 (IMS SIP)
+- RRC: TS 25.331, 36.331, 38.331
+- Conformance: TS 34.123-1, 36.523-1, 38.523-1, 51.010-1
+- 5G SBA: 62 specs (TS 29.500–29.599)
+- Security: TS 33.102, 33.401, 33.501
+- USIM: TS 31.102, 31.121, 31.124
+- NTN: TS 38.863
+- ...and more (36.xxx, 38.xxx, 23.xxx, 29.xxx series)
 
-**RRC - Radio Resource Control (3 specs) 🆕**
-- TS 25.331 (3G UMTS RRC - SIB details)
-- TS 36.331 (4G LTE RRC - SIB details)
-- TS 38.331 (5G NR RRC - SIB details)
+**IETF RFC (86 specs)** — core internet protocols
+- SIP/VoIP: RFC 3261, 3262–3265, 3311, 3428, 3515
+- Diameter: RFC 3588, 4005, 4006, 4072, 5779, 6733
+- TLS/DTLS: RFC 5246, 8446, 9147
+- QUIC: RFC 9000, 9001, 9002
+- HTTP: RFC 7540, 9110, 9112, 9113, 9114
+- OAuth/JWT: RFC 6749, 6750, 7519, 8693, 9068
+- SSH: RFC 4251–4254
+- DNS/DNSSEC: RFC 1034, 1035, 4033–4035, 7858, 8484
+- WebRTC: RFC 8825–8827, 8834, 8835
+- SCTP, RTP, SDP, STUN, TURN, XMPP, NETCONF, YANG, BGP, OSPF, MPLS, IPsec, IKEv2...
 
-**PCT - Protocol Conformance Test (4 specs)**
-- TS 51.010-1 (2G Protocol)
-- TS 34.123-1 (3G Protocol)
-- TS 36.523-1 (4G Protocol)
-- TS 38.523-1 (5G Protocol)
-
-**USIM/USAT (2 specs)**
-- TS 31.121 (USIM)
-- TS 31.124 (USAT)
-
-**IMS (2 specs)**
-- TS 34.229-1 (4G IMS)
-- TS 34.229-5 (5G IMS)
-
-**Architecture (2 specs)**
-- TS 38.300 (5G NR)
-- TR 37.901 (Data Throughput)
-
-**Total: 22,408 pre-built chunks, ~107MB**
+**Total: 188 specs, 89,987 sections**
 
 ### Optional: Update Data
 
