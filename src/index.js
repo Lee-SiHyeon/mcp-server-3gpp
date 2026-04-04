@@ -55,6 +55,7 @@ import { search3gppDocsSchema, handleSearch3gppDocs } from "./tools/search3gppDo
 import { searchRelatedSectionsSchema, handleSearchRelatedSections } from "./tools/searchRelatedSections.js";
 import { listSpecsSchema, handleListSpecs } from "./tools/listSpecs.js";
 import { getIngestGuideSchema, handleGetIngestGuide, GUIDES } from "./tools/getIngestGuide.js";
+import { getSpecReferencesSchema, handleGetSpecReferences } from "./tools/getSpecReferences.js";
 
 // DB modules
 import { getConnection, closeConnection } from "./db/connection.js";
@@ -81,6 +82,7 @@ function registerAllTools() {
   registerTool(searchRelatedSectionsSchema.name, searchRelatedSectionsSchema, handleSearchRelatedSections);
   registerTool(listSpecsSchema.name, listSpecsSchema, handleListSpecs);
   registerTool(getIngestGuideSchema.name, getIngestGuideSchema, handleGetIngestGuide);
+  registerTool(getSpecReferencesSchema.name, getSpecReferencesSchema, handleGetSpecReferences);
 }
 
 // ---------------------------------------------------------------------------
