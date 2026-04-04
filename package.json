@@ -22,7 +22,12 @@
     "corpus:rebuild": "node scripts/build_corpus.js --rebuild",
     "corpus:download": "python scripts/download_etsi_specs.py --latest-only",
     "corpus:extract": "python scripts/extract_all.py",
-    "corpus:full": "npm run corpus:download && npm run corpus:extract && npm run corpus:build"
+    "corpus:full": "npm run corpus:download && npm run corpus:extract && npm run corpus:build",
+    "rfc:download": "python scripts/download_rfc.py",
+    "rfc:extract": "python scripts/extract_rfc_structure.py",
+    "rfc:load": "node src/ingest/loadRfcSections.js",
+    "rfc:pipeline": "bash scripts/run_rfc_pipeline.sh",
+    "rfc:all": "bash scripts/run_rfc_pipeline.sh --all"
   },
   "keywords": [
     "mcp",
