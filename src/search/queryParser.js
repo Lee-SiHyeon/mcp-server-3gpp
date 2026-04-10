@@ -50,7 +50,7 @@ export function parseQuery(query, options = {}) {
   while ((m = phraseRe.exec(text)) !== null) {
     result.phrases.push(m[1]);
   }
-  text = text.replace(phraseRe, '').trim();
+  text = text.replace(/"([^"]+)"/g, '').trim();
 
   // Handle NOT/negation
   const words = text.split(/\s+/).filter(Boolean);

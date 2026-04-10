@@ -71,14 +71,17 @@ export function handleGetSection(args) {
   };
 
   if (includeNeighbors) {
+    // Use section_number ordering instead of rowid (rowid is not guaranteed contiguous)
     const neighbors = db.prepare(`
       SELECT id, section_number, section_title FROM sections
       WHERE spec_id = ? AND id != ?
-      AND rowid BETWEEN
-        (SELECT rowid FROM sections WHERE id = ?) - ?
-        AND (SELECT rowid FROM sections WHERE id = ?) + ?
-      ORDER BY rowid
-    `).all(section.spec_id, section.id, sectionId, neighborWindow, sectionId, neighborWindow);
+      ORDER BY CASE
+        WHEN section_number = ? THEN 0
+        WHEN section_number > ? THEN 1
+        ELSE -1
+      END, section_number
+      LIMIT ?
+    `).all(section.spec_id, section.id, section.section_number, section.section_number, neighborWindow * 2 + 1);
 
     result.neighbors = neighbors.map(n => ({
       section_id: n.id,

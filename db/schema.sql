@@ -96,6 +96,23 @@ END;
 CREATE INDEX IF NOT EXISTS idx_toc_spec ON toc(spec_id);
 CREATE INDEX IF NOT EXISTS idx_sections_spec ON sections(spec_id);
 CREATE INDEX IF NOT EXISTS idx_sections_parent ON sections(parent_section);
+CREATE INDEX IF NOT EXISTS idx_sections_spec_cover ON sections(spec_id, section_number, section_title, id);
+
+-- ---------------------------------------------------------------------------
+-- Cross-spec citation graph (populated by scripts/extract_cross_refs.js)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS spec_references (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  source_spec_id TEXT    NOT NULL,
+  target_spec_id TEXT    NOT NULL,
+  ref_type       TEXT    NOT NULL,       -- '3gpp' | 'rfc'
+  citation_text  TEXT,
+  section_id     TEXT,
+  in_corpus      INTEGER DEFAULT 0,
+  UNIQUE(source_spec_id, target_spec_id, section_id)
+);
+CREATE INDEX IF NOT EXISTS idx_specref_source ON spec_references(source_spec_id);
+CREATE INDEX IF NOT EXISTS idx_specref_target ON spec_references(target_spec_id);
 
 -- ---------------------------------------------------------------------------
 -- Ingestion tracking — records each data load for auditability.

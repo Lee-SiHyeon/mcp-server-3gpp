@@ -86,23 +86,21 @@ function registerAllTools() {
 }
 
 // ---------------------------------------------------------------------------
-// Main
+// Initialise database and register tools (shared between transports)
 // ---------------------------------------------------------------------------
-async function main() {
+function initServerData() {
   const dbPath = resolveDbPath();
   let dbFeatures = null;
 
   if (dbPath) {
-    // Initialise schema (idempotent) and probe optional extensions
     try {
       const { db, features } = initDatabase(dbPath);
       dbFeatures = features;
-      db.close(); // close the init handle; tools use the singleton below
+      db.close();
     } catch (err) {
       console.error(`[3GPP MCP] Schema init warning: ${err.message}`);
     }
 
-    // Warm up the singleton connection that tool handlers rely on
     getConnection(dbPath);
     console.error(`[3GPP MCP] Database ready: ${dbPath}`);
     if (dbFeatures) {
@@ -112,9 +110,6 @@ async function main() {
     registerAllTools();
     console.error(`[3GPP MCP] Registered ${toolRegistry.size} tools (v2 DB mode)`);
   } else {
-    // -----------------------------------------------------------------------
-    // Legacy fallback: no SQLite DB found — run v1 chunks.json mode
-    // -----------------------------------------------------------------------
     console.error("[3GPP MCP] No SQLite database found, falling back to legacy chunks.json mode");
 
     const CHUNKS_FILE = process.env.CHUNKS_FILE_PATH ||
@@ -129,7 +124,6 @@ async function main() {
       console.error(`[3GPP MCP] Error loading chunks: ${err.message}`);
     }
 
-    // Minimal keyword search over chunks
     function searchChunks(query, specFilter = null, maxResults = 5) {
       const keywords = query.toLowerCase().split(/\s+/);
       return chunksData
@@ -150,7 +144,6 @@ async function main() {
         .slice(0, maxResults);
     }
 
-    // Register legacy tools in the registry so the same handler map works
     registerTool("search_3gpp_docs", {
       name: "search_3gpp_docs",
       description: "Search 3GPP specification documents by keywords (legacy mode)",
@@ -187,21 +180,32 @@ async function main() {
 
     console.error(`[3GPP MCP] Registered ${toolRegistry.size} tools (legacy mode)`);
   }
+}
 
-  // -------------------------------------------------------------------------
-  // Create and configure the low-level MCP Server
-  // -------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Guide resources (shared between transports)
+// ---------------------------------------------------------------------------
+const GUIDE_RESOURCES = [
+  { uri: "3gpp://guides/etsi",    name: "ETSI Download Guide",    description: "How to download 3GPP specs from the ETSI portal (URL patterns, CLI usage)", mimeType: "application/json" },
+  { uri: "3gpp://guides/rfc",     name: "RFC Download Guide",     description: "How to download IETF RFC documents and ingest them (priority RFC list included)", mimeType: "application/json" },
+  { uri: "3gpp://guides/autorag", name: "AutoRAG Pipeline Guide", description: "How to run the full extraction pipeline: PDF/TXT → JSONL → SQLite corpus", mimeType: "application/json" },
+];
+
+// ---------------------------------------------------------------------------
+// Create and configure the MCP Server (reusable across transports)
+// ---------------------------------------------------------------------------
+export function createServer() {
+  initServerData();
+
   const server = new Server(
     { name: "3gpp-doc-server", version },
     { capabilities: { tools: {}, resources: {} } },
   );
 
-  // -- tools/list -----------------------------------------------------------
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: getToolList(),
   }));
 
-  // -- tools/call -----------------------------------------------------------
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
     const entry = toolRegistry.get(name);
@@ -224,18 +228,10 @@ async function main() {
     }
   });
 
-  // -- resources/list -------------------------------------------------------
-  const GUIDE_RESOURCES = [
-    { uri: "3gpp://guides/etsi",    name: "ETSI Download Guide",    description: "How to download 3GPP specs from the ETSI portal (URL patterns, CLI usage)", mimeType: "application/json" },
-    { uri: "3gpp://guides/rfc",     name: "RFC Download Guide",     description: "How to download IETF RFC documents and ingest them (priority RFC list included)", mimeType: "application/json" },
-    { uri: "3gpp://guides/autorag", name: "AutoRAG Pipeline Guide", description: "How to run the full extraction pipeline: PDF/TXT → JSONL → SQLite corpus", mimeType: "application/json" },
-  ];
-
   server.setRequestHandler(ListResourcesRequestSchema, async () => ({
     resources: GUIDE_RESOURCES,
   }));
 
-  // -- resources/read -------------------------------------------------------
   server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     const { uri } = request.params;
     const key = uri.replace("3gpp://guides/", "");
@@ -252,27 +248,37 @@ async function main() {
     };
   });
 
-  // -------------------------------------------------------------------------
-  // Graceful shutdown
-  // -------------------------------------------------------------------------
-  const shutdown = () => {
-    console.error("[3GPP MCP] Shutting down…");
-    closeConnection();
-    process.exit(0);
-  };
+  return server;
+}
+
+// ---------------------------------------------------------------------------
+// Graceful shutdown helper
+// ---------------------------------------------------------------------------
+export function shutdown() {
+  console.error("[3GPP MCP] Shutting down…");
+  closeConnection();
+  process.exit(0);
+}
+
+// ---------------------------------------------------------------------------
+// stdio transport entry point (default when run directly)
+// ---------------------------------------------------------------------------
+async function main() {
+  const server = createServer();
+
   process.on("SIGINT", shutdown);
   process.on("SIGTERM", shutdown);
 
-  // -------------------------------------------------------------------------
-  // Connect transport
-  // -------------------------------------------------------------------------
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("[3GPP MCP] Server started (v2)");
+  console.error("[3GPP MCP] Server started (stdio, v2)");
 }
 
-main().catch((err) => {
-  console.error("[3GPP MCP] Fatal:", err);
-  closeConnection();
-  process.exit(1);
-});
+// Only run stdio main when executed directly (not when imported by http.js)
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  main().catch((err) => {
+    console.error("[3GPP MCP] Fatal:", err);
+    closeConnection();
+    process.exit(1);
+  });
+}

@@ -19,8 +19,9 @@ export function handleGetSpecCatalog(args = {}) {
   const params = [];
 
   if (args.filter) {
-    conditions.push('(id LIKE ? OR title LIKE ?)');
-    params.push(`%${args.filter}%`, `%${args.filter}%`);
+    const escaped = args.filter.replace(/[%_^]/g, '^$&');
+    conditions.push("(id LIKE ? ESCAPE '^' OR title LIKE ? ESCAPE '^')");
+    params.push(`%${escaped}%`, `%${escaped}%`);
   }
   if (args.family) {
     conditions.push('series = ?');

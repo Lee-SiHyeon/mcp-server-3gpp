@@ -63,8 +63,8 @@ export function keywordSearch(parsed) {
     params[0] = simpleQuery;
     try {
       return normalizeResults(db.prepare(sql).all(...params));
-    } catch {
-      return [];
+    } catch (e2) {
+      throw new Error(`Search query syntax error. Try simpler terms. (${e2.message})`);
     }
   }
 }

@@ -45,9 +45,10 @@ export function handleGetSpecReferences(args) {
   const spec = db.prepare('SELECT id, title FROM specs WHERE id = ?').get(specId);
   if (!spec) {
     // Suggest similar IDs
+    const escaped = specId.replace(/[%_^]/g, '^$&');
     const suggestions = db.prepare(
-      "SELECT id FROM specs WHERE id LIKE ? LIMIT 5"
-    ).all(`%${specId.replace(/_/g, '%')}%`).map(r => r.id);
+      "SELECT id FROM specs WHERE id LIKE ? ESCAPE '^' LIMIT 5"
+    ).all(`%${escaped}%`).map(r => r.id);
     return {
       content: [{
         type: 'text',

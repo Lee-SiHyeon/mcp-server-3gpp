@@ -58,6 +58,7 @@ export function getConnection(dbPath) {
   // Performance pragmas — match what schema.js applies.
   _db.pragma('journal_mode = WAL');
   _db.pragma('busy_timeout = 5000');
+  _db.pragma('foreign_keys = ON');
 
   // Load sqlite-vec extension for optional vector search support.
   try {
@@ -76,8 +77,10 @@ export function closeConnection() {
   if (_db !== null) {
     try {
       _db.close();
-    } catch {
-      // Already closed — ignore.
+    } catch (err) {
+      if (err.message !== 'SQLITE_MISUSE: database is closed') {
+        console.error(`[DB] Close error: ${err.message}`);
+      }
     }
     _db = null;
   }
