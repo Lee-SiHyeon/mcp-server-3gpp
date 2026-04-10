@@ -9,6 +9,7 @@ import { test, after, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { hybridSearch } from '../src/search/hybridRanker.js';
 import { closeConnection } from '../src/db/connection.js';
+import { queryCache, getQueryCacheStats } from '../src/search/queryCache.js';
 
 // Close the DB handle after all tests in this file.
 after(() => closeConnection());
@@ -72,5 +73,86 @@ describe('hybridSearch — edge cases', () => {
     assert.ok('totalHits' in r,   'result must have totalHits');
     assert.ok('capabilities' in r,'result must have capabilities');
     assert.ok('results' in r,     'result must have results');
+  });
+});
+
+describe('hybridSearch — scoring and fusion', () => {
+  test('includeScores reveals score fields', () => {
+    const r = hybridSearch('PDN', { mode: 'keyword', maxResults: 5, includeScores: true });
+    assert.ok(r.results.length > 0, 'Expected at least one result for scoring test');
+    const result = r.results[0];
+    assert.ok('score' in result, 'result must have score field');
+    assert.ok('keyword_score' in result, 'result must have keyword_score field');
+    assert.ok('evidence' in result, 'result must have evidence field');
+  });
+
+  test('keyword-only mode: effectiveAlpha is 1.0', () => {
+    const r = hybridSearch('PDN', { mode: 'keyword', maxResults: 5, includeScores: true });
+    assert.ok(r.results.length > 0, 'Expected at least one result');
+    const result = r.results[0];
+    // In keyword mode, score should equal keyword_score (since alpha=1.0, semantic_score=0)
+    assert.strictEqual(result.score, result.keyword_score, 'In keyword mode, score must equal keyword_score');
+  });
+
+  test('scores are clamped to [0, 1]', () => {
+    const r = hybridSearch('PDN', { mode: 'keyword', maxResults: 10, includeScores: true });
+    if (r.results.length > 0) {
+      for (const result of r.results) {
+        assert.ok(result.score >= 0 && result.score <= 1, `score ${result.score} must be in [0, 1]`);
+        assert.ok(result.keyword_score >= 0 && result.keyword_score <= 1, `keyword_score ${result.keyword_score} must be in [0, 1]`);
+      }
+    }
+  });
+
+  test('mode hybrid falls back to keyword when no sqlite-vec', () => {
+    const r = hybridSearch('PDN', { mode: 'hybrid', maxResults: 3 });
+    // In this environment, sqlite-vec is not available, so hybrid should fall back to keyword
+    assert.strictEqual(r.mode, 'keyword', 'mode should fall back to keyword when hybrid is requested but sqlite-vec unavailable');
+  });
+
+  test('mode semantic falls back to keyword', () => {
+    const r = hybridSearch('PDN', { mode: 'semantic', maxResults: 3 });
+    assert.strictEqual(r.mode, 'keyword', 'semantic mode should fall back to keyword when sqlite-vec unavailable');
+  });
+});
+
+describe('hybridSearch — cache integration', () => {
+  test('repeated query returns cached result', () => {
+    queryCache.clear();
+    queryCache.resetStats();
+    
+    const r1 = hybridSearch('PDN connection', { spec: 'ts_24_301', maxResults: 5 });
+    const r2 = hybridSearch('PDN connection', { spec: 'ts_24_301', maxResults: 5 });
+    
+    assert.ok(!('cached' in r1) || r1.cached !== true, 'First call should not be marked as cached');
+    assert.ok(r2.cached === true, 'Second call with identical params must be marked as cached');
+  });
+
+  test('useCache: false bypasses cache', () => {
+    queryCache.clear();
+    queryCache.resetStats();
+    
+    const r1 = hybridSearch('authentication', { mode: 'keyword', maxResults: 3 });
+    const r2 = hybridSearch('authentication', { mode: 'keyword', maxResults: 3, useCache: false });
+    
+    assert.ok(!r2.cached || r2.cached !== true, 'Result with useCache: false should not have cached: true');
+  });
+
+  test('cache stats reflect usage', () => {
+    queryCache.clear();
+    queryCache.resetStats();
+    
+    hybridSearch('authentication', { mode: 'keyword', maxResults: 2 });
+    hybridSearch('authentication', { mode: 'keyword', maxResults: 2 });
+    hybridSearch('PDN', { mode: 'keyword', maxResults: 2 });
+    hybridSearch('PDN', { mode: 'keyword', maxResults: 2 });
+    
+    const stats = getQueryCacheStats();
+    assert.ok('hits' in stats, 'stats must have hits');
+    assert.ok('misses' in stats, 'stats must have misses');
+    assert.ok('size' in stats, 'stats must have size');
+    assert.ok('hitRate' in stats, 'stats must have hitRate');
+    assert.ok(stats.hits > 0, 'Expected cache hits from repeated queries');
+    assert.ok(stats.misses >= 2, 'Expected at least 2 cache misses from 2 different queries');
   });
 });

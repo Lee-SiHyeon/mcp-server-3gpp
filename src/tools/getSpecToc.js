@@ -1,4 +1,6 @@
 import { getConnection } from '../db/connection.js';
+import { getSpecById, getAllSpecIds } from '../db/queries.js';
+import { formatSuccess, formatError } from './helpers.js';
 
 export const getSpecTocSchema = {
   name: 'get_spec_toc',
@@ -19,17 +21,12 @@ export function handleGetSpecToc(args) {
   const db = getConnection();
   const { specId, maxDepth = 4, sectionPrefix, includeBriefs = true } = args;
 
-  const spec = db.prepare('SELECT id, title FROM specs WHERE id = ?').get(specId);
+  const spec = getSpecById(specId);
   if (!spec) {
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify({
-          error: `Spec not found: ${specId}`,
-          available_specs: db.prepare('SELECT id FROM specs ORDER BY id').all().map(s => s.id),
-        }),
-      }],
-    };
+    return formatError({
+      error: `Spec not found: ${specId}`,
+      available_specs: getAllSpecIds(),
+    });
   }
 
   let sql = `SELECT section_number, section_title, page, depth${includeBriefs ? ', brief' : ''} FROM toc WHERE spec_id = ?`;
@@ -59,13 +56,8 @@ export function handleGetSpecToc(args) {
     }
     fallbackSql += ' ORDER BY section_number LIMIT 100';
     const fbEntries = db.prepare(fallbackSql).all(...fbParams);
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify({ spec_id: specId, title: spec.title, entries: fbEntries, source: 'sections_fallback' }, null, 2),
-      }],
-    };
+    return formatSuccess({ spec_id: specId, title: spec.title, entries: fbEntries, source: 'sections_fallback' });
   }
 
-  return { content: [{ type: 'text', text: JSON.stringify({ spec_id: specId, title: spec.title, entries }, null, 2) }] };
+  return formatSuccess({ spec_id: specId, title: spec.title, entries });
 }

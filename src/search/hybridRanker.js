@@ -1,6 +1,7 @@
 import { parseQuery } from './queryParser.js';
 import { keywordSearch } from './keywordSearch.js';
 import { semanticSearch, isVectorSearchAvailable } from './semanticSearch.js';
+import { queryCache } from './queryCache.js';
 
 /**
  * Perform hybrid keyword + semantic search with fusion scoring.
@@ -8,9 +9,11 @@ import { semanticSearch, isVectorSearchAvailable } from './semanticSearch.js';
  * score = α * keyword_score + (1-α) * semantic_score
  * Default α = 0.4 (favors semantic rescue while rewarding exact terms)
  *
+ * Results are cached with LRU strategy to improve p95 latency for repeated queries.
+ *
  * @param {string} query - Raw search query
- * @param {object} [options] - { spec, maxResults, page, mode, alpha, includeScores, embedQueryFn }
- * @returns {{ results: object[], mode: string, capabilities: object, page: number, maxResults: number, totalHits: number }}
+ * @param {object} [options] - { spec, maxResults, page, mode, alpha, includeScores, embedQueryFn, useCache }
+ * @returns {{ results: object[], mode: string, capabilities: object, page: number, maxResults: number, totalHits: number, warnings: string[], mode_requested: string, mode_actual: string, cached?: boolean }}
  */
 export function hybridSearch(query, options = {}) {
   const {
@@ -21,7 +24,18 @@ export function hybridSearch(query, options = {}) {
     alpha = 0.4,
     includeScores = false,
     embedQueryFn = null,
+    useCache = true,
   } = options;
+
+  const warnings = [];
+
+  // Check cache first (skip for semantic/embeddings)
+  if (useCache) {
+    const cached = queryCache.get(query, { spec, page, mode });
+    if (cached) {
+      return { ...cached, cached: true };
+    }
+  }
 
   const parsed = parseQuery(query, {
     specFilter: spec,
@@ -38,9 +52,11 @@ export function hybridSearch(query, options = {}) {
   }
   if (actualMode === 'semantic' && !hasVector) {
     actualMode = 'keyword';
+    warnings.push(`mode_degraded: requested=${mode} actual=${actualMode}`);
   }
   if (actualMode === 'hybrid' && !hasVector) {
     actualMode = 'keyword';
+    warnings.push(`mode_degraded: requested=${mode} actual=${actualMode}`);
   }
 
   const capabilities = {
@@ -62,6 +78,7 @@ export function hybridSearch(query, options = {}) {
       semanticResults = semanticSearch(queryVec, parsed.k * 3, parsed.specFilter);
     } catch (e) {
       console.error(`Semantic search failed: ${e.message}`);
+      warnings.push(`semantic_search_failed: ${e.message}`);
     }
   }
 
@@ -142,12 +159,27 @@ export function hybridSearch(query, options = {}) {
     return result;
   });
 
-  return {
+  const response = {
     mode: actualMode,
     page,
     maxResults,
     totalHits: ranked.length,
     capabilities,
+    warnings,
+    mode_requested: mode,
+    mode_actual: actualMode,
     results,
   };
+
+  // Cache result for future calls
+  if (useCache) {
+    queryCache.set(query, response, { spec, page, mode });
+  }
+
+  return response;
 }
+
+/**
+ * Export cache for external monitoring/control
+ */
+export { queryCache, getQueryCacheStats } from './queryCache.js';

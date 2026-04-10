@@ -1,4 +1,5 @@
 import { getConnection } from '../db/connection.js';
+import { formatSuccess } from './helpers.js';
 
 export const listSpecsSchema = {
   name: 'list_specs',
@@ -12,5 +13,5 @@ export function handleListSpecs() {
     'SELECT id as spec_id, title, total_sections as count FROM specs ORDER BY id'
   ).all();
 
-  return { content: [{ type: 'text', text: JSON.stringify({ specs }, null, 2) }] };
+  return formatSuccess({ specs });
 }

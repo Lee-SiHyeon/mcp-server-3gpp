@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"git push origin main 2>&1\",\"timeout\":30000,\"description\":\"Push to remote\"}",
+  "error": "Exit code 128\nMissing or invalid credentials.\nError: connect ECONNREFUSED /run/user/1000/vscode-git-7e584f3fde.sock\n    at PipeConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {\n  errno: -111,\n  code: 'ECONNREFUSED',\n  syscall: 'connect',\n  address: '/run/user/1000/vscode-git-7e584f3fde.sock'\n}\nMissing or invalid credentials.\nError: connect ECONNREFUSED /run/user/1000/vscode-git-7e584f3fde.sock\n    at PipeConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {\n  errno: -111,\n  c...",
+  "timestamp": "2026-04-10T05:22:31.389Z",
+  "retry_count": 2
+}

@@ -1,4 +1,5 @@
 import { hybridSearch } from '../search/hybridRanker.js';
+import { formatSuccess, formatError } from './helpers.js';
 
 export const search3gppDocsSchema = {
   name: 'search_3gpp_docs',
@@ -21,7 +22,7 @@ export function handleSearch3gppDocs(args) {
   const { query, spec, maxResults = 5, page = 1, mode = 'auto', includeScores = false } = args;
 
   if (!query || !query.trim()) {
-    return { content: [{ type: 'text', text: JSON.stringify({ error: 'Query is required' }) }] };
+    return formatError('Query is required');
   }
 
   const clampedMax = Math.max(1, Math.min(20, maxResults));
@@ -34,5 +35,5 @@ export function handleSearch3gppDocs(args) {
     includeScores,
   });
 
-  return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  return formatSuccess(result);
 }

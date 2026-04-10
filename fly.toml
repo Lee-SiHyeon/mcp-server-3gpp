@@ -1,0 +1,28 @@
+app = "mcp-server-3gpp"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[http_service.concurrency]
+  type = "requests"
+  hard_limit = 50
+  soft_limit = 30
+
+[[vm]]
+  memory = "1gb"
+  cpu = 1
+
+[env]
+  PORT = "3000"
+  # API_KEY = "set-via-fly-secrets-set"
+  CORS_ORIGIN = "*"
+  RATE_LIMIT_MAX = "100"
+  RATE_LIMIT_WINDOW_MS = "60000"

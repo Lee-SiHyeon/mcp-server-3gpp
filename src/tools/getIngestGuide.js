@@ -6,6 +6,8 @@
  * from the corpus and you need to ingest it.
  */
 
+import { formatSuccess, formatError } from './helpers.js';
+
 export const GUIDES = {
   etsi: {
     title: 'Downloading ETSI/3GPP Specs',
@@ -211,11 +213,11 @@ export function handleGetIngestGuide(args) {
   } else if (GUIDES[type]) {
     result = { guide: GUIDES[type] };
   } else {
-    result = {
+    return formatError({
       error: `Unknown guide type: ${type}`,
       available: Object.keys(GUIDES).concat(['all']),
-    };
+    });
   }
 
-  return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  return formatSuccess(result);
 }

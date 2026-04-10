@@ -1,4 +1,5 @@
 import { getConnection } from '../db/connection.js';
+import { formatSuccess } from './helpers.js';
 
 export const getSpecCatalogSchema = {
   name: 'get_spec_catalog',
@@ -32,5 +33,5 @@ export function handleGetSpecCatalog(args = {}) {
   sql += ' ORDER BY series, id';
 
   const specs = db.prepare(sql).all(...params);
-  return { content: [{ type: 'text', text: JSON.stringify({ specs }, null, 2) }] };
+  return formatSuccess({ specs });
 }

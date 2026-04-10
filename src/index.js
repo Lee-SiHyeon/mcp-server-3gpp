@@ -57,6 +57,10 @@ import { listSpecsSchema, handleListSpecs } from "./tools/listSpecs.js";
 import { getIngestGuideSchema, handleGetIngestGuide, GUIDES } from "./tools/getIngestGuide.js";
 import { getSpecReferencesSchema, handleGetSpecReferences } from "./tools/getSpecReferences.js";
 
+// Validation middleware
+import { validateArgs } from "./tools/validateArgs.js";
+import { formatValidationError } from "./tools/helpers.js";
+
 // DB modules
 import { getConnection, closeConnection } from "./db/connection.js";
 import { initDatabase } from "./db/schema.js";
@@ -217,8 +221,14 @@ export function createServer() {
       };
     }
 
+    // Validate arguments before calling the handler
+    const validation = validateArgs(name, args ?? {});
+    if (!validation.valid) {
+      return formatValidationError(validation.error);
+    }
+
     try {
-      return entry.handler(args ?? {});
+      return entry.handler(validation.args);
     } catch (err) {
       console.error(`[3GPP MCP] Tool "${name}" error:`, err);
       return {

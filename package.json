@@ -14,7 +14,7 @@
     "download-pdfs": "node scripts/download-pdfs.js",
     "prepare-data": "node scripts/prepare-data.js",
     "setup": "npm run download-pdfs && npm run prepare-data",
-    "test": "node --test test/*.test.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js",
     "test:legacy": "node test_speckit_userstories.js",
     "validate": "node validate.js",
     "benchmark": "node scripts/benchmark.js",

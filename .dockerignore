@@ -1,0 +1,17 @@
+node_modules
+.git
+.github
+.specify
+raw
+extracted
+data/intermediate
+data/pdfs
+data/rfcs
+data/chunks.json
+data/3gpp.db
+test
+docs
+*.md
+!README.md
+.gitattributes
+.env
