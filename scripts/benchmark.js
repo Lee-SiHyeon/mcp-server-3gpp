@@ -26,6 +26,7 @@
 import { performance } from 'node:perf_hooks';
 import { hybridSearch } from '../src/search/hybridRanker.js';
 import { getConnection, closeConnection } from '../src/db/connection.js';
+import { queryCache, getQueryCacheStats } from '../src/search/queryCache.js';
 
 const QUERIES = [
   'authentication',
@@ -34,7 +35,7 @@ const QUERIES = [
   'SIB1 configuration',
   '5GMM cause code',
 ];
-const ITERATIONS = 10;
+const ITERATIONS = 20;
 const MAX_RESULTS = 50;
 
 function p95(times) {
@@ -62,6 +63,10 @@ async function main() {
     const times = [];
     let totalHits = 0;
 
+    // Warm-up iteration (not counted)
+    hybridSearch(query, { mode: 'keyword', maxResults: MAX_RESULTS });
+    
+    // Actual measurements
     for (let i = 0; i < ITERATIONS; i++) {
       const ts = performance.now();
       const result = hybridSearch(query, { mode: 'keyword', maxResults: MAX_RESULTS });
@@ -71,6 +76,7 @@ async function main() {
 
     const avg = times.reduce((s, t) => s + t, 0) / times.length;
     const p95v = p95(times);
+    const cacheHits = getQueryCacheStats();
 
     rows.push({
       query,
@@ -111,8 +117,11 @@ async function main() {
   }
 
   console.log(sep('└', '┴', '┘', '─'));
+  
+  const stats = getQueryCacheStats();
   console.log(`\nCold-start DB init: ${coldStart.toFixed(1)} ms`);
-  console.log(`Iterations per query: ${ITERATIONS}\n`);
+  console.log(`Iterations per query: ${ITERATIONS}`);
+  console.log(`Cache stats: ${stats.hits} hits, ${stats.misses} misses, ${stats.evictions} evictions\n`);
 
   closeConnection();
 }
