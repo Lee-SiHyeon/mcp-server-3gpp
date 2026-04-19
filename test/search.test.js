@@ -116,6 +116,47 @@ describe('hybridSearch — scoring and fusion', () => {
   });
 });
 
+describe('hybridSearch — title-aware chapter ranking', () => {
+  test('registration procedure prefers the canonical procedure chapter over generic leaves', () => {
+    const r = hybridSearch('registration procedure', {
+      spec: 'ts_24_501',
+      mode: 'keyword',
+      maxResults: 10,
+      useCache: false,
+    });
+
+    assert.ok(r.results.length > 0, 'Expected ranked results for registration procedure');
+    assert.strictEqual(r.results[0].section_number, '5.5.1');
+    assert.strictEqual(r.results[0].title, 'Registration procedure');
+
+    const noisyLeaf = r.results.findIndex(result =>
+      result.title === 'General' || /abnormal cases/i.test(result.title)
+    );
+    assert.strictEqual(noisyLeaf, -1, 'Generic leaf sections should not appear in the top chapter-focused results');
+  });
+
+  test('initial registration prefers the chapter anchor and emits navigation hints for generic subsections', () => {
+    const r = hybridSearch('initial registration', {
+      spec: 'ts_24_501',
+      mode: 'keyword',
+      maxResults: 10,
+      useCache: false,
+    });
+
+    assert.ok(r.results.length > 0, 'Expected ranked results for initial registration');
+    assert.strictEqual(r.results[0].section_number, '5.5.1.2');
+    assert.strictEqual(r.results[0].title, 'Registration procedure for initial registration');
+
+    const genericLeaf = r.results.find(result => result.section_number === '5.5.1.2.7');
+    assert.ok(genericLeaf, 'Expected a generic abnormal-case subsection in the result window');
+    assert.match(
+      genericLeaf.navigation_hint || '',
+      /5\.5\.1\.2 Registration procedure for initial registration/,
+      'Generic subsections should point callers back to the parent chapter anchor'
+    );
+  });
+});
+
 describe('hybridSearch — cache integration', () => {
   test('repeated query returns cached result', () => {
     queryCache.clear();

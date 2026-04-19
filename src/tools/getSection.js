@@ -1,6 +1,78 @@
 import { getConnection } from '../db/connection.js';
-import { getSectionById, getSectionSuggestions } from '../db/queries.js';
+import {
+  countContentfulDescendants,
+  getContentfulDescendants,
+  getSectionById,
+  getSectionChildren,
+  getSectionSuggestions,
+} from '../db/queries.js';
 import { formatSuccess, formatError, resolveSectionId } from './helpers.js';
+
+const NAV_CHILD_LIMIT = 10;
+const NAV_DESCENDANT_LIMIT = 8;
+const GENERIC_TITLE_PATTERNS = [
+  /^general$/i,
+  /^overview$/i,
+  /^introduction$/i,
+  /^scope$/i,
+  /^abnormal cases\b/i,
+];
+
+function isGenericTitle(title) {
+  return GENERIC_TITLE_PATTERNS.some(pattern => pattern.test(title || ''));
+}
+
+function summarizeBrief(brief, maxChars = 220) {
+  if (!brief || typeof brief !== 'string') return undefined;
+  const normalized = brief
+    .replace(/\bETSI TS \d{3} \d{3} V[\d.]+ \(\d{4}-\d{2}\)\b/ig, ' ')
+    .replace(/\b3GPP TS \d{2}\.\d{3} version [\d.]+ Release \d+\b/ig, ' ')
+    .replace(/\bETSI\b/ig, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!normalized) return undefined;
+  return normalized.length > maxChars
+    ? `${normalized.substring(0, maxChars - 3)}...`
+    : normalized;
+}
+
+function toNavigationEntry(section) {
+  return {
+    section_id: section.id,
+    section_number: section.section_number,
+    section_title: section.section_title,
+    page_start: section.page_start,
+    page_end: section.page_end,
+    content_length: section.content_length,
+    has_content: section.content_length > 0,
+    ...(section.brief ? { brief: summarizeBrief(section.brief) } : {}),
+  };
+}
+
+function buildNavigation(section) {
+  const childSections = getSectionChildren(section.id, NAV_CHILD_LIMIT).map(toNavigationEntry);
+  const suggestedSections = getContentfulDescendants(
+    section.spec_id,
+    section.section_number,
+    NAV_DESCENDANT_LIMIT,
+  )
+    .sort((a, b) =>
+      Number(isGenericTitle(a.section_title)) - Number(isGenericTitle(b.section_title)) ||
+      a.depth - b.depth ||
+      a.page_start - b.page_start ||
+      a.section_number.localeCompare(b.section_number, undefined, { numeric: true })
+    )
+    .map(toNavigationEntry);
+  const contentfulDescendantCount = countContentfulDescendants(section.spec_id, section.section_number);
+
+  return {
+    navigation_only: true,
+    reason: 'This section is a structural heading with no direct body content. Use the child or descendant sections below for procedure details.',
+    child_sections: childSections,
+    suggested_sections: suggestedSections,
+    descendant_content_count: contentfulDescendantCount,
+  };
+}
 
 export const getSectionSchema = {
   name: 'get_section',
@@ -42,7 +114,8 @@ export function handleGetSection(args) {
       });
     }
 
-    let content = section.content;
+    const hasDirectContent = typeof section.content === 'string' && section.content.trim().length > 0;
+    let content = section.content || '';
     let truncated = false;
     if (maxChars && content.length > maxChars) {
       content = content.substring(0, maxChars);
@@ -60,9 +133,15 @@ export function handleGetSection(args) {
         parent_section: section.parent_section,
         content,
         content_length: section.content_length,
+        has_content: hasDirectContent,
+        ...(hasDirectContent ? {} : { navigation_only: true }),
         ...(truncated ? { truncated: true } : {}),
       },
     };
+
+    if (!hasDirectContent) {
+      result.navigation = buildNavigation(section);
+    }
 
     if (includeNeighbors) {
       // Use section_number ordering instead of rowid (rowid is not guaranteed contiguous)

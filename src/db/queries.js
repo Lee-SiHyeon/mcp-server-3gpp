@@ -53,6 +53,98 @@ export function getSectionSuggestions(specPart, numPrefix, limit = 5) {
 }
 
 /**
+ * Fetch immediate child sections for a structural section.
+ * Includes TOC briefs when available so callers can present navigation hints.
+ * @param {string} sectionId
+ * @param {number} [limit=12]
+ * @returns {Array<object>}
+ */
+export function getSectionChildren(sectionId, limit = 12) {
+  const db = getConnection();
+  return db.prepare(`
+    SELECT
+      s.id,
+      s.spec_id,
+      s.section_number,
+      s.section_title,
+      s.content_length,
+      s.page_start,
+      s.page_end,
+      s.depth,
+      t.brief
+    FROM sections s
+    LEFT JOIN toc t
+      ON t.spec_id = s.spec_id
+     AND t.section_number = s.section_number
+    WHERE s.parent_section = ?
+    ORDER BY s.section_number
+    LIMIT ?
+  `).all(sectionId, limit);
+}
+
+/**
+ * Fetch the nearest contentful descendants underneath a structural section.
+ * Ordered to prefer the shallowest useful descendants first.
+ * @param {string} specId
+ * @param {string} sectionNumber
+ * @param {number} [limit=8]
+ * @returns {Array<object>}
+ */
+export function getContentfulDescendants(specId, sectionNumber, limit = 8) {
+  const db = getConnection();
+  return db.prepare(`
+    SELECT
+      s.id,
+      s.spec_id,
+      s.section_number,
+      s.section_title,
+      s.content_length,
+      s.page_start,
+      s.page_end,
+      s.depth,
+      t.brief
+    FROM sections s
+    LEFT JOIN toc t
+      ON t.spec_id = s.spec_id
+     AND t.section_number = s.section_number
+    WHERE s.spec_id = ?
+      AND s.section_number LIKE ?
+      AND s.content_length > 0
+    ORDER BY s.depth, s.page_start, s.section_number
+    LIMIT ?
+  `).all(specId, `${sectionNumber}.%`, limit);
+}
+
+/**
+ * Count contentful descendants underneath a structural section.
+ * @param {string} specId
+ * @param {string} sectionNumber
+ * @returns {number}
+ */
+export function countContentfulDescendants(specId, sectionNumber) {
+  const db = getConnection();
+  const row = db.prepare(`
+    SELECT COUNT(*) AS count
+    FROM sections
+    WHERE spec_id = ?
+      AND section_number LIKE ?
+      AND content_length > 0
+  `).get(specId, `${sectionNumber}.%`);
+  return row?.count ?? 0;
+}
+
+/**
+ * Fetch a section by spec + section number.
+ * @param {string} specId
+ * @param {string} sectionNumber
+ * @returns {object|undefined}
+ */
+export function getSectionByNumber(specId, sectionNumber) {
+  const db = getConnection();
+  return db.prepare('SELECT * FROM sections WHERE spec_id = ? AND section_number = ?').get(specId, sectionNumber);
+}
+
+/**
  * Suggest spec IDs that contain a substring (fuzzy match).
  * @param {string} specId — partial spec ID entered by the user
  * @param {number} [limit=5]

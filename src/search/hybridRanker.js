@@ -3,6 +3,133 @@ import { keywordSearch } from './keywordSearch.js';
 import { semanticSearch, isVectorSearchAvailable } from './semanticSearch.js';
 import { queryCache } from './queryCache.js';
 
+const TITLE_STOP_WORDS = new Set([
+  'a',
+  'an',
+  'and',
+  'by',
+  'for',
+  'in',
+  'of',
+  'on',
+  'or',
+  'the',
+  'to',
+  'with',
+  'without',
+]);
+
+const GENERIC_TITLE_PATTERNS = [
+  /^general$/i,
+  /^overview$/i,
+  /^introduction$/i,
+  /^scope$/i,
+  /^abnormal cases\b/i,
+];
+
+function normalizeSearchText(text) {
+  return (text || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function tokenizeSearchText(text) {
+  return normalizeSearchText(text)
+    .split(/\s+/)
+    .filter(token => token && !TITLE_STOP_WORDS.has(token));
+}
+
+function isGenericTitle(title) {
+  return GENERIC_TITLE_PATTERNS.some(pattern => pattern.test(title || ''));
+}
+
+function getSectionDepth(row) {
+  if (Number.isFinite(row.depth)) return row.depth;
+  if (!row.section_number) return 99;
+  return row.section_number.split('.').length;
+}
+
+function getTitleSignal(title, queryTokens, normalizedQuery) {
+  const normalizedTitle = normalizeSearchText(title);
+  const titleTokens = new Set(tokenizeSearchText(title));
+  const matchedTokenCount = queryTokens.filter(token => titleTokens.has(token)).length;
+  const coverage = queryTokens.length > 0 ? matchedTokenCount / queryTokens.length : 0;
+  const exact = Boolean(normalizedQuery) && normalizedTitle === normalizedQuery;
+  const containsQuery = Boolean(normalizedQuery) && normalizedTitle.includes(normalizedQuery);
+  const startsWithQuery = Boolean(normalizedQuery) &&
+    (normalizedTitle === normalizedQuery || normalizedTitle.startsWith(`${normalizedQuery} `));
+
+  return {
+    coverage,
+    exact,
+    containsQuery,
+    startsWithQuery,
+    generic: isGenericTitle(title),
+  };
+}
+
+function buildNavigationHint(row, titleSignal, parentSignal) {
+  if (!row.parent_section_number || !row.parent_section_title) return null;
+  if (!parentSignal.containsQuery && !parentSignal.exact && parentSignal.coverage < 0.5) return null;
+  if (!titleSignal.generic && parentSignal.coverage <= titleSignal.coverage + 0.25 && !parentSignal.exact) {
+    return null;
+  }
+
+  const parentSource = `${row.spec_id?.replace(/_/g, ' ').toUpperCase()} §${row.parent_section_number}`;
+  return `Start with ${parentSource} ${row.parent_section_title}`;
+}
+
+function applyStructureAwareRanking(row, parsed) {
+  const normalizedQuery = normalizeSearchText(parsed.normalizedText);
+  const queryTokens = tokenizeSearchText(parsed.normalizedText);
+
+  if (!normalizedQuery && queryTokens.length === 0) {
+    row.navigation_hint = null;
+    return;
+  }
+
+  const titleSignal = getTitleSignal(row.section_title, queryTokens, normalizedQuery);
+  const parentSignal = getTitleSignal(row.parent_section_title, queryTokens, normalizedQuery);
+  const depth = getSectionDepth(row);
+  const shallowBoost = Math.max(0, 6 - depth) * 0.015;
+  let structureDelta = 0;
+
+  if (titleSignal.exact) {
+    structureDelta += 0.05;
+  } else {
+    if (titleSignal.startsWithQuery) structureDelta += 0.025;
+    else if (titleSignal.containsQuery) structureDelta += 0.015;
+
+    structureDelta += 0.04 * titleSignal.coverage;
+  }
+
+  if (titleSignal.coverage >= 0.5 || titleSignal.exact) {
+    structureDelta += shallowBoost * 0.5;
+  } else if (depth >= 5) {
+    structureDelta -= 0.015;
+  }
+
+  if (titleSignal.generic && !titleSignal.exact && titleSignal.coverage < 1) {
+    structureDelta -= 0.05;
+  }
+
+  if (row.parent_section_title && parentSignal.exact && !titleSignal.exact &&
+      (titleSignal.generic || titleSignal.coverage < 0.75)) {
+    structureDelta -= 0.05;
+  } else if (row.parent_section_title && parentSignal.coverage > titleSignal.coverage + 0.25) {
+    structureDelta -= 0.03;
+  }
+
+  row.rank_exactness = titleSignal.exact ? 1 : 0;
+  row.rank_title_coverage = titleSignal.coverage;
+  row.rank_parent_anchor = parentSignal.exact && (titleSignal.generic || titleSignal.coverage < 0.75) ? 1 : 0;
+  row.rank_generic_penalty = titleSignal.generic ? 1 : 0;
+  row.rank_depth = depth;
+  row.navigation_hint = buildNavigationHint(row, titleSignal, parentSignal);
+  row.score = Math.max(0, Math.min(1, row.score + structureDelta));
+}
+
 /**
  * Perform hybrid keyword + semantic search with fusion scoring.
  *
@@ -126,11 +253,19 @@ export function hybridSearch(query, options = {}) {
       row.score = Math.min(1, row.score + 0.05);
     }
 
-    row.score = Math.max(0, Math.min(1, row.score));
+    applyStructureAwareRanking(row, parsed);
   }
 
   // Sort by score descending
-  const ranked = [...merged.values()].sort((a, b) => b.score - a.score);
+  const ranked = [...merged.values()].sort((a, b) =>
+    (b.rank_exactness ?? 0) - (a.rank_exactness ?? 0) ||
+    b.score - a.score ||
+    (b.rank_title_coverage ?? 0) - (a.rank_title_coverage ?? 0) ||
+    (a.rank_generic_penalty ?? 0) - (b.rank_generic_penalty ?? 0) ||
+    (a.rank_parent_anchor ?? 0) - (b.rank_parent_anchor ?? 0) ||
+    (a.rank_depth ?? 99) - (b.rank_depth ?? 99) ||
+    (a.section_number || '').localeCompare(b.section_number || '', undefined, { numeric: true })
+  );
 
   // Paginate
   const startIdx = (page - 1) * maxResults;
@@ -148,6 +283,10 @@ export function hybridSearch(query, options = {}) {
       page_start: row.page_start,
       page_end: row.page_end,
     };
+
+    if (row.navigation_hint) {
+      result.navigation_hint = row.navigation_hint;
+    }
 
     if (includeScores) {
       result.score = Math.round(row.score * 1000) / 1000;

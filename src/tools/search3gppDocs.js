@@ -3,7 +3,7 @@ import { formatSuccess, formatError } from './helpers.js';
 
 export const search3gppDocsSchema = {
   name: 'search_3gpp_docs',
-  description: 'Search 3GPP specifications using keyword and/or semantic search. Supports quoted phrases, spec filtering, and Boolean operators. Returns ranked results with section references for follow-up retrieval via get_section.',
+  description: 'Search 3GPP specifications using keyword and/or semantic search. Supports quoted phrases, spec filtering, and Boolean operators. Returns ranked results biased toward the most relevant document/chapter anchors, with section references for follow-up retrieval via get_section.',
   inputSchema: {
     type: 'object',
     properties: {

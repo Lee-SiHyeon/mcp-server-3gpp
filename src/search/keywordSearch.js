@@ -1,5 +1,8 @@
 import { getConnection } from '../db/connection.js';
 
+const TITLE_WEIGHT = 10.0;
+const CONTENT_WEIGHT = 1.0;
+
 /**
  * Perform FTS5 keyword search with BM25 ranking.
  * @param {object} parsed - Output from parseQuery
@@ -33,13 +36,18 @@ export function keywordSearch(parsed) {
       s.spec_id,
       s.section_number,
       s.section_title,
+      s.depth,
+      s.parent_section,
+      p.section_number as parent_section_number,
+      p.section_title as parent_section_title,
       s.page_start,
       s.page_end,
       s.content_length,
-      bm25(sections_fts) as raw_bm25,
+      bm25(sections_fts, ${TITLE_WEIGHT}, ${CONTENT_WEIGHT}) as raw_bm25,
       snippet(sections_fts, 1, '<mark>', '</mark>', '...', 40) as snippet
     FROM sections_fts
     JOIN sections s ON s.rowid = sections_fts.rowid
+    LEFT JOIN sections p ON p.id = s.parent_section
     WHERE sections_fts MATCH ?
   `;
   const params = [ftsQuery];
@@ -49,7 +57,7 @@ export function keywordSearch(parsed) {
     params.push(parsed.specFilter);
   }
 
-  sql += ` ORDER BY bm25(sections_fts) LIMIT ?`;
+  sql += ` ORDER BY bm25(sections_fts, ${TITLE_WEIGHT}, ${CONTENT_WEIGHT}) LIMIT ?`;
   params.push(parsed.k * 3);
 
   try {
@@ -85,6 +93,10 @@ function normalizeResults(rows) {
     spec_id: row.spec_id,
     section_number: row.section_number,
     section_title: row.section_title,
+    depth: row.depth,
+    parent_section: row.parent_section,
+    parent_section_number: row.parent_section_number,
+    parent_section_title: row.parent_section_title,
     page_start: row.page_start,
     page_end: row.page_end,
     content_length: row.content_length,

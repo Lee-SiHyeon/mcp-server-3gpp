@@ -38,11 +38,16 @@ export function semanticSearch(queryVector, limit = 30, specFilter = null) {
         s.spec_id,
         s.section_number,
         s.section_title,
+        s.depth,
+        s.parent_section,
+        p.section_number as parent_section_number,
+        p.section_title as parent_section_title,
         s.page_start,
         s.page_end,
         s.content_length
       FROM vec_sections v
       JOIN sections s ON s.id = v.section_id
+      LEFT JOIN sections p ON p.id = s.parent_section
       WHERE v.embedding MATCH ?
     `;
     const params = [queryVector];
@@ -65,6 +70,10 @@ export function semanticSearch(queryVector, limit = 30, specFilter = null) {
       spec_id: row.spec_id,
       section_number: row.section_number,
       section_title: row.section_title,
+      depth: row.depth,
+      parent_section: row.parent_section,
+      parent_section_number: row.parent_section_number,
+      parent_section_title: row.parent_section_title,
       page_start: row.page_start,
       page_end: row.page_end,
       content_length: row.content_length,

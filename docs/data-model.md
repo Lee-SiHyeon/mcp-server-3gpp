@@ -1,245 +1,225 @@
-# Data Model — mcp-server-3gpp v2.0
+# Data Model
 
 ## Overview
 
-Version 2.0 migrates from a flat JSON corpus (`data/chunks.json`, ~22K chunks loaded entirely into memory) to a structured SQLite database with FTS5 full-text search and optional vector similarity search.
+The current repository ships a structured SQLite corpus at `data/corpus/3gpp.db`.
 
-The new model gives us:
+This is the v2 data model used by the live server:
 
-- **Structured navigation** — specs → table-of-contents → sections hierarchy.
-- **BM25 keyword search** via FTS5, replacing the naïve `string.includes` scan.
-- **Optional semantic search** via sqlite-vec 384-dimension embeddings.
-- **Incremental ingestion** — load one spec at a time instead of rebuilding the whole file.
-- **Auditability** — every ingestion run is recorded with row counts and warnings.
+- `specs` stores document-level metadata.
+- `toc` stores chapter navigation rows.
+- `sections` stores full section text.
+- `sections_fts` powers FTS5 keyword search.
+- `spec_references` stores cross-spec citations.
+- `ingestion_runs` records corpus load activity.
+- `vec_sections` is optional and appears only when `sqlite-vec` is available and embeddings have been loaded.
 
-The schema lives in `db/schema.sql` and is applied automatically by `src/db/schema.js` on first use.
+Current bundled corpus counts:
 
----
+| Table / concept | Count |
+| --- | --- |
+| Specs | 207 |
+| TOC rows | 63,376 |
+| Section rows | 66,109 |
+| Cross-spec references | 45,162 |
+| Ingestion runs | 535 |
 
-## Entity-Relationship Diagram
+## Entity relationships
 
-```
-┌──────────────┐
-│    specs     │
-│──────────────│
-│ PK id        │──────────────────┐
-│    title     │                  │
-│    version   │                  │
-│    series    │                  │
-│    ...       │                  │
-└──────────────┘                  │
-       │                          │
-       │ 1 ─── N                  │ 1 ─── N
-       ▼                          ▼
-┌──────────────┐          ┌───────────────┐
-│     toc      │          │   sections    │───── sections_fts (FTS5)
-│──────────────│          │───────────────│
-│ PK id (auto) │          │ PK id         │
-│ FK spec_id   │          │ FK spec_id    │
-│    section_# │          │    section_#  │
-│    title     │          │    content    │
-│    page      │          │ FK parent_sec │──┐  (self-referential)
-│    depth     │          │    depth      │  │
-│    brief     │          └───────────────┘  │
-│    sort_order│                  ▲           │
-└──────────────┘                  └───────────┘
-                                       │
-                                       │ (optional, runtime)
-                                       ▼
-                               ┌───────────────┐
-                               │ vec_sections   │
-                               │───────────────│
-                               │ PK section_id  │
-                               │    embedding   │
-                               │   float[384]   │
-                               └───────────────┘
+```text
+specs (1) ----< toc
+specs (1) ----< sections
+sections (self) ---- parent_section
+sections (1) ---- sections_fts (content-synced FTS index by rowid)
+specs (many) ----< spec_references >---- (many) specs
+sections (0/1) ----< vec_sections
 ```
 
----
+## ID conventions
 
-## Tables
+| Concept | Format | Example |
+| --- | --- | --- |
+| Spec ID | `{prefix}_{series}_{number}` or `rfc_{number}` | `ts_24_301`, `tr_37_901`, `rfc_3261` |
+| Section ID | `{spec_id}:{section_number}` | `ts_24_301:5.5.1.2.4` |
+| Parent section ID | Same as section ID | `ts_24_301:5.5.1.2` |
 
-### `specs` — Specification Registry
+Notes:
 
-Each 3GPP specification document (e.g., TS 24.301) gets one row.
+- The prefix on `specs.id` carries the document family: `ts_`, `tr_`, or `rfc_`.
+- `series` is stored separately and is mainly useful for grouping 3GPP documents.
+- `parent_section` is stored directly in `sections`; tree traversal does not depend on string slicing alone.
 
-| Column          | Type    | Description                                  |
-|-----------------|---------|----------------------------------------------|
-| `id`            | TEXT PK | Lowercase underscore format: `ts_24_301`     |
-| `title`         | TEXT    | Full spec title                              |
-| `version`       | TEXT    | Version string, e.g., `v18.9.0`             |
-| `series`        | TEXT    | Series number for grouping, e.g., `24`       |
-| `description`   | TEXT    | Brief description (160-240 chars)            |
-| `total_sections`| INTEGER | Count of sections ingested                   |
-| `total_pages`   | INTEGER | Total page count from PDF                    |
-| `source_pdf`    | TEXT    | Original PDF filename                        |
-| `ingested_at`   | TEXT    | ISO 8601 timestamp (auto-set)                |
+## Core tables
 
-### `toc` — Table of Contents
+### `specs`
 
-Lightweight navigation index. One row per section heading — no full text.
+One row per indexed document.
 
-| Column           | Type    | Description                                |
-|------------------|---------|--------------------------------------------|
-| `id`             | INTEGER | Auto-incremented PK                        |
-| `spec_id`        | TEXT FK | References `specs.id`                      |
-| `section_number` | TEXT    | e.g., `5.3.2.1`                            |
-| `section_title`  | TEXT    | Heading text                               |
-| `page`           | INTEGER | Page number in the PDF                     |
-| `depth`          | INTEGER | Nesting depth: 0 = top-level               |
-| `brief`          | TEXT    | First sentence or ~180 chars summary       |
-| `sort_order`     | INTEGER | Preserves original document order          |
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | TEXT PRIMARY KEY | Canonical spec ID |
+| `title` | TEXT NOT NULL | Full document title |
+| `version` | TEXT | Version string when available |
+| `series` | TEXT | Series grouping such as `24`, `29`, `38` |
+| `description` | TEXT | Brief summary |
+| `total_sections` | INTEGER | Number of section rows for the document |
+| `total_pages` | INTEGER | Page count if known |
+| `source_pdf` | TEXT | Origin file name for PDF-based ingest |
+| `ingested_at` | TEXT | Default `datetime('now')` |
 
-Unique constraint on `(spec_id, section_number)`.
+`get_spec_catalog` reads from this table.
 
-### `sections` — Full Section Content
+### `toc`
 
-The primary search corpus. Each row holds the complete text of one section.
+Navigation-oriented chapter index. This is what `get_spec_toc` uses first.
 
-| Column           | Type    | Description                                |
-|------------------|---------|--------------------------------------------|
-| `id`             | TEXT PK | Composite key: `{spec_id}:{section_number}`|
-| `spec_id`        | TEXT FK | References `specs.id`                      |
-| `section_number` | TEXT    | e.g., `5.3.2.1`                            |
-| `section_title`  | TEXT    | Heading text                               |
-| `page_start`     | INTEGER | Starting page in PDF                       |
-| `page_end`       | INTEGER | Ending page in PDF                         |
-| `content`        | TEXT    | Full section text                          |
-| `content_length` | INTEGER | `length(content)` — for stats/filtering    |
-| `parent_section` | TEXT    | Parent composite key for tree traversal    |
-| `depth`          | INTEGER | Nesting depth: 0 = top-level               |
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | INTEGER PRIMARY KEY AUTOINCREMENT | Internal row ID |
+| `spec_id` | TEXT NOT NULL | FK to `specs.id` |
+| `section_number` | TEXT NOT NULL | Chapter number |
+| `section_title` | TEXT NOT NULL | Heading text |
+| `page` | INTEGER | Page number if known |
+| `depth` | INTEGER | `0` for top level, then increasing depth |
+| `brief` | TEXT | Short summary text |
+| `sort_order` | INTEGER | Preserves source order |
 
-Unique constraint on `(spec_id, section_number)`.
+Constraints and behavior:
 
-### `sections_fts` — FTS5 Virtual Table
+- Unique on `(spec_id, section_number)`
+- Indexed by `spec_id`
+- `get_spec_toc` can fall back to `sections` if no TOC rows exist for a spec
 
-Content-sync'd FTS5 table for BM25 keyword search. Indexes `section_title` and `content` columns from `sections`.
+### `sections`
 
-Kept in sync automatically via `AFTER INSERT/UPDATE/DELETE` triggers on the `sections` table.
+Full text retrieval table and local hierarchy graph.
 
-### `vec_sections` — Vector Embeddings (Optional)
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | TEXT PRIMARY KEY | Composite section ID |
+| `spec_id` | TEXT NOT NULL | FK to `specs.id` |
+| `section_number` | TEXT NOT NULL | Chapter number |
+| `section_title` | TEXT NOT NULL | Heading text |
+| `page_start` | INTEGER | First page |
+| `page_end` | INTEGER | Last page |
+| `content` | TEXT NOT NULL | Full section text |
+| `content_length` | INTEGER | Character count |
+| `parent_section` | TEXT | Parent section ID |
+| `depth` | INTEGER | Depth within the document tree |
 
-Created at runtime **only** when the `sqlite-vec` extension is available. Stores 384-dimensional float embeddings (matching `all-MiniLM-L6-v2` or similar models).
+Constraints and indexes:
 
-| Column       | Type       | Description                              |
-|--------------|------------|------------------------------------------|
-| `section_id` | TEXT PK   | References `sections.id`                 |
-| `embedding`  | float[384]| Dense vector for similarity search       |
+- Unique on `(spec_id, section_number)`
+- Indexed by `spec_id`
+- Indexed by `parent_section`
+- Covering index on `(spec_id, section_number, section_title, id)`
 
-### `ingestion_runs` — Audit Log
+Tool usage:
 
-Records each data load operation for debugging and reproducibility.
+- `get_section` reads exact text from this table.
+- `search_related_sections` uses `parent_section` to discover parent, child, and sibling nodes.
 
-| Column         | Type    | Description                                 |
-|----------------|---------|---------------------------------------------|
-| `id`           | INTEGER | Auto-incremented PK                         |
-| `spec_id`      | TEXT    | Which spec was ingested (nullable)          |
-| `source_type`  | TEXT    | `pdf_extraction` or `legacy_migration`      |
-| `rows_inserted`| INTEGER | Number of rows written                      |
-| `warnings`     | TEXT    | JSON array of warning strings               |
-| `started_at`   | TEXT    | ISO 8601 start timestamp (auto-set)         |
-| `completed_at` | TEXT    | ISO 8601 completion timestamp               |
+## Search index
 
----
+### `sections_fts`
 
-## ID Conventions
+`sections_fts` is an FTS5 virtual table in content-sync mode.
 
-| Concept          | Format                           | Example                   |
-|------------------|----------------------------------|---------------------------|
-| Spec ID          | `ts_{series}_{number}`           | `ts_24_301`               |
-| Section ID       | `{spec_id}:{section_number}`     | `ts_24_301:5.3.2.1`       |
-| Parent Section   | Same composite format            | `ts_24_301:5.3.2`         |
+Indexed fields:
 
-The composite `section_id` format enables:
-- Globally unique keys across all specs.
-- Simple tree traversal by stripping the last dotted segment to find the parent.
-- Efficient prefix queries: `WHERE id LIKE 'ts_24_301:%'` returns all sections of a spec.
+- `section_title`
+- `content`
 
----
+Important correction: the live FTS table does not index `section_number`.
 
-## FTS5 Behaviour
+Synchronization is handled by these triggers:
 
-### Content-Sync Mode
+- `sections_ai`
+- `sections_ad`
+- `sections_au`
 
-The `sections_fts` virtual table uses `content='sections'` mode, meaning it does **not** store its own copy of the text. Instead, it maintains an inverted index that points back to rowids in the `sections` table.
+Keyword ranking uses SQLite `bm25(sections_fts)` and snippet extraction.
 
-Three triggers (`sections_ai`, `sections_ad`, `sections_au`) keep the FTS index in sync whenever rows are inserted, deleted, or updated in `sections`.
+## Cross-spec graph
 
-### BM25 Ranking
+### `spec_references`
 
-Queries use SQLite's built-in `bm25()` function:
+Stores document-to-document reference edges, aggregated by `get_spec_references`.
 
-```sql
-SELECT s.id, s.section_title, bm25(sections_fts, 5.0, 1.0) AS score
-FROM sections_fts fts
-JOIN sections s ON s.rowid = fts.rowid
-WHERE sections_fts MATCH 'attach AND procedure'
-ORDER BY score
-LIMIT 20;
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | INTEGER PRIMARY KEY AUTOINCREMENT | Internal row ID |
+| `source_spec_id` | TEXT NOT NULL | Spec containing the reference |
+| `target_spec_id` | TEXT NOT NULL | Referenced spec |
+| `ref_type` | TEXT NOT NULL | Usually `3gpp` or `rfc` |
+| `citation_text` | TEXT | Raw matched citation text |
+| `section_id` | TEXT | Section where the citation was found |
+| `in_corpus` | INTEGER DEFAULT 0 | Whether the target spec exists in `specs` |
+
+Constraints and indexes:
+
+- Unique on `(source_spec_id, target_spec_id, section_id)`
+- Indexed by `source_spec_id`
+- Indexed by `target_spec_id`
+
+This table is the bridge for cross-document reasoning, especially when a chapter points into RFCs or adjacent 3GPP releases/specs.
+
+## Ingestion audit trail
+
+### `ingestion_runs`
+
+Captures corpus-build metadata.
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | INTEGER PRIMARY KEY AUTOINCREMENT | Internal row ID |
+| `spec_id` | TEXT | Document ingested, if scoped |
+| `source_type` | TEXT | For example `pdf_extraction` or `legacy_migration` |
+| `rows_inserted` | INTEGER | Number of rows written |
+| `warnings` | TEXT | JSON-encoded warning list |
+| `started_at` | TEXT | Default `datetime('now')` |
+| `completed_at` | TEXT | Completion timestamp |
+
+This table is operational metadata. It is not queried by end-user MCP tools.
+
+## Optional vector table
+
+### `vec_sections`
+
+This table is created at runtime by `src/db/schema.js` only if `sqlite-vec` loads successfully.
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `section_id` | TEXT PRIMARY KEY | References `sections.id` |
+| `embedding` | `float[384]` | Dense vector |
+
+Important runtime nuance:
+
+- The presence of `vec_sections` means the database can store embeddings.
+- It does not guarantee that `search_3gpp_docs` will run semantic search in normal MCP usage.
+- The current search layer only activates semantic or hybrid ranking when a query embedding function is provided.
+
+## Tool-to-table mapping
+
+| Tool | Primary tables |
+| --- | --- |
+| `get_spec_catalog` | `specs` |
+| `get_spec_toc` | `toc`, fallback `sections` |
+| `get_section` | `sections` |
+| `search_3gpp_docs` | `sections_fts`, `sections`, optional `vec_sections` |
+| `search_related_sections` | `sections`, then `sections_fts` via search helpers |
+| `get_spec_references` | `spec_references`, `specs` |
+| `get_ingest_guide` | None, static guide payload |
+| `list_specs` | `specs` |
+
+## Files that define the model
+
+```text
+db/schema.sql
+src/db/schema.js
+src/db/connection.js
+src/db/queries.js
+src/types/records.js
 ```
 
-Weights: title matches are boosted 5× over body content matches.
-
-### Query Syntax
-
-FTS5 supports:
-- **AND/OR**: `attach AND procedure`
-- **Phrase**: `"tracking area update"`
-- **Prefix**: `authen*`
-- **Column filter**: `section_title : attach`
-- **NEAR**: `NEAR(attach reject, 10)`
-
----
-
-## Vector Search (Optional)
-
-When `sqlite-vec` is available at runtime, `initDatabase()` creates the `vec_sections` table and sets `features.vectorSearch = true`.
-
-Typical similarity query:
-
-```sql
-SELECT section_id, distance
-FROM vec_sections
-WHERE embedding MATCH ?
-ORDER BY distance
-LIMIT 10;
-```
-
-The parameter is a 384-float vector (e.g., from `all-MiniLM-L6-v2`).
-
-If `sqlite-vec` is not installed, vector search is silently disabled and only FTS5 keyword search is available. This is the expected state for most deployments.
-
----
-
-## Schema Versioning
-
-The schema version is stored in SQLite's built-in `PRAGMA user_version`:
-
-| Version | Description                  |
-|---------|------------------------------|
-| 0       | Empty / uninitialised        |
-| 1       | Initial schema (this file)   |
-
-**Migration strategy** for future versions:
-
-1. `initDatabase()` reads `PRAGMA user_version`.
-2. If the version is less than the latest, run migration SQL files in order (e.g., `db/migrate_v1_to_v2.sql`).
-3. Each migration file ends with `PRAGMA user_version = N;`.
-4. Migrations run inside a transaction for atomicity.
-
----
-
-## File Layout
-
-```
-db/
-  schema.sql              ← DDL (this schema)
-src/db/
-  schema.js               ← initDatabase() — applies schema, probes extensions
-  connection.js           ← Singleton connection factory (no schema logic)
-src/types/
-  records.js              ← JSDoc typedefs for SpecRecord, SectionRecord, etc.
-data/
-  3gpp.db                 ← Runtime database (created on first use, gitignored)
-  chunks.json             ← Legacy flat JSON (kept for backward compatibility)
-```
+These files, plus the shipped SQLite database, are the source of truth for the current v2 model. Older `chunks.json` descriptions are legacy history, not the active data contract.
