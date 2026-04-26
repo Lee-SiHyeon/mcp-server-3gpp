@@ -58,6 +58,7 @@ echo ""
 echo "MCP Endpoint: https://${APP_NAME}.fly.dev/mcp"
 echo "Health Check: https://${APP_NAME}.fly.dev/health"
 if [ -z "${API_KEY}" ]; then
-  echo "Warning: No API_KEY set. Server is open access."
+  echo "Warning: No API_KEY set. Production HTTP startup requires API_KEY by default."
   echo "Set it with: flyctl secrets set API_KEY=your-secret --app ${APP_NAME}"
+  echo "For an intentionally open deployment, set ALLOW_OPEN_HTTP=true as a Fly secret or env var."
 fi

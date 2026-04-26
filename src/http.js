@@ -31,6 +31,10 @@ const API_KEY = process.env.API_KEY || "";
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 const RATE_LIMIT_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS || "60000", 10);
 const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || "100", 10);
+const MAX_BODY_BYTES = parseInt(process.env.MAX_BODY_BYTES || "1048576", 10);
+const TRUST_PROXY = process.env.TRUST_PROXY === "true";
+const ALLOW_OPEN_HTTP = process.env.ALLOW_OPEN_HTTP === "true";
+const REQUIRE_API_KEY = process.env.NODE_ENV === "production" && !ALLOW_OPEN_HTTP;
 
 // ---------------------------------------------------------------------------
 // Rate limiter (in-memory, per-IP)
@@ -73,7 +77,7 @@ function setCorsHeaders(res) {
 // API key authentication
 // ---------------------------------------------------------------------------
 function authenticate(req) {
-  if (!API_KEY) return true; // No key configured = open access
+  if (!API_KEY) return !REQUIRE_API_KEY;
 
   const authHeader = req.headers["authorization"] || "";
   if (authHeader.startsWith("Bearer ")) {
@@ -84,23 +88,62 @@ function authenticate(req) {
   return false;
 }
 
+function getSingleHeader(value) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function getClientIp(req) {
+  if (TRUST_PROXY) {
+    const forwardedFor = getSingleHeader(req.headers["x-forwarded-for"]);
+    const forwardedIp = forwardedFor?.split(",")[0]?.trim();
+    if (forwardedIp) return forwardedIp;
+  }
+
+  return req.socket.remoteAddress || "unknown";
+}
+
+function httpError(statusCode, message) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+}
+
 // ---------------------------------------------------------------------------
 // Parse JSON body from incoming request
 // ---------------------------------------------------------------------------
 function parseBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
-    req.on("data", (chunk) => chunks.push(chunk));
+    let totalBytes = 0;
+    let failed = false;
+
+    function fail(statusCode, message) {
+      if (failed) return;
+      failed = true;
+      reject(httpError(statusCode, message));
+    }
+
+    req.on("data", (chunk) => {
+      totalBytes += chunk.length;
+      if (totalBytes > MAX_BODY_BYTES) {
+        fail(413, `Request body exceeds ${MAX_BODY_BYTES} bytes`);
+        return;
+      }
+      chunks.push(chunk);
+    });
     req.on("end", () => {
+      if (failed) return;
       const body = Buffer.concat(chunks).toString("utf-8");
       if (!body) return resolve(undefined);
       try {
         resolve(JSON.parse(body));
       } catch (err) {
-        reject(err);
+        reject(httpError(400, `Invalid JSON body: ${err.message}`));
       }
     });
-    req.on("error", reject);
+    req.on("error", (err) => {
+      if (!failed) reject(err);
+    });
   });
 }
 
@@ -113,8 +156,9 @@ const sessions = new Map();
 // Main
 // ---------------------------------------------------------------------------
 async function main() {
-  // Create the MCP server (shared logic with stdio transport)
-  const mcpServer = createServer();
+  if (REQUIRE_API_KEY && !API_KEY) {
+    throw new Error("API_KEY is required in production. Set ALLOW_OPEN_HTTP=true to run without authentication.");
+  }
 
   const httpServer = http.createServer(async (req, res) => {
     setCorsHeaders(res);
@@ -155,7 +199,7 @@ async function main() {
     }
 
     // Rate limiting
-    const clientIp = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket.remoteAddress;
+    const clientIp = getClientIp(req);
     if (!checkRateLimit(clientIp)) {
       res.writeHead(429, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Rate limit exceeded" }));
@@ -170,20 +214,24 @@ async function main() {
       }
 
       // Determine session handling
-      const sessionId = req.headers["mcp-session-id"];
+      const sessionId = getSingleHeader(req.headers["mcp-session-id"]);
 
       let transport;
+      let session;
       if (sessionId && sessions.has(sessionId)) {
         // Reuse existing transport for the session
-        transport = sessions.get(sessionId);
+        session = sessions.get(sessionId);
+        transport = session.transport;
       } else if (req.method === "POST" && parsedBody && isInitializeRequest(parsedBody)) {
         // New initialization request — create a new transport
+        const mcpServer = createServer();
         transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => randomUUID(),
           onsessioninitialized: (sid) => {
-            sessions.set(sid, transport);
+            sessions.set(sid, { transport, server: mcpServer });
           },
           onsessionclosed: (sid) => {
+            sessions.get(sid)?.server.close();
             sessions.delete(sid);
           },
         });
@@ -207,8 +255,10 @@ async function main() {
     } catch (err) {
       console.error("[3GPP MCP HTTP] Request error:", err);
       if (!res.headersSent) {
-        res.writeHead(500, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Internal server error" }));
+        const statusCode = err.statusCode || 500;
+        const message = statusCode >= 500 ? "Internal server error" : err.message;
+        res.writeHead(statusCode, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: message }));
       }
     }
   });
@@ -216,7 +266,12 @@ async function main() {
   // Graceful shutdown
   const handleShutdown = () => {
     console.error("[3GPP MCP HTTP] Shutting down…");
-    rateLimitCleanup?.close?.();
+    clearInterval(rateLimitCleanup);
+    for (const { transport, server } of sessions.values()) {
+      transport.close?.();
+      server.close();
+    }
+    sessions.clear();
     httpServer.close(() => {
       shutdown();
     });
@@ -229,6 +284,8 @@ async function main() {
     console.error(`[3GPP MCP HTTP] MCP endpoint: http://localhost:${PORT}/mcp`);
     console.error(`[3GPP MCP HTTP] Health check: http://localhost:${PORT}/health`);
     console.error(`[3GPP MCP HTTP] Auth: ${API_KEY ? "API key required" : "open (no API_KEY set)"}`);
+    console.error(`[3GPP MCP HTTP] Max body bytes: ${MAX_BODY_BYTES}`);
+    console.error(`[3GPP MCP HTTP] Trust proxy: ${TRUST_PROXY}`);
   });
 }
 

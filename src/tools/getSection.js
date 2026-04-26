@@ -144,17 +144,34 @@ export function handleGetSection(args) {
     }
 
     if (includeNeighbors) {
-      // Use section_number ordering instead of rowid (rowid is not guaranteed contiguous)
       const neighbors = db.prepare(`
-        SELECT id, section_number, section_title FROM sections
-        WHERE spec_id = ? AND id != ?
-        ORDER BY CASE
-          WHEN section_number = ? THEN 0
-          WHEN section_number > ? THEN 1
-          ELSE -1
-        END, section_number
-        LIMIT ?
-      `).all(section.spec_id, section.id, section.section_number, section.section_number, neighborWindow * 2 + 1);
+        WITH ordered AS (
+          SELECT
+            s.id,
+            s.section_number,
+            s.section_title,
+            ROW_NUMBER() OVER (
+              ORDER BY
+                COALESCE(t.sort_order, 1000000000),
+                COALESCE(s.page_start, 1000000000),
+                s.rowid
+            ) AS ord
+          FROM sections s
+          LEFT JOIN toc t
+            ON t.spec_id = s.spec_id
+           AND t.section_number = s.section_number
+          WHERE s.spec_id = ?
+        ),
+        anchor AS (
+          SELECT ord FROM ordered WHERE id = ?
+        )
+        SELECT ordered.id, ordered.section_number, ordered.section_title
+        FROM ordered
+        JOIN anchor
+        WHERE ordered.id != ?
+          AND ABS(ordered.ord - anchor.ord) <= ?
+        ORDER BY ordered.ord
+      `).all(section.spec_id, section.id, section.id, neighborWindow);
 
       result.neighbors = neighbors.map(n => ({
         section_id: n.id,

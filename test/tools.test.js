@@ -19,6 +19,7 @@ import { getVectorSearchStatus, isVectorSearchAvailable } from '../src/search/se
 import { hybridSearch }         from '../src/search/hybridRanker.js';
 import { closeConnection }      from '../src/db/connection.js';
 import { loadStructuredSections } from '../src/ingest/loadDatabase.js';
+import { formatError } from '../src/tools/helpers.js';
 
 // Helper: parse the first text content item as JSON.
 async function parseResult(responseOrPromise) {
@@ -32,6 +33,16 @@ async function parseResult(responseOrPromise) {
 
 // Close DB handle after all tests.
 after(() => closeConnection());
+
+describe('MCP error envelopes', () => {
+  test('formatError marks handler errors as MCP errors', async () => {
+    const response = formatError('not found');
+    const data = await parseResult(response);
+
+    assert.strictEqual(response.isError, true);
+    assert.strictEqual(data.error, 'not found');
+  });
+});
 
 // ---------------------------------------------------------------------------
 // get_spec_catalog
@@ -81,6 +92,7 @@ describe('handleGetSpecToc', () => {
   test('unknown spec returns an error object (not a throw)', async () => {
     const response = handleGetSpecToc({ specId: 'ts_99_999' });
     const data = await parseResult(response);
+    assert.strictEqual(response.isError, true);
     assert.ok(data.error, 'Unknown spec must return an error message');
   });
 });
@@ -122,6 +134,21 @@ describe('handleGetSection', () => {
     } else {
       assert.ok(data.error, 'Must have error if section is absent');
     }
+  });
+
+  test('includeNeighbors returns adjacent document sections', async () => {
+    const response = handleGetSection({
+      sectionId: 'ts_24_501:5.5.1.2.3',
+      includeNeighbors: true,
+      neighborWindow: 2,
+      maxChars: 1,
+    });
+    const data = await parseResult(response);
+
+    assert.deepStrictEqual(
+      data.neighbors.map(section => section.section_number),
+      ['5.5.1.2.1', '5.5.1.2.2', '5.5.1.2.4', '5.5.1.2.5'],
+    );
   });
 });
 

@@ -18,7 +18,7 @@ export function formatSuccess(data) {
  * Wrap an error in the MCP content format.
  * @param {string|object} errorMessage — either a string or a pre-built error object
  * @param {object} [details] — extra fields merged into the error object
- * @returns {{ content: Array<{type: string, text: string}> }}
+ * @returns {{ content: Array<{type: string, text: string}>, isError: boolean }}
  */
 export function formatError(errorMessage, details) {
   const errorObj = typeof errorMessage === 'string'
@@ -26,6 +26,7 @@ export function formatError(errorMessage, details) {
     : errorMessage;
   return {
     content: [{ type: 'text', text: JSON.stringify(errorObj) }],
+    isError: true,
   };
 }
 

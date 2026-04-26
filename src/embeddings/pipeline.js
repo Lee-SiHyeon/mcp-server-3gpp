@@ -129,7 +129,7 @@ export async function initEmbedding() {
         quantized: true,
       });
       modelReady = true;
-      console.log(`Embedding model loaded: ${MODEL_NAME}`);
+      console.error(`Embedding model loaded: ${MODEL_NAME}`);
       return true;
     } catch (error) {
       pipeline = null;
