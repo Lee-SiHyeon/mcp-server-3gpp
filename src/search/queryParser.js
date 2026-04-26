@@ -29,6 +29,9 @@ export function parseQuery(query, options = {}) {
   };
 
   let text = query.trim();
+  text = text
+    .replace(/\b5g[\s-]*mm\b/ig, '5gmm')
+    .replace(/\b5g[\s-]*sm\b/ig, '5gsm');
 
   // Extract spec:xxx filter
   const specMatch = text.match(/spec:(\S+)/i);
@@ -45,28 +48,25 @@ export function parseQuery(query, options = {}) {
   }
 
   // Extract quoted phrases
-  const phraseRe = /"([^"]+)"/g;
-  let m;
-  while ((m = phraseRe.exec(text)) !== null) {
-    result.phrases.push(m[1]);
-  }
-  text = text.replace(/"([^"]+)"/g, '').trim();
+  const phrasePattern = /"([^"]+)"/g;
+  result.phrases.push(...[...text.matchAll(phrasePattern)].map(([, phrase]) => phrase));
+  text = text.replace(phrasePattern, '').trim();
 
   // Handle NOT/negation
   const words = text.split(/\s+/).filter(Boolean);
-  let skipNext = false;
   for (let i = 0; i < words.length; i++) {
-    if (skipNext) { skipNext = false; continue; }
-    const w = words[i];
-    if (w === 'OR') continue; // OR is implicit in FTS5
-    if (w === 'NOT' && i + 1 < words.length) {
+    const word = words[i];
+    if (word === 'OR') continue; // OR is implicit in FTS5
+    if (word === 'NOT' && i + 1 < words.length) {
       result.negatedTerms.push(words[i + 1].toLowerCase());
-      skipNext = true;
-    } else if (w.startsWith('-')) {
-      result.negatedTerms.push(w.slice(1).toLowerCase());
-    } else {
-      result.terms.push(w);
+      i += 1;
+      continue;
     }
+    if (word.startsWith('-')) {
+      result.negatedTerms.push(word.slice(1).toLowerCase());
+      continue;
+    }
+    result.terms.push(word);
   }
 
   result.normalizedText = [...result.phrases, ...result.terms].join(' ');

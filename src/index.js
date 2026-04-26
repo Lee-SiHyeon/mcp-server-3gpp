@@ -228,7 +228,7 @@ export function createServer() {
     }
 
     try {
-      return entry.handler(validation.args);
+      return await entry.handler(validation.args);
     } catch (err) {
       console.error(`[3GPP MCP] Tool "${name}" error:`, err);
       return {

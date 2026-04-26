@@ -151,12 +151,15 @@ export function loadStructuredSections(intermediateDir, dbPath, options = {}) {
         }
 
         const content = section.content || '';
+        const sectionId = section.section_id || `${specId}:${section.section_number}`;
         const depth = section.depth ?? sectionDepth(section.section_number);
-        const parentId = section.parent_section || getParentSectionId(section.section_id);
+        const parentId = section.parent_section
+          ? (section.parent_section.includes(':') ? section.parent_section : `${specId}:${section.parent_section}`)
+          : getParentSectionId(sectionId);
 
         try {
           insertSection.run({
-            id: section.section_id,
+            id: sectionId,
             spec_id: specId,
             section_number: section.section_number,
             section_title: section.section_title || '',
@@ -170,8 +173,8 @@ export function loadStructuredSections(intermediateDir, dbPath, options = {}) {
           sectionCount++;
           results.sections++;
         } catch (e) {
-          warnings.push(`Section insert failed: ${section.section_id}: ${e.message}`);
-          results.errors.push({ specId, sectionId: section.section_id, error: e.message });
+          warnings.push(`Section insert failed: ${sectionId}: ${e.message}`);
+          results.errors.push({ specId, sectionId, error: e.message });
         }
       }
 

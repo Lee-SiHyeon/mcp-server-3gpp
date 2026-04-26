@@ -89,6 +89,22 @@ END;
 --   embedding float[384]
 -- );
 
+CREATE TABLE IF NOT EXISTS embedding_index_metadata (
+  index_name TEXT PRIMARY KEY,
+  model_name TEXT NOT NULL,
+  embedding_dim INTEGER NOT NULL,
+  query_prefix TEXT NOT NULL,
+  passage_prefix TEXT NOT NULL,
+  prefix_policy_version TEXT NOT NULL,
+  policy_version TEXT NOT NULL,
+  policy_signature TEXT NOT NULL,
+  section_count INTEGER NOT NULL,
+  vec_row_count INTEGER NOT NULL,
+  last_built_scope TEXT NOT NULL DEFAULT 'all',
+  last_built_spec_id TEXT,
+  generated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- ---------------------------------------------------------------------------
 -- Indexes
 -- ---------------------------------------------------------------------------

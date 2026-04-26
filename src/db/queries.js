@@ -145,6 +145,37 @@ export function getSectionByNumber(specId, sectionNumber) {
 }
 
 /**
+ * Fetch contentful sections in the same spec with the exact same title.
+ * Useful when a structural heading and a later definition clause share a title.
+ * @param {string} specId
+ * @param {string} sectionTitle
+ * @param {number} [limit=5]
+ * @returns {Array<object>}
+ */
+export function getContentfulSectionsByTitle(specId, sectionTitle, limit = 5) {
+  const db = getConnection();
+  return db.prepare(`
+    SELECT
+      id,
+      spec_id,
+      section_number,
+      section_title,
+      page_start,
+      page_end,
+      content_length,
+      substr(content, 1, 240) AS snippet,
+      parent_section,
+      depth
+    FROM sections
+    WHERE spec_id = ?
+      AND section_title = ?
+      AND content_length > 0
+    ORDER BY depth, page_start, section_number
+    LIMIT ?
+  `).all(specId, sectionTitle, limit);
+}
+
+/**
  * Suggest spec IDs that contain a substring (fuzzy match).
  * @param {string} specId — partial spec ID entered by the user
  * @param {number} [limit=5]

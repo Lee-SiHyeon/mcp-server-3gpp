@@ -26,7 +26,7 @@
 import { performance } from 'node:perf_hooks';
 import { hybridSearch } from '../src/search/hybridRanker.js';
 import { getConnection, closeConnection } from '../src/db/connection.js';
-import { queryCache, getQueryCacheStats } from '../src/search/queryCache.js';
+import { getQueryCacheStats } from '../src/search/queryCache.js';
 
 const QUERIES = [
   'authentication',
@@ -64,19 +64,18 @@ async function main() {
     let totalHits = 0;
 
     // Warm-up iteration (not counted)
-    hybridSearch(query, { mode: 'keyword', maxResults: MAX_RESULTS });
+    await hybridSearch(query, { mode: 'keyword', maxResults: MAX_RESULTS });
     
     // Actual measurements
     for (let i = 0; i < ITERATIONS; i++) {
       const ts = performance.now();
-      const result = hybridSearch(query, { mode: 'keyword', maxResults: MAX_RESULTS });
+      const result = await hybridSearch(query, { mode: 'keyword', maxResults: MAX_RESULTS });
       times.push(performance.now() - ts);
       if (i === ITERATIONS - 1) totalHits = result.totalHits;
     }
 
     const avg = times.reduce((s, t) => s + t, 0) / times.length;
     const p95v = p95(times);
-    const cacheHits = getQueryCacheStats();
 
     rows.push({
       query,

@@ -15,6 +15,7 @@ import * as sqliteVec from 'sqlite-vec';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { ensureEmbeddingMetadataTable } from '../embeddings/indexMetadata.js';
 
 // Resolve project root: this file lives at src/db/schema.js → go up two levels.
 const __filename = fileURLToPath(import.meta.url);
@@ -84,6 +85,8 @@ export function initDatabase(dbPath) {
   } catch {
     // sqlite-vec not available — vector search disabled, which is fine.
   }
+
+  ensureEmbeddingMetadataTable(db);
 
   return { db, features };
 }

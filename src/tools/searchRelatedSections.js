@@ -5,7 +5,7 @@ import { formatSuccess, formatError, resolveSectionId } from './helpers.js';
 
 export const searchRelatedSectionsSchema = {
   name: 'search_related_sections',
-  description: 'Find sections related to a known anchor section. Discovers parent, child, sibling sections and semantically similar content. Use after get_section to explore related procedures or requirements.',
+  description: 'Find sections related to a known anchor section. Discovers parent, child, sibling sections and keyword-related content within the current corpus. Use after get_section to explore nearby procedures or requirements. In v1 this tool stays structural/keyword-oriented rather than live-semantic.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -19,10 +19,20 @@ export const searchRelatedSectionsSchema = {
   },
 };
 
-export function handleSearchRelatedSections(args) {
+function buildRelatedResult(row, relation, score) {
+  return {
+    ...row,
+    section_id: row.section_id ?? row.id,
+    title: row.section_title ?? row.title,
+    relation,
+    score,
+  };
+}
+
+export async function handleSearchRelatedSections(args) {
   try {
     const db = getConnection();
-    let { sectionId, specId, sectionNumber, query, sameSpecOnly = true, maxResults = 5 } = args;
+    let { sectionId, specId, query, sameSpecOnly = true, maxResults = 5 } = args;
 
     sectionId = resolveSectionId(args);
 
@@ -43,15 +53,17 @@ export function handleSearchRelatedSections(args) {
         const parent = db.prepare(
           'SELECT id, spec_id, section_number, section_title, page_start, page_end FROM sections WHERE id = ?'
         ).get(section.parent_section);
-        if (parent) results.push({ ...parent, section_id: parent.id, relation: 'parent', score: 0.95 });
+        if (parent) {
+          results.push(buildRelatedResult(parent, 'parent', 0.95));
+        }
       }
 
       // Child sections
       const children = db.prepare(
         'SELECT id, spec_id, section_number, section_title, page_start, page_end FROM sections WHERE parent_section = ? ORDER BY section_number LIMIT 5'
       ).all(sectionId);
-      for (const c of children) {
-        results.push({ ...c, section_id: c.id, relation: 'child', score: 0.90 });
+      for (const child of children) {
+        results.push(buildRelatedResult(child, 'child', 0.90));
       }
 
       // Siblings (same parent)
@@ -59,8 +71,8 @@ export function handleSearchRelatedSections(args) {
         const siblings = db.prepare(
           'SELECT id, spec_id, section_number, section_title, page_start, page_end FROM sections WHERE parent_section = ? AND id != ? ORDER BY section_number LIMIT 5'
         ).all(section.parent_section, sectionId);
-        for (const s of siblings) {
-          results.push({ ...s, section_id: s.id, relation: 'sibling', score: 0.85 });
+        for (const sibling of siblings) {
+          results.push(buildRelatedResult(sibling, 'sibling', 0.85));
         }
       }
 
@@ -68,32 +80,43 @@ export function handleSearchRelatedSections(args) {
       if (results.length < maxResults) {
         const searchQuery = section.section_title;
         const searchSpec = sameSpecOnly ? specId : undefined;
-        const searchResults = hybridSearch(searchQuery, { spec: searchSpec, maxResults: maxResults * 2, includeScores: true });
-        for (const sr of searchResults.results) {
-          if (sr.section_id !== sectionId && !results.find(r => r.section_id === sr.section_id)) {
-            results.push({ ...sr, relation: 'keyword_related', score: sr.score || 0.5 });
+        const searchResults = await hybridSearch(searchQuery, {
+          spec: searchSpec,
+          maxResults: maxResults * 2,
+          mode: 'keyword',
+          includeScores: true,
+        });
+        const existingSectionIds = new Set(results.map((result) => result.section_id));
+        for (const searchResult of searchResults.results) {
+          if (searchResult.section_id !== sectionId && !existingSectionIds.has(searchResult.section_id)) {
+            results.push(buildRelatedResult(searchResult, 'keyword_related', searchResult.score || 0.5));
+            existingSectionIds.add(searchResult.section_id);
           }
         }
       }
     } else if (query) {
       anchor = { query };
-      const searchResults = hybridSearch(query, { maxResults: maxResults * 2, includeScores: true });
-      for (const sr of searchResults.results) {
-        results.push({ ...sr, relation: 'query_match', score: sr.score || 0.5 });
+      const searchResults = await hybridSearch(query, {
+        maxResults: maxResults * 2,
+        mode: 'keyword',
+        includeScores: true,
+      });
+      for (const searchResult of searchResults.results) {
+        results.push(buildRelatedResult(searchResult, 'query_match', searchResult.score || 0.5));
       }
     } else {
       return formatError('Provide sectionId, specId+sectionNumber, or query');
     }
 
-    const trimmed = results.slice(0, maxResults).map(r => ({
-      section_id: r.section_id || r.id,
-      spec_id: r.spec_id,
-      section_number: r.section_number,
-      title: r.section_title || r.title,
-      relation: r.relation,
-      page_start: r.page_start,
-      page_end: r.page_end,
-      score: Math.round((r.score || 0) * 1000) / 1000,
+    const trimmed = results.slice(0, maxResults).map((result) => ({
+      section_id: result.section_id,
+      spec_id: result.spec_id,
+      section_number: result.section_number,
+      title: result.title,
+      relation: result.relation,
+      page_start: result.page_start,
+      page_end: result.page_end,
+      score: Math.round((result.score || 0) * 1000) / 1000,
     }));
 
     return formatSuccess({ anchor, results: trimmed });

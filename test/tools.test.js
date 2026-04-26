@@ -15,13 +15,14 @@ import { handleGetSpecCatalog } from '../src/tools/getSpecCatalog.js';
 import { handleGetSpecToc }     from '../src/tools/getSpecToc.js';
 import { handleGetSection }     from '../src/tools/getSection.js';
 import { handleSearch3gppDocs } from '../src/tools/search3gppDocs.js';
-import { isVectorSearchAvailable } from '../src/search/semanticSearch.js';
+import { getVectorSearchStatus, isVectorSearchAvailable } from '../src/search/semanticSearch.js';
 import { hybridSearch }         from '../src/search/hybridRanker.js';
 import { closeConnection }      from '../src/db/connection.js';
 import { loadStructuredSections } from '../src/ingest/loadDatabase.js';
 
 // Helper: parse the first text content item as JSON.
-function parseResult(response) {
+async function parseResult(responseOrPromise) {
+  const response = await Promise.resolve(responseOrPromise);
   assert.ok(response, 'Response must not be null/undefined');
   assert.ok(response.content, 'Response must have content array');
   assert.ok(response.content.length > 0, 'content must be non-empty');
@@ -36,16 +37,16 @@ after(() => closeConnection());
 // get_spec_catalog
 // ---------------------------------------------------------------------------
 describe('handleGetSpecCatalog', () => {
-  test('returns specs array with at least one entry', () => {
+  test('returns specs array with at least one entry', async () => {
     const response = handleGetSpecCatalog({});
-    const data = parseResult(response);
+    const data = await parseResult(response);
     assert.ok(Array.isArray(data.specs), 'data.specs must be an array');
     assert.ok(data.specs.length > 0, 'specs array must be non-empty');
   });
 
-  test('filter "24_301" returns ts_24_301', () => {
+  test('filter "24_301" returns ts_24_301', async () => {
     const response = handleGetSpecCatalog({ filter: '24_301' });
-    const data = parseResult(response);
+    const data = await parseResult(response);
     assert.ok(Array.isArray(data.specs), 'data.specs must be an array');
     assert.ok(
       data.specs.some(s => s.id === 'ts_24_301'),
@@ -58,9 +59,9 @@ describe('handleGetSpecCatalog', () => {
 // get_spec_toc
 // ---------------------------------------------------------------------------
 describe('handleGetSpecToc', () => {
-  test('returns entries for ts_24_301', () => {
+  test('returns entries for ts_24_301', async () => {
     const response = handleGetSpecToc({ specId: 'ts_24_301' });
-    const data = parseResult(response);
+    const data = await parseResult(response);
     // Handler returns { spec_id, title, entries: [...] } on success.
     // May also return { sections: [...] } or { toc: [...] } depending on version.
     const hasContent =
@@ -77,9 +78,9 @@ describe('handleGetSpecToc', () => {
     }
   });
 
-  test('unknown spec returns an error object (not a throw)', () => {
+  test('unknown spec returns an error object (not a throw)', async () => {
     const response = handleGetSpecToc({ specId: 'ts_99_999' });
-    const data = parseResult(response);
+    const data = await parseResult(response);
     assert.ok(data.error, 'Unknown spec must return an error message');
   });
 });
@@ -88,9 +89,9 @@ describe('handleGetSpecToc', () => {
 // get_section
 // ---------------------------------------------------------------------------
 describe('handleGetSection', () => {
-  test('fetch by sectionId "ts_24_301:5.5" returns content', () => {
+  test('fetch by sectionId "ts_24_301:5.5" returns content', async () => {
     const response = handleGetSection({ sectionId: 'ts_24_301:5.5' });
-    const data = parseResult(response);
+    const data = await parseResult(response);
     if (data.error) {
       // Section not found — try the specific sub-section or fallback.
       // At a minimum the handler must not throw.
@@ -101,9 +102,9 @@ describe('handleGetSection', () => {
     }
   });
 
-  test('fetch by specId + sectionNumber works', () => {
+  test('fetch by specId + sectionNumber works', async () => {
     const response = handleGetSection({ specId: 'ts_24_301', sectionNumber: '5.5' });
-    const data = parseResult(response);
+    const data = await parseResult(response);
     if (!data.error) {
       assert.ok(data.section, 'Must return a section when section number exists');
     }
@@ -113,9 +114,9 @@ describe('handleGetSection', () => {
     }
   });
 
-  test('fetch "ts_24_301:5.5.1.2.5" is successful or returns clean error', () => {
+  test('fetch "ts_24_301:5.5.1.2.5" is successful or returns clean error', async () => {
     const response = handleGetSection({ sectionId: 'ts_24_301:5.5.1.2.5' });
-    const data = parseResult(response);
+    const data = await parseResult(response);
     if (data.section) {
       assert.ok(data.section.section_id || data.section.id);
     } else {
@@ -128,26 +129,46 @@ describe('handleGetSection', () => {
 // search_3gpp_docs
 // ---------------------------------------------------------------------------
 describe('handleSearch3gppDocs', () => {
-  test('"authentication" returns valid JSON results', () => {
-    const response = handleSearch3gppDocs({ query: 'authentication' });
-    const data = parseResult(response);
+  test('"authentication" returns valid JSON results', async () => {
+    const data = await parseResult(handleSearch3gppDocs({ query: 'authentication' }));
     assert.ok(Array.isArray(data.results), 'results must be an array');
     assert.ok(data.results.length > 0, 'Must have at least one result');
   });
 
-  test('empty query returns error or empty results — no throw', () => {
-    const response = handleSearch3gppDocs({ query: '' });
-    const data = parseResult(response);
+  test('empty query returns error or empty results — no throw', async () => {
+    const data = await parseResult(handleSearch3gppDocs({ query: '' }));
     // Either an error object OR an empty results array is acceptable.
     const acceptable = data.error || (Array.isArray(data.results) && data.results.length === 0);
     assert.ok(acceptable, 'Empty query must return error or empty results');
   });
 
-  test('unknown spec filter returns 0 results cleanly', () => {
-    const response = handleSearch3gppDocs({ query: 'test', spec: 'ts_99_999' });
-    const data = parseResult(response);
+  test('unknown spec filter returns 0 results cleanly', async () => {
+    const data = await parseResult(handleSearch3gppDocs({ query: 'test', spec: 'ts_99_999' }));
     assert.ok(Array.isArray(data.results), 'results must be an array');
     assert.strictEqual(data.results.length, 0, 'Unknown spec must yield 0 results');
+  });
+
+  test('semantic request either activates or degrades cleanly depending on readiness', async () => {
+    const data = await parseResult(handleSearch3gppDocs({
+      query: 'registration procedure',
+      spec: 'ts_24_501',
+      mode: 'semantic',
+      includeScores: true,
+    }));
+
+    assert.strictEqual(data.mode_requested, 'semantic');
+    if (isVectorSearchAvailable()) {
+      assert.ok(
+        data.mode_actual === 'semantic' || data.mode_actual === 'hybrid',
+        'Semantic-ready environments should not degrade semantic mode to keyword'
+      );
+    } else {
+      assert.strictEqual(data.mode_actual, 'keyword');
+      assert.ok(
+        Array.isArray(data.warnings) && data.warnings.some((warning) => warning.includes('mode_degraded')),
+        'Expected degraded-mode warning when semantic mode is unavailable'
+      );
+    }
   });
 });
 
@@ -155,22 +176,25 @@ describe('handleSearch3gppDocs', () => {
 // Graceful degradation
 // ---------------------------------------------------------------------------
 describe('graceful degradation', () => {
-  test('sqlite-vec missing → isVectorSearchAvailable() returns false', () => {
-    // In this environment sqlite-vec is not installed.
-    const available = isVectorSearchAvailable();
-    assert.strictEqual(available, false, 'sqlite-vec should not be available');
+  test('vector search status reflects current index readiness', () => {
+    const status = getVectorSearchStatus();
+    assert.strictEqual(isVectorSearchAvailable(), status.available);
+    assert.ok(Array.isArray(status.reasons), 'status.reasons must be an array');
   });
 
-  test('keyword search still works when vector search unavailable', () => {
-    // Even without sqlite-vec, keyword mode must work.
-    const r = hybridSearch('authentication', { mode: 'keyword', maxResults: 3 });
-    assert.ok(r.results.length > 0, 'Keyword search must work without sqlite-vec');
+  test('keyword search still works regardless of vector search readiness', async () => {
+    const r = await hybridSearch('authentication', { mode: 'keyword', maxResults: 3 });
+    assert.ok(r.results.length > 0, 'Keyword search must work in all readiness states');
     assert.strictEqual(r.mode, 'keyword', 'Mode must be keyword');
   });
 
-  test('auto mode falls back to keyword when sqlite-vec missing', () => {
-    const r = hybridSearch('security', { mode: 'auto', maxResults: 3 });
-    assert.strictEqual(r.mode, 'keyword', 'Auto mode must fall back to keyword');
+  test('direct hybridSearch auto mode stays keyword without an embedding function', async () => {
+    const r = await hybridSearch('normal and periodic tracking', { mode: 'auto', maxResults: 3 });
+    assert.strictEqual(
+      r.mode,
+      'keyword',
+      'Direct hybridSearch calls without embedQueryFn must stay keyword-mode even when vectors exist'
+    );
   });
 
   test('loadStructuredSections with nonexistent directory does not crash test runner', () => {

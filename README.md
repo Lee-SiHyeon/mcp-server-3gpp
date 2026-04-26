@@ -24,9 +24,10 @@ Search is a starting point, not the whole product. The model is expected to brow
 
 ## Search behavior
 
-- `search_3gpp_docs` exposes keyword search with quoted phrases, `spec:` filters, `section:` hints, and negation.
-- The database and runtime can host `sqlite-vec` embeddings via `vec_sections`.
-- The default MCP tool path is still keyword-first unless a query embedding function is supplied to the search layer, so do not assume semantic ranking is active just because `vec_sections` exists.
+- Baseline `npm install` gives you the keyword-ready server path: BM25/FTS search, TOC navigation, exact section retrieval, and cross-spec references.
+- `search_3gpp_docs` supports quoted phrases, `spec:` filters, `section:` hints, and negation in that baseline path.
+- The database and runtime can host `sqlite-vec` embeddings via `vec_sections`, but that only makes the corpus vector-capable.
+- Semantic or hybrid retrieval should be treated as an optional readiness state. It is active only when the runtime has semantic prerequisites and the smoke path actually returns `mode_actual=hybrid` or `mode_actual=semantic` with semantic evidence in results.
 
 ## Quick start
 
@@ -46,6 +47,11 @@ The bundled database is tracked with Git LFS. A healthy startup looks like:
 [3GPP MCP] Features - FTS: true, Vector: true
 [3GPP MCP] Registered 8 tools (v2 DB mode)
 ```
+
+`npm run validate` now reports two separate states:
+
+- `Baseline keyword readiness`: the DB-backed 8-tool server is healthy and search/navigation work in keyword mode.
+- `Optional semantic readiness`: whether semantic prerequisites are installed and whether the live tool smoke test actually activated semantic/hybrid retrieval.
 
 ## MCP client configuration
 
@@ -156,7 +162,52 @@ npm run validate
 npm test
 ```
 
-`npm run validate` checks the package metadata, resolves the DB path, verifies the core schema and counts, and confirms that the v2 server registers the current 8-tool surface.
+`npm run validate` checks the package metadata, resolves the DB path, verifies the core schema and counts, confirms the v2 8-tool surface, runs the navigation smoke path, and reports semantic readiness separately from baseline keyword readiness.
+
+## Optional semantic readiness
+
+Semantic retrieval is not part of the baseline install contract. Treat it as an operator opt-in layer on top of the keyword server.
+
+Current prerequisites:
+
+1. `sqlite-vec` must load successfully at runtime.
+2. `vec_sections` must be populated with embeddings for the active corpus.
+3. A compatible transformers runtime must be present for local embeddings. The repository now ships with `@huggingface/transformers`, and the runtime still accepts `@xenova/transformers` for compatibility.
+4. The live `search_3gpp_docs` smoke path must actually return `mode_actual=hybrid` or `mode_actual=semantic`.
+
+`scripts/generate_embeddings.js` is now the real local corpus-population workflow for `vec_sections`. It can build or rebuild the embedding index, but semantic-active readiness still requires a **fresh full-corpus index**. Partial runs (`--spec` or `--limit`) are useful for smoke tests and controlled backfills, but they intentionally do **not** mark semantic retrieval as globally ready.
+
+## Manual smoke workflows
+
+Degraded-path smoke:
+
+```bash
+npm install
+npm run validate
+```
+
+Expected result:
+
+- `Baseline keyword readiness: true`
+- `Optional semantic prerequisites met: false` or `Semantic-active tool smoke: false`
+- `Search mode actual: keyword`
+
+Semantic-active smoke:
+
+1. Run `npm install`.
+2. Ensure `sqlite-vec` loads and `vec_sections` is populated with a fresh **full-corpus** embedding index that matches the active 384-dim model/prefix contract. Example:
+
+```bash
+node scripts/generate_embeddings.js --rebuild
+```
+
+3. Run `npm run validate`.
+
+Expected result:
+
+- `Optional semantic prerequisites met: true`
+- `Semantic-active tool smoke: true`
+- `Semantic smoke mode actual: hybrid` or `semantic`
 
 ## Project structure
 

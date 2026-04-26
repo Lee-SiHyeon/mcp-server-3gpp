@@ -1,4 +1,5 @@
 import { hybridSearch } from '../search/hybridRanker.js';
+import { initEmbedding, embedText } from '../embeddings/pipeline.js';
 import { formatSuccess, formatError } from './helpers.js';
 
 export const search3gppDocsSchema = {
@@ -18,7 +19,37 @@ export const search3gppDocsSchema = {
   },
 };
 
-export function handleSearch3gppDocs(args) {
+let embeddingAvailability = 'unknown';
+let embeddingInitPromise = null;
+
+async function ensureEmbeddingReady() {
+  if (embeddingAvailability === 'ready') return true;
+
+  if (!embeddingInitPromise) {
+    embeddingInitPromise = initEmbedding()
+      .then(ready => {
+        embeddingAvailability = ready ? 'ready' : 'unknown';
+        return ready;
+      })
+      .catch(() => {
+        embeddingAvailability = 'unknown';
+        return false;
+      })
+      .finally(() => {
+        embeddingInitPromise = null;
+      });
+  }
+
+  return embeddingInitPromise;
+}
+
+async function embedQuery(text) {
+  const ready = await ensureEmbeddingReady();
+  if (!ready) return null;
+  return embedText(text);
+}
+
+export async function handleSearch3gppDocs(args) {
   const { query, spec, maxResults = 5, page = 1, mode = 'auto', includeScores = false } = args;
 
   if (!query || !query.trim()) {
@@ -27,12 +58,13 @@ export function handleSearch3gppDocs(args) {
 
   const clampedMax = Math.max(1, Math.min(20, maxResults));
 
-  const result = hybridSearch(query, {
+  const result = await hybridSearch(query, {
     spec,
     maxResults: clampedMax,
     page: Math.max(1, page),
     mode,
     includeScores,
+    embedQueryFn: mode === 'keyword' ? null : embedQuery,
   });
 
   return formatSuccess(result);

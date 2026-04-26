@@ -37,3 +37,4 @@ data/pdfs/*.pdf
 data/pdfs/manifest.json
 __pycache__/
 scripts/__pycache__/
+.omx/

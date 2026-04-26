@@ -162,4 +162,11 @@ describe('complex queries', () => {
     assert(normalized.includes('word1'), 'normalized should include word1');
     assert(normalized.includes('word2'), 'normalized should include word2');
   });
+
+  test('5g mm is normalized to 5gmm', () => {
+    const result = parseQuery('5g mm reject cause');
+    assert(result.terms.includes('5gmm'), '5g mm should normalize to 5gmm');
+    assert(!result.terms.includes('5g'), '5g should not remain as a separate term');
+    assert(!result.terms.includes('mm'), 'mm should not remain as a separate term');
+  });
 });

@@ -2,6 +2,7 @@ import { parseQuery } from './queryParser.js';
 import { keywordSearch } from './keywordSearch.js';
 import { semanticSearch, isVectorSearchAvailable } from './semanticSearch.js';
 import { queryCache } from './queryCache.js';
+import { getContentfulSectionsByTitle } from '../db/queries.js';
 
 const TITLE_STOP_WORDS = new Set([
   'a',
@@ -80,9 +81,67 @@ function buildNavigationHint(row, titleSignal, parentSignal) {
   return `Start with ${parentSource} ${row.parent_section_title}`;
 }
 
+function isDefinitionIntent(queryTokens) {
+  return queryTokens.includes('cause');
+}
+
+function augmentExactTitleRescues(merged, parsed) {
+  const normalizedQuery = normalizeSearchText(parsed.normalizedText);
+  const queryTokens = tokenizeSearchText(parsed.normalizedText);
+  const definitionIntent = isDefinitionIntent(queryTokens);
+
+  if (!definitionIntent) {
+    return;
+  }
+
+  for (const row of [...merged.values()]) {
+    if (!row.spec_id || !row.section_title || (row.content_length ?? 0) > 0) {
+      continue;
+    }
+
+    const titleSignal = getTitleSignal(row.section_title, queryTokens, normalizedQuery);
+    if (!titleSignal.exact && titleSignal.coverage < 0.5) {
+      continue;
+    }
+
+    const rescuedSections = getContentfulSectionsByTitle(row.spec_id, row.section_title, 5);
+    for (const rescuedSection of rescuedSections) {
+      if (rescuedSection.id === row.section_id) {
+        continue;
+      }
+
+      const existing = merged.get(rescuedSection.id);
+      const rescuedEvidence = new Set(existing?.evidence ?? []);
+      for (const item of row.evidence ?? []) {
+        rescuedEvidence.add(item);
+      }
+      rescuedEvidence.add('title_rescue');
+
+      merged.set(rescuedSection.id, {
+        ...(existing ?? {}),
+        section_id: rescuedSection.id,
+        spec_id: rescuedSection.spec_id,
+        section_number: rescuedSection.section_number,
+        section_title: rescuedSection.section_title,
+        page_start: rescuedSection.page_start,
+        page_end: rescuedSection.page_end,
+        content_length: rescuedSection.content_length,
+        snippet: existing?.snippet || rescuedSection.snippet || '',
+        parent_section: rescuedSection.parent_section,
+        depth: rescuedSection.depth,
+        keyword_score: Math.max(existing?.keyword_score ?? 0, row.keyword_score * 0.95),
+        semantic_score: Math.max(existing?.semantic_score ?? 0, row.semantic_score * 0.95),
+        evidence: [...rescuedEvidence],
+        rank_rescued_content: 2,
+      });
+    }
+  }
+}
+
 function applyStructureAwareRanking(row, parsed) {
   const normalizedQuery = normalizeSearchText(parsed.normalizedText);
   const queryTokens = tokenizeSearchText(parsed.normalizedText);
+  const definitionIntent = isDefinitionIntent(queryTokens);
 
   if (!normalizedQuery && queryTokens.length === 0) {
     row.navigation_hint = null;
@@ -93,6 +152,7 @@ function applyStructureAwareRanking(row, parsed) {
   const parentSignal = getTitleSignal(row.parent_section_title, queryTokens, normalizedQuery);
   const depth = getSectionDepth(row);
   const shallowBoost = Math.max(0, 6 - depth) * 0.015;
+  const hasContent = (row.content_length ?? 0) > 0;
   let structureDelta = 0;
 
   if (titleSignal.exact) {
@@ -121,13 +181,59 @@ function applyStructureAwareRanking(row, parsed) {
     structureDelta -= 0.03;
   }
 
+  if (definitionIntent && !hasContent) {
+    structureDelta -= 0.22;
+  } else if (definitionIntent && hasContent && (titleSignal.exact || titleSignal.coverage >= 0.5)) {
+    structureDelta += 0.12;
+  }
+
+  if (definitionIntent && hasContent && /(information element|reason why|indicate the reason)/i.test(row.snippet || '')) {
+    structureDelta += 0.12;
+  }
+
+  if (row.rank_rescued_content) {
+    structureDelta += row.rank_rescued_content === 2 ? 0.15 : 0.08;
+  }
+
   row.rank_exactness = titleSignal.exact ? 1 : 0;
+  row.rank_has_content = definitionIntent && hasContent ? 1 : 0;
   row.rank_title_coverage = titleSignal.coverage;
   row.rank_parent_anchor = parentSignal.exact && (titleSignal.generic || titleSignal.coverage < 0.75) ? 1 : 0;
   row.rank_generic_penalty = titleSignal.generic ? 1 : 0;
   row.rank_depth = depth;
   row.navigation_hint = buildNavigationHint(row, titleSignal, parentSignal);
   row.score = Math.max(0, Math.min(1, row.score + structureDelta));
+}
+
+function isUsableQueryVector(queryVector) {
+  if (!queryVector) return false;
+  if (typeof queryVector.length === 'number') return queryVector.length > 0;
+  return ArrayBuffer.isView(queryVector);
+}
+
+function resolveSearchMode(requestedMode, semanticReady, warnings) {
+  if (requestedMode === 'auto') {
+    return semanticReady ? 'hybrid' : 'keyword';
+  }
+
+  if ((requestedMode === 'semantic' || requestedMode === 'hybrid') && !semanticReady) {
+    warnings.push(`mode_degraded: requested=${requestedMode} actual=keyword`);
+    return 'keyword';
+  }
+
+  return requestedMode;
+}
+
+function getEffectiveAlpha(mode, alpha) {
+  if (mode === 'keyword') {
+    return 1.0;
+  }
+
+  if (mode === 'semantic') {
+    return 0.0;
+  }
+
+  return alpha;
 }
 
 /**
@@ -140,9 +246,9 @@ function applyStructureAwareRanking(row, parsed) {
  *
  * @param {string} query - Raw search query
  * @param {object} [options] - { spec, maxResults, page, mode, alpha, includeScores, embedQueryFn, useCache }
- * @returns {{ results: object[], mode: string, capabilities: object, page: number, maxResults: number, totalHits: number, warnings: string[], mode_requested: string, mode_actual: string, cached?: boolean }}
+ * @returns {Promise<{ results: object[], mode: string, capabilities: object, page: number, maxResults: number, totalHits: number, warnings: string[], mode_requested: string, mode_actual: string, cached?: boolean }>}
  */
-export function hybridSearch(query, options = {}) {
+export async function hybridSearch(query, options = {}) {
   const {
     spec = null,
     maxResults = 5,
@@ -155,10 +261,21 @@ export function hybridSearch(query, options = {}) {
   } = options;
 
   const warnings = [];
+  const cacheNamespace = 'keyword-only';
+  const cacheOptions = {
+    spec,
+    page,
+    mode,
+    maxResults,
+    includeScores,
+    alpha,
+    cacheNamespace,
+  };
+  const cacheEligible = useCache && mode === 'keyword' && !embedQueryFn;
 
-  // Check cache first (skip for semantic/embeddings)
-  if (useCache) {
-    const cached = queryCache.get(query, { spec, page, mode });
+  // Runtime-dependent semantic/auto responses are not cached in v1.
+  if (cacheEligible) {
+    const cached = queryCache.get(query, cacheOptions);
     if (cached) {
       return { ...cached, cached: true };
     }
@@ -171,24 +288,26 @@ export function hybridSearch(query, options = {}) {
     k: maxResults * 3,
   });
 
-  // Determine actual mode
-  const hasVector = isVectorSearchAvailable() && !!embedQueryFn;
-  let actualMode = mode;
-  if (mode === 'auto') {
-    actualMode = hasVector ? 'hybrid' : 'keyword';
+  const semanticRequested = mode === 'auto' || mode === 'semantic' || mode === 'hybrid';
+  const vectorSearchAvailable = semanticRequested && isVectorSearchAvailable();
+  let queryVector = null;
+  let semanticReady = false;
+
+  if (semanticRequested && vectorSearchAvailable && embedQueryFn) {
+    try {
+      queryVector = await embedQueryFn(parsed.normalizedText);
+      semanticReady = isUsableQueryVector(queryVector);
+    } catch (e) {
+      console.error(`Embedding query failed: ${e.message}`);
+      warnings.push(`semantic_search_failed: ${e.message}`);
+    }
   }
-  if (actualMode === 'semantic' && !hasVector) {
-    actualMode = 'keyword';
-    warnings.push(`mode_degraded: requested=${mode} actual=${actualMode}`);
-  }
-  if (actualMode === 'hybrid' && !hasVector) {
-    actualMode = 'keyword';
-    warnings.push(`mode_degraded: requested=${mode} actual=${actualMode}`);
-  }
+
+  const actualMode = resolveSearchMode(mode, semanticReady, warnings);
 
   const capabilities = {
     keyword: true,
-    semantic: hasVector,
+    semantic: semanticReady,
   };
 
   // Execute searches
@@ -199,10 +318,9 @@ export function hybridSearch(query, options = {}) {
     keywordResults = keywordSearch(parsed);
   }
 
-  if ((actualMode === 'semantic' || actualMode === 'hybrid') && hasVector && embedQueryFn) {
+  if ((actualMode === 'semantic' || actualMode === 'hybrid') && semanticReady) {
     try {
-      const queryVec = embedQueryFn(parsed.normalizedText);
-      semanticResults = semanticSearch(queryVec, parsed.k * 3, parsed.specFilter);
+      semanticResults = semanticSearch(queryVector, parsed.k * 3, parsed.specFilter);
     } catch (e) {
       console.error(`Semantic search failed: ${e.message}`);
       warnings.push(`semantic_search_failed: ${e.message}`);
@@ -236,12 +354,12 @@ export function hybridSearch(query, options = {}) {
     }
   }
 
-  // Compute fused scores
-  const effectiveAlpha = actualMode === 'keyword' ? 1.0 :
-                         actualMode === 'semantic' ? 0.0 :
-                         parsed.alpha;
+  augmentExactTitleRescues(merged, parsed);
 
-  for (const [, row] of merged) {
+  // Compute fused scores
+  const effectiveAlpha = getEffectiveAlpha(actualMode, parsed.alpha);
+
+  for (const row of merged.values()) {
     row.score = effectiveAlpha * row.keyword_score + (1 - effectiveAlpha) * row.semantic_score;
 
     // Boost exact section/title matches
@@ -259,6 +377,8 @@ export function hybridSearch(query, options = {}) {
   // Sort by score descending
   const ranked = [...merged.values()].sort((a, b) =>
     (b.rank_exactness ?? 0) - (a.rank_exactness ?? 0) ||
+    (b.rank_has_content ?? 0) - (a.rank_has_content ?? 0) ||
+    (b.rank_rescued_content ?? 0) - (a.rank_rescued_content ?? 0) ||
     b.score - a.score ||
     (b.rank_title_coverage ?? 0) - (a.rank_title_coverage ?? 0) ||
     (a.rank_generic_penalty ?? 0) - (b.rank_generic_penalty ?? 0) ||
@@ -311,8 +431,8 @@ export function hybridSearch(query, options = {}) {
   };
 
   // Cache result for future calls
-  if (useCache) {
-    queryCache.set(query, response, { spec, page, mode });
+  if (cacheEligible) {
+    queryCache.set(query, response, cacheOptions);
   }
 
   return response;

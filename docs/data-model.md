@@ -197,7 +197,8 @@ Important runtime nuance:
 
 - The presence of `vec_sections` means the database can store embeddings.
 - It does not guarantee that `search_3gpp_docs` will run semantic search in normal MCP usage.
-- The current search layer only activates semantic or hybrid ranking when a query embedding function is provided.
+- Semantic-active should only be claimed when the runtime also has `sqlite-vec` loaded, the optional embedding runtime installed, and a live smoke query actually reports `mode_actual=hybrid` or `mode_actual=semantic`.
+- Baseline `npm install` should still be treated as keyword-ready only unless validation proves the semantic-active path.
 
 ## Tool-to-table mapping
 

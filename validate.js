@@ -31,6 +31,9 @@ const DB_CANDIDATES = [
   path.join(__dirname, "data", "3gpp.db"),
 ].filter(Boolean);
 
+const SEMANTIC_ACTIVE_MODES = new Set(["semantic", "hybrid"]);
+const TRANSFORMERS_PACKAGES = ["@huggingface/transformers", "@xenova/transformers"];
+
 function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
@@ -58,6 +61,16 @@ function parseToolPayload(response) {
   const text = response?.content?.[0]?.text;
   assert(text, "Tool response did not contain text content");
   return JSON.parse(text);
+}
+
+async function resolveToolPayload(responseOrPromise) {
+  return parseToolPayload(await Promise.resolve(responseOrPromise));
+}
+
+async function invokeTool(name, args) {
+  const tool = toolRegistry.get(name);
+  assert(tool, `Tool is not registered: ${name}`);
+  return resolveToolPayload(tool.handler(args));
 }
 
 function logSection(title) {
@@ -101,7 +114,61 @@ function buildSearchQuery(sectionTitle) {
   return terms.length > 0 ? terms.join(" ") : "registration procedure";
 }
 
-try {
+function getInstalledTransformersPackage() {
+  for (const packageName of TRANSFORMERS_PACKAGES) {
+    try {
+      require.resolve(packageName);
+      return packageName;
+    } catch {
+      // Try the next compatible package.
+    }
+  }
+  return null;
+}
+
+export function evaluateSemanticReadiness({
+  vectorExtensionLoaded,
+  vecCount,
+  transformersPackage,
+  searchPayload,
+}) {
+  const reasons = [];
+  const warnings = Array.isArray(searchPayload?.warnings) ? searchPayload.warnings : [];
+  const semanticEvidence = Array.isArray(searchPayload?.results)
+    ? searchPayload.results.some((result) => Array.isArray(result.evidence) && result.evidence.includes("semantic"))
+    : false;
+  const modeActual = searchPayload?.mode_actual ?? "keyword";
+  const modeRequested = searchPayload?.mode_requested ?? "auto";
+
+  if (!vectorExtensionLoaded) {
+    reasons.push("sqlite-vec extension is not loaded");
+  }
+  if (vecCount === 0) {
+    reasons.push("vec_sections has no embeddings");
+  }
+  if (!transformersPackage) {
+    reasons.push("no compatible transformers package is installed");
+  }
+  if (!SEMANTIC_ACTIVE_MODES.has(modeActual)) {
+    reasons.push(`search_3gpp_docs stayed in ${modeActual} mode`);
+  }
+  if (!semanticEvidence) {
+    reasons.push("search results did not include semantic evidence");
+  }
+
+  return {
+    optional: true,
+    prerequisites_met: vectorExtensionLoaded && vecCount > 0 && Boolean(transformersPackage),
+    semantic_active: SEMANTIC_ACTIVE_MODES.has(modeActual) && semanticEvidence,
+    transformers_package: transformersPackage,
+    mode_requested: modeRequested,
+    mode_actual: modeActual,
+    reasons,
+    warnings,
+  };
+}
+
+export async function runValidation() {
   console.log("=== 3GPP MCP Server Validation (v2) ===");
 
   logSection("Package");
@@ -127,11 +194,13 @@ try {
   const vecCount = hasVecTable
     ? initDb.prepare("SELECT COUNT(*) AS c FROM vec_sections").get().c
     : 0;
+  const transformersPackage = getInstalledTransformersPackage();
 
   console.log(`Resolved DB: ${dbPath}`);
   console.log(`FTS available: ${features.ftsSearch}`);
   console.log(`Vector extension loaded: ${features.vectorSearch}`);
   console.log(`vec_sections rows: ${vecCount}`);
+  console.log(`Transformers package: ${transformersPackage ?? "not installed"}`);
   console.log(`Specs: ${tableCounts.specs}`);
   console.log(`TOC rows: ${tableCounts.toc}`);
   console.log(`Sections: ${tableCounts.sections}`);
@@ -190,58 +259,45 @@ try {
   logSection("Navigation smoke test");
   const searchQuery = buildSearchQuery(sampleSection.section_title);
 
-  const catalogPayload = parseToolPayload(
-    toolRegistry.get("get_spec_catalog").handler({ filter: sampleSpec.id })
-  );
+  const catalogPayload = await invokeTool("get_spec_catalog", { filter: sampleSpec.id });
   assert(Array.isArray(catalogPayload.specs), "get_spec_catalog did not return a specs array");
   assert(catalogPayload.specs.length > 0, "get_spec_catalog returned no specs");
 
-  const tocPayload = parseToolPayload(
-    toolRegistry.get("get_spec_toc").handler({ specId: sampleSpec.id, maxDepth: 2 })
-  );
+  const tocPayload = await invokeTool("get_spec_toc", { specId: sampleSpec.id, maxDepth: 2 });
   assert(Array.isArray(tocPayload.entries), "get_spec_toc did not return entries");
   assert(tocPayload.entries.length > 0, `get_spec_toc returned no entries for ${sampleSpec.id}`);
 
-  const sectionPayload = parseToolPayload(
-    toolRegistry.get("get_section").handler({ sectionId: sampleSection.id, maxChars: 400 })
-  );
+  const sectionPayload = await invokeTool("get_section", { sectionId: sampleSection.id, maxChars: 400 });
   assert(sectionPayload.section?.section_id === sampleSection.id, "get_section returned the wrong section");
 
-  const relatedPayload = parseToolPayload(
-    toolRegistry.get("search_related_sections").handler({ sectionId: sampleSection.id, maxResults: 3 })
-  );
+  const relatedPayload = await invokeTool("search_related_sections", { sectionId: sampleSection.id, maxResults: 3 });
   assert(Array.isArray(relatedPayload.results), "search_related_sections did not return results");
 
-  const searchPayload = parseToolPayload(
-    toolRegistry.get("search_3gpp_docs").handler({
-      query: searchQuery,
-      spec: sampleSpec.id,
-      maxResults: 3,
-      includeScores: true,
-    })
-  );
+  const searchPayload = await invokeTool("search_3gpp_docs", {
+    query: searchQuery,
+    spec: sampleSpec.id,
+    maxResults: 3,
+    includeScores: true,
+    mode: "auto",
+  });
   assert(Array.isArray(searchPayload.results), "search_3gpp_docs did not return results");
 
   const refsPayload = referenceSpec
-    ? parseToolPayload(
-        toolRegistry.get("get_spec_references").handler({
-          specId: referenceSpec.spec_id,
-          direction: "outgoing",
-          maxResults: 3,
-        })
-      )
+    ? await invokeTool("get_spec_references", {
+        specId: referenceSpec.spec_id,
+        direction: "outgoing",
+        maxResults: 3,
+      })
     : null;
   if (refsPayload) {
     assert(refsPayload.spec_id === referenceSpec.spec_id, "get_spec_references returned the wrong spec");
   }
 
-  const listPayload = parseToolPayload(toolRegistry.get("list_specs").handler({}));
+  const listPayload = await invokeTool("list_specs", {});
   assert(Array.isArray(listPayload.specs), "list_specs did not return specs");
   assert(listPayload.specs.length > 0, "list_specs returned no specs");
 
-  const guidePayload = parseToolPayload(
-    toolRegistry.get("get_ingest_guide").handler({ type: "all" })
-  );
+  const guidePayload = await invokeTool("get_ingest_guide", { type: "all" });
   assert(guidePayload.guides?.etsi, "get_ingest_guide missing ETSI guide");
   assert(guidePayload.guides?.rfc, "get_ingest_guide missing RFC guide");
   assert(guidePayload.guides?.autorag, "get_ingest_guide missing AutoRAG guide");
@@ -260,14 +316,38 @@ try {
     console.log(`Outgoing references returned: ${refsPayload.outgoing.count}`);
   }
 
+  logSection("Readiness");
+  const semanticReadiness = evaluateSemanticReadiness({
+    vectorExtensionLoaded: features.vectorSearch,
+    vecCount,
+    transformersPackage,
+    searchPayload,
+  });
+  console.log("Baseline keyword readiness: true");
+  console.log(`Optional semantic prerequisites met: ${semanticReadiness.prerequisites_met}`);
+  console.log(`Semantic-active tool smoke: ${semanticReadiness.semantic_active}`);
+  console.log(`Semantic transformers runtime: ${semanticReadiness.transformers_package ?? "missing"}`);
+  console.log(`Semantic smoke mode requested: ${semanticReadiness.mode_requested}`);
+  console.log(`Semantic smoke mode actual: ${semanticReadiness.mode_actual}`);
+  if (semanticReadiness.reasons.length > 0) {
+    console.log(`Semantic readiness blockers: ${semanticReadiness.reasons.join("; ")}`);
+  }
+
   logSection("Interpretation");
   console.log("Validation confirms the v2 DB-backed server, the current 8-tool surface, and the intended chapter-navigation workflow.");
-  console.log("Search is validated as a discovery tool. Exact retrieval still flows through get_spec_toc and get_section.");
+  console.log("Baseline validation proves keyword-first discovery and the chapter-navigation workflow.");
+  console.log("Semantic retrieval is optional and only counts as active when the smoke path actually returns semantic/hybrid evidence, not merely because vec_sections exists.");
 
   closeConnection();
   console.log("\nValidation passed.");
-} catch (error) {
-  closeConnection();
-  console.error(`\nValidation failed: ${error.message}`);
-  process.exit(1);
+}
+
+const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === __filename;
+
+if (isDirectRun) {
+  runValidation().catch((error) => {
+    closeConnection();
+    console.error(`\nValidation failed: ${error.message}`);
+    process.exit(1);
+  });
 }

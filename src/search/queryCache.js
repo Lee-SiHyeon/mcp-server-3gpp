@@ -21,8 +21,26 @@ class LRUQueryCache {
    * Generate cache key from query parameters
    */
   _getCacheKey(query, options = {}) {
-    const { spec = null, page = 1, mode = 'auto' } = options;
-    return `${query}|${spec}|${page}|${mode}`;
+    const {
+      spec = null,
+      page = 1,
+      mode = 'auto',
+      maxResults = null,
+      includeScores = false,
+      alpha = null,
+      cacheNamespace = 'default',
+    } = options;
+
+    return JSON.stringify({
+      query,
+      spec,
+      page,
+      mode,
+      maxResults,
+      includeScores: Boolean(includeScores),
+      alpha: alpha == null ? null : Number(alpha),
+      cacheNamespace,
+    });
   }
 
   /**

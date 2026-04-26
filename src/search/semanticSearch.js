@@ -1,38 +1,42 @@
 import { getConnection } from '../db/connection.js';
+import { getEmbeddingIndexStatus } from '../embeddings/indexMetadata.js';
+import { serializeVector } from '../embeddings/serializeVector.js';
 
-/**
- * Check if vector search is available.
- */
-export function isVectorSearchAvailable() {
+export function getVectorSearchStatus() {
   try {
     const db = getConnection();
-    const result = db.prepare(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='vec_sections'"
-    ).get();
-    if (!result) return false;
-
-    const count = db.prepare('SELECT count(*) as c FROM vec_sections').get();
-    return count.c > 0;
+    return getEmbeddingIndexStatus(db);
   } catch {
-    return false;
+    return {
+      available: false,
+      reasons: ['db_unavailable'],
+      sectionCount: 0,
+      vecRowCount: 0,
+      metadata: null,
+      expected: null,
+    };
   }
 }
 
-/**
- * Perform vector similarity search.
- * @param {Float32Array|Buffer} queryVector - 384-dim query embedding
- * @param {number} limit - Max results
- * @param {string} [specFilter] - Optional spec filter
- * @returns {Array<{section_id: string, spec_id: string, section_number: string, section_title: string, distance: number, semantic_score: number}>}
- */
+export function isVectorSearchAvailable() {
+  return getVectorSearchStatus().available;
+}
+
+function coerceQueryVector(queryVector) {
+  if (Buffer.isBuffer(queryVector)) return queryVector;
+  if (queryVector instanceof Float32Array) return serializeVector(queryVector);
+  throw new Error('queryVector must be a Buffer or Float32Array');
+}
+
 export function semanticSearch(queryVector, limit = 30, specFilter = null) {
-  if (!isVectorSearchAvailable()) return [];
+  const status = getVectorSearchStatus();
+  if (!status.available) return [];
 
   const db = getConnection();
 
   try {
     let sql = `
-      SELECT 
+      SELECT
         v.section_id,
         v.distance,
         s.spec_id,
@@ -50,22 +54,22 @@ export function semanticSearch(queryVector, limit = 30, specFilter = null) {
       LEFT JOIN sections p ON p.id = s.parent_section
       WHERE v.embedding MATCH ?
     `;
-    const params = [queryVector];
+    const params = [coerceQueryVector(queryVector)];
 
     if (specFilter) {
-      sql += ` AND s.spec_id = ?`;
+      sql += ' AND s.spec_id = ?';
       params.push(specFilter);
     }
 
-    sql += ` ORDER BY v.distance LIMIT ?`;
+    sql += ' AND k = ? ORDER BY v.distance';
     params.push(limit);
 
     const rows = db.prepare(sql).all(...params);
 
     if (rows.length === 0) return [];
-    const maxDist = Math.max(...rows.map(r => r.distance)) || 1;
+    const maxDist = Math.max(...rows.map((row) => row.distance)) || 1;
 
-    return rows.map(row => ({
+    return rows.map((row) => ({
       section_id: row.section_id,
       spec_id: row.spec_id,
       section_number: row.section_number,
@@ -80,8 +84,8 @@ export function semanticSearch(queryVector, limit = 30, specFilter = null) {
       distance: row.distance,
       semantic_score: Math.max(0, 1 - (row.distance / maxDist)),
     }));
-  } catch (e) {
-    console.error(`Vector search failed: ${e.message}`);
+  } catch (error) {
+    console.error(`Vector search failed: ${error.message}`);
     return [];
   }
 }

@@ -112,14 +112,16 @@ The current query parser supports:
 - FTS5 BM25 keyword search is the default live path.
 - `sections_fts` indexes `section_title` and `content`.
 - Search results return ranked section metadata plus snippets and optional scores.
+- A baseline `npm install` is expected to satisfy this keyword-ready path.
 
 ### What is conditional
 
 - `sqlite-vec` can be loaded at runtime.
 - `vec_sections` can exist and contain embeddings.
-- Semantic or hybrid ranking only becomes active when the search layer is given a query embedding function.
+- A compatible transformers runtime is optional and should not be treated as part of the baseline install contract. The current embedding code accepts `@huggingface/transformers` or `@xenova/transformers`.
+- Semantic or hybrid ranking should only be treated as active when the live tool path has semantic prerequisites and a smoke query returns semantic evidence.
 
-That means the database can advertise vector support while the default MCP tool flow still executes keyword ranking. Docs should reflect that distinction.
+That means the database can advertise vector support while the default MCP tool flow still executes keyword ranking. Validation and docs should distinguish keyword-ready baseline, vector-capable storage/runtime, and semantic-active tool behavior.
 
 ## Data responsibilities
 
@@ -151,11 +153,14 @@ Audit log for corpus build/load operations.
 
 Optional runtime table for embeddings.
 
+The presence of `vec_sections` alone is not enough to claim semantic readiness. Semantic-active should only be claimed when `sqlite-vec` is loaded, embeddings are present, the optional embedding runtime is installed, and a live `search_3gpp_docs` smoke query reports `mode_actual=hybrid` or `mode_actual=semantic` with semantic evidence.
+
 ## Response shaping and validation
 
 - All tool handlers return MCP text content containing JSON.
 - `src/tools/validateArgs.js` applies Zod validation before dispatch.
 - Validation errors are returned as structured MCP errors, not thrown through the transport.
+- `validate.js` should treat handlers as sync-or-async and report semantic readiness separately from baseline keyword readiness.
 
 This keeps the tool layer predictable for LLM callers and easier to smoke-test with `validate.js`.
 
