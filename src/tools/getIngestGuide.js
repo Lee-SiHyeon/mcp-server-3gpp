@@ -9,6 +9,62 @@
 import { formatSuccess, formatError } from './helpers.js';
 
 export const GUIDES = {
+  catalog: {
+    title: 'Cataloging ETSI Delivery Metadata',
+    description: 'Crawl ETSI directory metadata into SQLite before choosing which documents to download, extract, and embed.',
+    steps: [
+      {
+        step: 1,
+        action: 'Run a tiny catalog smoke crawl',
+        command: 'npm run catalog:smoke',
+        notes: 'Catalogs a small TS range with versions/files only. It does not download PDFs or generate embeddings.',
+      },
+      {
+        step: 2,
+        action: 'Preview a catalog crawl without writing crawl progress',
+        command: 'python3 scripts/crawl_etsi_catalog.py --publication-types etsi_ts etsi_tr --depth documents --plan-only',
+        notes: 'Use before broad crawls to estimate selected publication types and ranges.',
+      },
+      {
+        step: 3,
+        action: 'Catalog selected publication types',
+        command: 'npm run catalog:crawl -- --publication-types etsi_ts etsi_tr --depth versions --max-ranges 10',
+        notes: 'Use --max-ranges, --max-docs, --max-versions, and --max-requests for controlled backfills. Remove limits only when you are ready for a long metadata crawl.',
+      },
+      {
+        step: 4,
+        action: 'Resume an interrupted compatible crawl',
+        command: 'npm run catalog:crawl -- --publication-types etsi_ts etsi_tr --depth versions --max-ranges 10 --resume',
+        notes: 'Resume skips range units already marked completed in catalog_crawl_progress.',
+      },
+      {
+        step: 5,
+        action: 'Catalog all ETSI publication type directories',
+        command: 'npm run catalog:crawl -- --all-publication-types --depth versions',
+        notes: 'Stores metadata in etsi_publication_types, etsi_ranges, etsi_documents, etsi_versions, and optionally etsi_files.',
+      },
+      {
+        step: 6,
+        action: 'Select priority catalog rows for later ingest',
+        command: 'npm run catalog:select -- --policy priority --apply',
+        notes: 'Marks 3GPP-mapped priority series/documents in etsi_document_status. This does not download PDFs.',
+      },
+      {
+        step: 7,
+        action: 'Emit a download plan from selected catalog rows',
+        command: 'npm run catalog:download-plan -- --policy priority',
+        notes: 'Outputs tab-separated type/spec/document/version data that can feed a later downloader bridge.',
+      },
+      {
+        step: 8,
+        action: 'Inspect cataloged documents via MCP',
+        tools: ['search_etsi_catalog', 'get_etsi_document'],
+      },
+    ],
+    dbPath: 'data/corpus/3gpp.db',
+    tables: ['etsi_publication_types', 'etsi_ranges', 'etsi_documents', 'etsi_versions', 'etsi_files', 'etsi_document_status', 'catalog_crawl_runs', 'catalog_crawl_progress'],
+  },
+
   etsi: {
     title: 'Downloading ETSI/3GPP Specs',
     description: 'Download 3GPP specs from the ETSI portal as PDFs and ingest them into the corpus.',
@@ -183,11 +239,13 @@ export const getIngestGuideSchema = {
   description: `Returns step-by-step operational instructions for expanding the 3GPP/RFC corpus.
 Use this tool when:
 - A document is missing from the corpus and needs to be downloaded and ingested
+- You want to catalog ETSI metadata before downloading documents
 - You need to know the ETSI URL pattern for a specific spec
 - You want to run the AutoRAG pipeline after downloading new PDFs
 - You need to add RFC documents (SIP, Diameter, TLS, OAuth, QUIC, etc.) to the corpus
 
-Three guides available:
+Four guides available:
+- "catalog": Crawl ETSI metadata into SQLite without downloading PDFs
 - "etsi": Download 3GPP specs from ETSI portal (ts/tr/en types, series-level bulk download)
 - "rfc": Download IETF RFC documents and ingest them (priority list included)
 - "autorag": Run the full extraction pipeline (PDF→JSONL→SQLite)`,
@@ -196,8 +254,8 @@ Three guides available:
     properties: {
       type: {
         type: 'string',
-        enum: ['etsi', 'rfc', 'autorag', 'all'],
-        description: 'Which guide to return. Use "all" to get all three guides at once.',
+        enum: ['catalog', 'etsi', 'rfc', 'autorag', 'all'],
+        description: 'Which guide to return. Use "all" to get all guides at once.',
       },
     },
     required: ['type'],

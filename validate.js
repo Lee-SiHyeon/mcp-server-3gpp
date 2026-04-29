@@ -23,6 +23,8 @@ const EXPECTED_TOOLS = [
   "list_specs",
   "get_ingest_guide",
   "get_spec_references",
+  "search_etsi_catalog",
+  "get_etsi_document",
 ];
 
 const DB_CANDIDATES = [
@@ -187,6 +189,10 @@ export async function runValidation() {
     sections: initDb.prepare("SELECT COUNT(*) AS c FROM sections").get().c,
     spec_references: initDb.prepare("SELECT COUNT(*) AS c FROM spec_references").get().c,
     ingestion_runs: initDb.prepare("SELECT COUNT(*) AS c FROM ingestion_runs").get().c,
+    etsi_documents: initDb.prepare("SELECT COUNT(*) AS c FROM etsi_documents").get().c,
+    etsi_versions: initDb.prepare("SELECT COUNT(*) AS c FROM etsi_versions").get().c,
+    etsi_document_status: initDb.prepare("SELECT COUNT(*) AS c FROM etsi_document_status").get().c,
+    catalog_crawl_progress: initDb.prepare("SELECT COUNT(*) AS c FROM catalog_crawl_progress").get().c,
   };
   const hasVecTable = !!initDb
     .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'vec_sections'")
@@ -206,6 +212,10 @@ export async function runValidation() {
   console.log(`Sections: ${tableCounts.sections}`);
   console.log(`Cross-spec references: ${tableCounts.spec_references}`);
   console.log(`Ingestion runs: ${tableCounts.ingestion_runs}`);
+  console.log(`ETSI catalog documents: ${tableCounts.etsi_documents}`);
+  console.log(`ETSI catalog versions: ${tableCounts.etsi_versions}`);
+  console.log(`ETSI document status rows: ${tableCounts.etsi_document_status}`);
+  console.log(`ETSI crawl progress rows: ${tableCounts.catalog_crawl_progress}`);
 
   assert(tableCounts.specs > 0, "Expected at least one spec in the corpus");
   assert(tableCounts.sections > 0, "Expected at least one section in the corpus");
@@ -293,11 +303,19 @@ export async function runValidation() {
     assert(refsPayload.spec_id === referenceSpec.spec_id, "get_spec_references returned the wrong spec");
   }
 
+  const etsiCatalogPayload = await invokeTool("search_etsi_catalog", { maxResults: 1 });
+  assert(etsiCatalogPayload.status?.counts, "search_etsi_catalog missing catalog status");
+  assert(Array.isArray(etsiCatalogPayload.documents), "search_etsi_catalog did not return documents");
+
+  const etsiDocumentPayload = await invokeTool("get_etsi_document", { documentId: "does_not_exist" });
+  assert(etsiDocumentPayload.error, "get_etsi_document should return a clean not-found error");
+
   const listPayload = await invokeTool("list_specs", {});
   assert(Array.isArray(listPayload.specs), "list_specs did not return specs");
   assert(listPayload.specs.length > 0, "list_specs returned no specs");
 
   const guidePayload = await invokeTool("get_ingest_guide", { type: "all" });
+  assert(guidePayload.guides?.catalog, "get_ingest_guide missing catalog guide");
   assert(guidePayload.guides?.etsi, "get_ingest_guide missing ETSI guide");
   assert(guidePayload.guides?.rfc, "get_ingest_guide missing RFC guide");
   assert(guidePayload.guides?.autorag, "get_ingest_guide missing AutoRAG guide");
@@ -315,6 +333,7 @@ export async function runValidation() {
   if (refsPayload?.outgoing) {
     console.log(`Outgoing references returned: ${refsPayload.outgoing.count}`);
   }
+  console.log(`ETSI catalog rows returned: ${etsiCatalogPayload.documents.length}`);
 
   logSection("Readiness");
   const semanticReadiness = evaluateSemanticReadiness({
@@ -334,7 +353,7 @@ export async function runValidation() {
   }
 
   logSection("Interpretation");
-  console.log("Validation confirms the v2 DB-backed server, the current 8-tool surface, and the intended chapter-navigation workflow.");
+  console.log("Validation confirms the v2 DB-backed server, the current 10-tool surface, and the intended chapter-navigation workflow.");
   console.log("Baseline validation proves keyword-first discovery and the chapter-navigation workflow.");
   console.log("Semantic retrieval is optional and only counts as active when the smoke path actually returns semantic/hybrid evidence, not merely because vec_sections exists.");
 

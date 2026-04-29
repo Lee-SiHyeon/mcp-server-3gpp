@@ -50,6 +50,28 @@ const schemas = {
     maxResults: z.number().int().min(1).max(100).optional(),
   }),
 
+  search_etsi_catalog: z.object({
+    query: z.string().optional(),
+    publicationType: z.string().optional(),
+    mapped3gppSpec: z.string().optional(),
+    range: z.string().optional(),
+    onlyIngested: z.boolean().optional(),
+    hasVersions: z.boolean().optional(),
+    hasFiles: z.boolean().optional(),
+    selectedForIngest: z.boolean().optional(),
+    ingestStatus: z.string().optional(),
+    maxResults: z.number().int().min(1).max(100).optional(),
+  }),
+
+  get_etsi_document: z.object({
+    documentId: z.string().optional(),
+    publicationType: z.string().optional(),
+    etsiNumber: z.string().optional(),
+    mapped3gppSpec: z.string().optional(),
+    includeFiles: z.boolean().optional(),
+    maxVersions: z.number().int().min(1).max(200).optional(),
+  }),
+
   search_related_sections: z.object({
     sectionId: z.string().optional(),
     specId: z.string().optional(),
@@ -60,7 +82,7 @@ const schemas = {
   }),
 
   get_ingest_guide: z.object({
-    type: z.enum(['etsi', 'rfc', 'autorag', 'all']),
+    type: z.enum(['catalog', 'etsi', 'rfc', 'autorag', 'all']),
   }),
 
   list_specs: z.object({}).passthrough(),

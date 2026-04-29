@@ -16,6 +16,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { ensureEmbeddingMetadataTable } from '../embeddings/indexMetadata.js';
+import { ensureCatalogSchema } from './catalogSchema.js';
 
 // Resolve project root: this file lives at src/db/schema.js → go up two levels.
 const __filename = fileURLToPath(import.meta.url);
@@ -27,7 +28,15 @@ const SCHEMA_SQL_PATH = path.join(PROJECT_ROOT, 'db', 'schema.sql');
 const schemaSql = fs.readFileSync(SCHEMA_SQL_PATH, 'utf-8');
 
 /** Tables the schema must create (used to verify a successful apply). */
-const REQUIRED_TABLES = ['specs', 'toc', 'sections', 'sections_fts', 'ingestion_runs'];
+const REQUIRED_TABLES = [
+  'specs',
+  'toc',
+  'sections',
+  'sections_fts',
+  'ingestion_runs',
+  'etsi_documents',
+  'etsi_versions',
+];
 
 /**
  * Initialise (or open) a SQLite database with the 3GPP schema.
@@ -67,6 +76,10 @@ export function initDatabase(dbPath) {
       }
     }
   }
+
+  // Existing v1 databases predate the catalog layer. Keep this idempotent so
+  // tools can open a prebuilt corpus and still expose catalog functionality.
+  ensureCatalogSchema(db);
 
   // --- Optional: sqlite-vec extension -------------------------------------
   const features = { vectorSearch: false, ftsSearch: true };

@@ -56,6 +56,8 @@ import { searchRelatedSectionsSchema, handleSearchRelatedSections } from "./tool
 import { listSpecsSchema, handleListSpecs } from "./tools/listSpecs.js";
 import { getIngestGuideSchema, handleGetIngestGuide, GUIDES } from "./tools/getIngestGuide.js";
 import { getSpecReferencesSchema, handleGetSpecReferences } from "./tools/getSpecReferences.js";
+import { searchEtsiCatalogSchema, handleSearchEtsiCatalog } from "./tools/searchEtsiCatalog.js";
+import { getEtsiDocumentSchema, handleGetEtsiDocument } from "./tools/getEtsiDocument.js";
 
 // Validation middleware
 import { validateArgs } from "./tools/validateArgs.js";
@@ -87,6 +89,8 @@ function registerAllTools() {
   registerTool(listSpecsSchema.name, listSpecsSchema, handleListSpecs);
   registerTool(getIngestGuideSchema.name, getIngestGuideSchema, handleGetIngestGuide);
   registerTool(getSpecReferencesSchema.name, getSpecReferencesSchema, handleGetSpecReferences);
+  registerTool(searchEtsiCatalogSchema.name, searchEtsiCatalogSchema, handleSearchEtsiCatalog);
+  registerTool(getEtsiDocumentSchema.name, getEtsiDocumentSchema, handleGetEtsiDocument);
 }
 
 // ---------------------------------------------------------------------------

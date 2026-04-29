@@ -4,7 +4,7 @@ MCP server for 3GPP and IETF RFC specifications, backed by a prebuilt SQLite cor
 
 The current v2 server is built around AI-guided chapter navigation, not hard-coded protocol lookup logic. The intended workflow is:
 
-1. Discover relevant specs with `get_spec_catalog` or `search_3gpp_docs`.
+1. Discover relevant specs with `get_spec_catalog`, `search_etsi_catalog`, or `search_3gpp_docs`.
 2. Walk the chapter structure with `get_spec_toc`.
 3. Retrieve exact text with `get_section`.
 4. Expand locally with `search_related_sections`.
@@ -14,7 +14,7 @@ Search is a starting point, not the whole product. The model is expected to brow
 
 ## What ships today
 
-- DB-backed v2 server with 8 MCP tools
+- DB-backed v2 server with 10 MCP tools
 - Prebuilt corpus in `data/corpus/3gpp.db`
 - 207 specs total: 112 TS, 2 TR, 93 RFC
 - 66,109 full sections and 63,376 TOC rows
@@ -45,12 +45,12 @@ The bundled database is tracked with Git LFS. A healthy startup looks like:
 ```text
 [3GPP MCP] Database ready: .../data/corpus/3gpp.db
 [3GPP MCP] Features - FTS: true, Vector: true
-[3GPP MCP] Registered 8 tools (v2 DB mode)
+[3GPP MCP] Registered 10 tools (v2 DB mode)
 ```
 
 `npm run validate` now reports two separate states:
 
-- `Baseline keyword readiness`: the DB-backed 8-tool server is healthy and search/navigation work in keyword mode.
+- `Baseline keyword readiness`: the DB-backed 10-tool server is healthy and search/navigation work in keyword mode.
 - `Optional semantic readiness`: whether semantic prerequisites are installed and whether the live tool smoke test actually activated semantic/hybrid retrieval.
 
 ## MCP client configuration
@@ -108,6 +108,8 @@ The server checks these DB locations in order:
 | `search_3gpp_docs` | Rank candidate sections for a query and return section IDs for follow-up retrieval. |
 | `search_related_sections` | Expand from an anchor section through parent, child, sibling, and search-derived neighbors. |
 | `get_spec_references` | Traverse incoming and outgoing cross-spec citations. |
+| `search_etsi_catalog` | Search cataloged ETSI delivery metadata, including documents not yet downloaded or embedded. |
+| `get_etsi_document` | Inspect one ETSI catalog document with versions and optional file URLs. |
 | `get_ingest_guide` | Return operational instructions for ETSI download, RFC ingest, or the extraction pipeline. |
 | `list_specs` | Compatibility alias with a smaller output shape; prefer `get_spec_catalog`. |
 
@@ -150,6 +152,7 @@ LLM client
   -> tool registry + validation
   -> tool handlers
   -> SQLite corpus (specs, toc, sections, sections_fts, spec_references, ingestion_runs)
+  -> ETSI catalog (etsi_publication_types, etsi_ranges, etsi_documents, etsi_versions, etsi_files)
   -> optional vec_sections table and guide resources
 ```
 
@@ -162,7 +165,7 @@ npm run validate
 npm test
 ```
 
-`npm run validate` checks the package metadata, resolves the DB path, verifies the core schema and counts, confirms the v2 8-tool surface, runs the navigation smoke path, and reports semantic readiness separately from baseline keyword readiness.
+`npm run validate` checks the package metadata, resolves the DB path, verifies the core schema and counts, confirms the v2 10-tool surface, runs the navigation smoke path, and reports semantic readiness separately from baseline keyword readiness.
 
 ## Optional semantic readiness
 
@@ -178,6 +181,34 @@ Current prerequisites:
 `scripts/generate_embeddings.js` is now the real local corpus-population workflow for `vec_sections`. It can build or rebuild the embedding index, but semantic-active readiness still requires a **fresh full-corpus index**. Partial runs (`--spec` or `--limit`) are useful for smoke tests and controlled backfills, but they intentionally do **not** mark semantic retrieval as globally ready.
 
 ## Manual smoke workflows
+
+ETSI catalog smoke:
+
+```bash
+npm run catalog:smoke
+```
+
+This crawls a tiny ETSI TS range into the catalog tables only. It does not
+download PDFs, extract text, or generate embeddings. For broader cataloging,
+use `npm run catalog:crawl -- --all-publication-types --depth versions` and add
+limits such as `--max-ranges`, `--max-docs`, `--max-versions`, or
+`--max-requests` for controlled backfills.
+
+Catalog crawler safety controls:
+
+```bash
+python3 scripts/crawl_etsi_catalog.py --publication-types etsi_ts etsi_tr --depth documents --plan-only
+python3 scripts/crawl_etsi_catalog.py --publication-types etsi_ts etsi_tr --depth documents --max-ranges 10
+python3 scripts/crawl_etsi_catalog.py --publication-types etsi_ts etsi_tr --depth documents --resume
+python3 scripts/select_etsi_ingest.py --policy priority --format download-list
+```
+
+The crawler records progress in `catalog_crawl_runs` and
+`catalog_crawl_progress`. Long catalog writes remain CLI-only; MCP catalog tools
+are read-only. Download, extraction, and embedding status lives separately from
+document identity in `etsi_document_status`. `select_etsi_ingest.py` marks
+priority 3GPP-mapped ETSI documents for later download/extract/embed work and
+can emit a tab-separated download plan without downloading any PDFs.
 
 Degraded-path smoke:
 
