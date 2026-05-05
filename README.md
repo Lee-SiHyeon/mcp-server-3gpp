@@ -29,6 +29,12 @@ Search is a starting point, not the whole product. The model is expected to brow
 - The database and runtime can host `sqlite-vec` embeddings via `vec_sections`, but that only makes the corpus vector-capable.
 - Semantic or hybrid retrieval should be treated as an optional readiness state. It is active only when the runtime has semantic prerequisites and the smoke path actually returns `mode_actual=hybrid` or `mode_actual=semantic` with semantic evidence in results.
 
+## Requirements
+
+- Node.js 20.x, 22.x, and 24.x are the supported, CI-tested runtimes.
+- The project uses `better-sqlite3` 12.x so installs can use prebuilt native binaries across the supported Node versions, including Node 24 on Windows.
+- If you expand the Node version range later, update the native dependency and CI matrix together.
+
 ## Quick start
 
 ```bash
