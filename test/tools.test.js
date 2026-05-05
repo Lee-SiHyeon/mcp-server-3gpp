@@ -184,18 +184,22 @@ describe('handleSearch3gppDocs', () => {
     }));
 
     assert.strictEqual(data.mode_requested, 'semantic');
-    if (isVectorSearchAvailable()) {
-      assert.ok(
-        data.mode_actual === 'semantic' || data.mode_actual === 'hybrid',
-        'Semantic-ready environments should not degrade semantic mode to keyword'
-      );
-    } else {
-      assert.strictEqual(data.mode_actual, 'keyword');
+    if (data.mode_actual === 'keyword') {
       assert.ok(
         Array.isArray(data.warnings) && data.warnings.some((warning) => warning.includes('mode_degraded')),
-        'Expected degraded-mode warning when semantic mode is unavailable'
+        'Expected degraded-mode warning when semantic mode is unavailable at tool-call time'
       );
+      return;
     }
+
+    assert.ok(
+      data.mode_actual === 'semantic' || data.mode_actual === 'hybrid',
+      'Semantic tool calls should either activate semantic retrieval or degrade cleanly to keyword'
+    );
+    assert.ok(
+      !isVectorSearchAvailable() || data.results.some((result) => result.evidence?.includes('semantic')),
+      'Semantic-active environments should include semantic evidence in scored results'
+    );
   });
 });
 

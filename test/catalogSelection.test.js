@@ -11,9 +11,10 @@ import { initDatabase } from '../src/db/schema.js';
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mcp-etsi-select-'));
 const dbPath = path.join(tmpDir, 'select.db');
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const pythonBin = process.env.PYTHON ?? (process.platform === 'win32' ? 'python' : 'python3');
 
 function runSelect(args = []) {
-  return execFileSync('python3', ['scripts/select_etsi_ingest.py', '--db', dbPath, ...args], {
+  return execFileSync(pythonBin, ['scripts/select_etsi_ingest.py', '--db', dbPath, ...args], {
     cwd: projectRoot,
     encoding: 'utf8',
   });
