@@ -200,9 +200,13 @@ def etsi_range_dir(etsi_num: str) -> str:
     """Compute the ETSI range directory name.
 
     For ETSI number 124301 → range is 124300_124399
-    For 13412301 (8-digit with sub-part) → 13412300_13412399
+    For 13412301 (8-digit with sub-part) ETSI stores these under the parent's
+    range directory, so 13412301 → range is 134100_134199 (parent base 134123).
     """
     num = int(etsi_num)
+    # Sub-part specs (8+ digits) are stored under the parent spec's range.
+    if num >= 10000000:
+        num = num // 100  # 13412301 → 134123
     range_start = (num // 100) * 100
     range_end = range_start + 99
     return f"{range_start}_{range_end}"

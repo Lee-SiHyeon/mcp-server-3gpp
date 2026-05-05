@@ -1,35 +1,15 @@
 {
-  "downloaded_at": "2026-04-04T03:39:34Z",
+  "downloaded_at": "2026-05-05T04:25:39Z",
   "specs": [
     {
-      "spec": "29.303",
-      "type": "ts",
-      "etsi_num": "129303",
-      "version": "19.1.0",
-      "url": "https://www.etsi.org/deliver/etsi_ts/129300_129399/129303/19.01.00_60/ts_129303v190100p.pdf",
-      "pdf_filename": "ts_29_303_v19.1.0.pdf",
-      "file_size_bytes": 537128,
-      "status": "downloaded"
-    },
-    {
-      "spec": "29.538",
-      "type": "ts",
-      "etsi_num": "129538",
-      "version": "19.4.0",
-      "url": "https://www.etsi.org/deliver/etsi_ts/129500_129599/129538/19.04.00_60/ts_129538v190400p.pdf",
-      "pdf_filename": "ts_29_538_v19.4.0.pdf",
-      "file_size_bytes": 635296,
-      "status": "downloaded"
-    },
-    {
-      "spec": "29.540",
-      "type": "ts",
-      "etsi_num": "129540",
-      "version": "19.5.0",
-      "url": "https://www.etsi.org/deliver/etsi_ts/129500_129599/129540/19.05.00_60/ts_129540v190500p.pdf",
-      "pdf_filename": "ts_29_540_v19.5.0.pdf",
-      "file_size_bytes": 326008,
-      "status": "downloaded"
+      "spec": "38.863",
+      "type": "tr",
+      "etsi_num": "138863",
+      "version": "",
+      "url": "",
+      "pdf_filename": "",
+      "file_size_bytes": 0,
+      "status": "no_version_found"
     }
   ]
 }
