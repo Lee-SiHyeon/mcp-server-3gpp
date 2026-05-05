@@ -58,6 +58,8 @@ import { getIngestGuideSchema, handleGetIngestGuide, GUIDES } from "./tools/getI
 import { getSpecReferencesSchema, handleGetSpecReferences } from "./tools/getSpecReferences.js";
 import { searchEtsiCatalogSchema, handleSearchEtsiCatalog } from "./tools/searchEtsiCatalog.js";
 import { getEtsiDocumentSchema, handleGetEtsiDocument } from "./tools/getEtsiDocument.js";
+import { getTestCaseStructureSchema, handleGetTestCaseStructure } from "./tools/getTestCaseStructure.js";
+import { listTestCasesSchema, handleListTestCases } from "./tools/listTestCases.js";
 
 // Validation middleware
 import { validateArgs } from "./tools/validateArgs.js";
@@ -91,6 +93,8 @@ function registerAllTools() {
   registerTool(getSpecReferencesSchema.name, getSpecReferencesSchema, handleGetSpecReferences);
   registerTool(searchEtsiCatalogSchema.name, searchEtsiCatalogSchema, handleSearchEtsiCatalog);
   registerTool(getEtsiDocumentSchema.name, getEtsiDocumentSchema, handleGetEtsiDocument);
+  registerTool(getTestCaseStructureSchema.name, getTestCaseStructureSchema, handleGetTestCaseStructure);
+  registerTool(listTestCasesSchema.name, listTestCasesSchema, handleListTestCases);
 }
 
 // ---------------------------------------------------------------------------

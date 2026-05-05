@@ -25,6 +25,8 @@ const EXPECTED_TOOLS = [
   "get_spec_references",
   "search_etsi_catalog",
   "get_etsi_document",
+  "get_test_case_structure",
+  "list_test_cases",
 ];
 
 const DB_CANDIDATES = [
@@ -353,7 +355,7 @@ export async function runValidation() {
   }
 
   logSection("Interpretation");
-  console.log("Validation confirms the v2 DB-backed server, the current 10-tool surface, and the intended chapter-navigation workflow.");
+  console.log("Validation confirms the v2 DB-backed server, the current 12-tool surface, and the intended chapter-navigation workflow.");
   console.log("Baseline validation proves keyword-first discovery and the chapter-navigation workflow.");
   console.log("Semantic retrieval is optional and only counts as active when the smoke path actually returns semantic/hybrid evidence, not merely because vec_sections exists.");
 
