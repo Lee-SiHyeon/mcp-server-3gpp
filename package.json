@@ -67,12 +67,12 @@
     "url": "https://github.com/Lee-SiHyeon/mcp-server-3gpp/issues"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "20.x || 22.x || 24.x"
   },
   "dependencies": {
     "@huggingface/transformers": "^3.8.0",
     "@modelcontextprotocol/sdk": "^1.25.4",
-    "better-sqlite3": "^11.8.1",
+    "better-sqlite3": "^12.9.0",
     "sqlite-vec": "^0.1.9",
     "zod": "^4.1.13"
   }
