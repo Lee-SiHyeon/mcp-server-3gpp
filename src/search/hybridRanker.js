@@ -1,8 +1,11 @@
 import { parseQuery } from './queryParser.js';
 import { keywordSearch } from './keywordSearch.js';
 import { semanticSearch, isVectorSearchAvailable } from './semanticSearch.js';
+import { anytxtSearch, isAnytxtAvailable, detectAnytxt } from './anytxtSearch.js';
+import { expandQuery, isHydeEnabled } from './hydeExpander.js';
 import { queryCache } from './queryCache.js';
 import { getContentfulSectionsByTitle } from '../db/queries.js';
+import path from 'node:path';
 
 const TITLE_STOP_WORDS = new Set([
   'a',
@@ -236,16 +239,32 @@ function getEffectiveAlpha(mode, alpha) {
   return alpha;
 }
 
+const RRF_K = 60;
+
+function computeRrfScore(ranks) {
+  let score = 0;
+  for (const rank of ranks) {
+    if (rank !== undefined) score += 1 / (RRF_K + rank);
+  }
+  return score;
+}
+
+function computeLinearScore(keywordScore, semanticScore, alpha) {
+  return alpha * keywordScore + (1 - alpha) * semanticScore;
+}
+
 /**
  * Perform hybrid keyword + semantic search with fusion scoring.
  *
- * score = α * keyword_score + (1-α) * semantic_score
- * Default α = 0.4 (favors semantic rescue while rewarding exact terms)
+ * Fusion methods:
+ * - 'rrf' (default): Reciprocal Rank Fusion — combines rank positions from both
+ *   retrievers. Robust to score distribution mismatch, no normalization needed.
+ * - 'linear': Weighted score combination α·keyword + (1-α)·semantic.
  *
  * Results are cached with LRU strategy to improve p95 latency for repeated queries.
  *
  * @param {string} query - Raw search query
- * @param {object} [options] - { spec, maxResults, page, mode, alpha, includeScores, embedQueryFn, useCache }
+ * @param {object} [options] - { spec, maxResults, page, mode, alpha, fusion, includeScores, embedQueryFn, useCache }
  * @returns {Promise<{ results: object[], mode: string, capabilities: object, page: number, maxResults: number, totalHits: number, warnings: string[], mode_requested: string, mode_actual: string, cached?: boolean }>}
  */
 export async function hybridSearch(query, options = {}) {
@@ -255,10 +274,14 @@ export async function hybridSearch(query, options = {}) {
     page = 1,
     mode = 'auto',
     alpha = 0.4,
+    fusion = 'rrf',
     includeScores = false,
     embedQueryFn = null,
     useCache = true,
+    rawDir = '',
   } = options;
+
+  const useRrf = fusion === 'rrf';
 
   const warnings = [];
   const cacheNamespace = 'keyword-only';
@@ -308,24 +331,63 @@ export async function hybridSearch(query, options = {}) {
   const capabilities = {
     keyword: true,
     semantic: semanticReady,
+    anytxt: isAnytxtAvailable(),
   };
 
   // Execute searches
   let keywordResults = [];
   let semanticResults = [];
+  let anytxtResults = [];
+  let hydeResults = [];
 
   if (actualMode !== 'semantic') {
     keywordResults = keywordSearch(parsed);
   }
 
-  if ((actualMode === 'semantic' || actualMode === 'hybrid') && semanticReady) {
-    try {
-      semanticResults = semanticSearch(queryVector, parsed.k * 3, parsed.specFilter);
-    } catch (e) {
-      console.error(`Semantic search failed: ${e.message}`);
-      warnings.push(`semantic_search_failed: ${e.message}`);
+  // Run direct semantic search and HyDE expansion in parallel
+  const semanticPromise = (async () => {
+    if ((actualMode === 'semantic' || actualMode === 'hybrid') && semanticReady) {
+      try {
+        return semanticSearch(queryVector, parsed.k * 3, parsed.specFilter);
+      } catch (e) {
+        console.error(`Semantic search failed: ${e.message}`);
+        warnings.push(`semantic_search_failed: ${e.message}`);
+      }
     }
-  }
+    return [];
+  })();
+
+  const hydePromise = (async () => {
+    if (semanticReady && isHydeEnabled() && embedQueryFn) {
+      try {
+        const { hypotheticalVector } = await expandQuery(parsed.normalizedText, embedQueryFn);
+        if (hypotheticalVector) {
+          return semanticSearch(hypotheticalVector, parsed.k, parsed.specFilter);
+        }
+      } catch (e) {
+        console.error(`HyDE search failed: ${e.message}`);
+      }
+    }
+    return [];
+  })();
+
+  const anytxtPromise = (async () => {
+    if (isAnytxtAvailable()) {
+      try {
+        const resolvedRawDir = rawDir || guessRawDir();
+        const results = await anytxtSearch(parsed, resolvedRawDir, { limit: parsed.k * 3 });
+        if (results.length > 0) capabilities.anytxt = true;
+        return results;
+      } catch (e) {
+        console.error(`AnyTXT search failed: ${e.message}`);
+      }
+    }
+    return [];
+  })();
+
+  [semanticResults, hydeResults, anytxtResults] = await Promise.all([
+    semanticPromise, hydePromise, anytxtPromise,
+  ]);
 
   // Merge results
   const merged = new Map();
@@ -354,13 +416,74 @@ export async function hybridSearch(query, options = {}) {
     }
   }
 
+  for (const row of anytxtResults) {
+    if (merged.has(row.section_id)) {
+      const existing = merged.get(row.section_id);
+      existing.anytxt_score = row.anytxt_score;
+      existing.evidence.push('anytxt');
+    } else {
+      merged.set(row.section_id, {
+        ...row,
+        keyword_score: 0,
+        semantic_score: 0,
+        anytxt_score: row.anytxt_score,
+        evidence: ['anytxt'],
+      });
+    }
+  }
+
+  for (const row of hydeResults) {
+    if (merged.has(row.section_id)) {
+      const existing = merged.get(row.section_id);
+      existing.hyde_score = row.semantic_score;
+      existing.evidence.push('hyde');
+    } else {
+      merged.set(row.section_id, {
+        ...row,
+        keyword_score: 0,
+        semantic_score: 0,
+        hyde_score: row.semantic_score,
+        evidence: ['hyde'],
+      });
+    }
+  }
+
   augmentExactTitleRescues(merged, parsed);
 
   // Compute fused scores
   const effectiveAlpha = getEffectiveAlpha(actualMode, parsed.alpha);
 
+  // Build rank maps for RRF (1-indexed ranks from each retriever's result order)
+  const keywordRankMap = new Map();
+  const semanticRankMap = new Map();
+  const anytxtRankMap = new Map();
+  const hydeRankMap = new Map();
+  if (useRrf) {
+    keywordResults.forEach((row, i) => keywordRankMap.set(row.section_id, i + 1));
+    semanticResults.forEach((row, i) => semanticRankMap.set(row.section_id, i + 1));
+    anytxtResults.forEach((row, i) => anytxtRankMap.set(row.section_id, i + 1));
+    hydeResults.forEach((row, i) => hydeRankMap.set(row.section_id, i + 1));
+  }
+
+  const activeRetrieverCount = (actualMode !== 'semantic' ? 1 : 0) +
+    (semanticReady && (actualMode === 'semantic' || actualMode === 'hybrid') ? 1 : 0) +
+    (anytxtResults.length > 0 ? 1 : 0) +
+    (hydeResults.length > 0 ? 1 : 0);
+
   for (const row of merged.values()) {
-    row.score = effectiveAlpha * row.keyword_score + (1 - effectiveAlpha) * row.semantic_score;
+    if (useRrf && activeRetrieverCount >= 2) {
+      const kr = keywordRankMap.get(row.section_id);
+      const sr = semanticRankMap.get(row.section_id);
+      const ar = anytxtRankMap.get(row.section_id);
+      const hr = hydeRankMap.get(row.section_id);
+      const rrfRaw = computeRrfScore([kr, sr, ar, hr]);
+      // Normalize: max possible = N/(K+1) where N = number of active retrievers
+      const maxRrf = activeRetrieverCount / (RRF_K + 1);
+      row.score = maxRrf > 0 ? rrfRaw / maxRrf : 0;
+      row.rrf_raw = rrfRaw;
+    } else {
+      row.score = computeLinearScore(row.keyword_score, row.semantic_score, effectiveAlpha);
+    }
 
     // Boost exact section/title matches
     if (parsed.sectionRef && row.section_number === parsed.sectionRef) {
@@ -413,6 +536,15 @@ export async function hybridSearch(query, options = {}) {
       result.keyword_score = Math.round(row.keyword_score * 1000) / 1000;
       result.semantic_score = Math.round(row.semantic_score * 1000) / 1000;
       result.evidence = row.evidence;
+      if (row.anytxt_score !== undefined) {
+        result.anytxt_score = Math.round(row.anytxt_score * 1000) / 1000;
+      }
+      if (row.hyde_score !== undefined) {
+        result.hyde_score = Math.round(row.hyde_score * 1000) / 1000;
+      }
+      if (row.rrf_raw !== undefined) {
+        result.rrf_raw = Math.round(row.rrf_raw * 10000) / 10000;
+      }
     }
 
     return result;
@@ -438,7 +570,19 @@ export async function hybridSearch(query, options = {}) {
   return response;
 }
 
+function guessRawDir() {
+  try {
+    const db = getConnection();
+    const row = db.prepare('SELECT value FROM _meta WHERE key = ?').get('raw_dir');
+    if (row?.value) return row.value;
+  } catch {}
+  return path.join(process.cwd(), 'raw');
+}
+
 /**
  * Export cache for external monitoring/control
  */
 export { queryCache, getQueryCacheStats } from './queryCache.js';
+export { detectAnytxt, isAnytxtAvailable } from './anytxtSearch.js';
+export { getAnytxtStatus } from './anytxtSearch.js';
+export { configureHyde, isHydeEnabled, getHydeConfig } from './hydeExpander.js';
