@@ -1,3 +1,5 @@
+import { expandQuerySynonyms } from './synonyms.js';
+
 /**
  * Parse a search query into structured form.
  *
@@ -70,6 +72,8 @@ export function parseQuery(query, options = {}) {
   }
 
   result.normalizedText = [...result.phrases, ...result.terms].join(' ');
+
+  result.synonymExpansions = expandQuerySynonyms(result.normalizedText);
 
   // Mode overrides
   if (options.mode === 'keyword') {

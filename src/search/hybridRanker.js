@@ -254,6 +254,14 @@ function computeLinearScore(keywordScore, semanticScore, alpha) {
   return alpha * keywordScore + (1 - alpha) * semanticScore;
 }
 
+function buildRelaxedQuery(query, parsed) {
+  const words = query.trim().split(/\s+/).filter(w => w.length > 3);
+  if (words.length > 2) return words.slice(0, 2).join(' ');
+  const stripped = query.replace(/\([^)]*\)/g, '').replace(/"[^"]*"/g, '').trim();
+  if (stripped && stripped !== query && stripped.length > 3) return stripped;
+  return null;
+}
+
 /**
  * Perform hybrid keyword + semantic search with fusion scoring.
  *
@@ -582,6 +590,25 @@ export async function hybridSearch(query, options = {}) {
     mode_actual: actualMode,
     results,
   };
+
+  if (ranked.length === 0 && !options._fallback) {
+    const relaxed = buildRelaxedQuery(query, parsed);
+    if (relaxed && relaxed !== query) {
+      const fallbackResponse = await hybridSearch(relaxed, {
+        ...options,
+        maxResults,
+        _fallback: true,
+      });
+      if (fallbackResponse.results.length > 0) {
+        for (const r of fallbackResponse.results) {
+          r.fallback_query = relaxed;
+          if (!r.evidence) r.evidence = [];
+          r.evidence = [...r.evidence, 'fallback'];
+        }
+        return { ...fallbackResponse, fallback: true, fallback_query: relaxed };
+      }
+    }
+  }
 
   // Cache result for future calls
   if (cacheEligible) {
