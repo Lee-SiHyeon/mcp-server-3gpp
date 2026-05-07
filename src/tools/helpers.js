@@ -15,6 +15,18 @@ export function formatSuccess(data) {
 }
 
 /**
+ * Wrap success payload as both legacy text content and structuredContent.
+ * @param {object} data — JSON-serialisable structured payload
+ * @returns {{ content: Array<{type: string, text: string}>, structuredContent: object }}
+ */
+export function formatStructuredSuccess(data) {
+  return {
+    content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+    structuredContent: data,
+  };
+}
+
+/**
  * Wrap an error in the MCP content format.
  * @param {string|object} errorMessage — either a string or a pre-built error object
  * @param {object} [details] — extra fields merged into the error object

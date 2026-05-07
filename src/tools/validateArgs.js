@@ -20,6 +20,13 @@ const schemas = {
     page: z.number().int().min(1).optional(),
     mode: z.enum(['auto', 'keyword', 'semantic', 'hybrid']).optional(),
     includeScores: z.boolean().optional(),
+    includeCitations: z.boolean().optional(),
+    citationStyle: z.enum(['3gpp', 'ieee', 'apa', 'plain']).optional(),
+  }),
+
+  generate_citation: z.object({
+    section_ids: z.array(z.string().min(1)).min(1),
+    style: z.enum(['3gpp', 'ieee', 'apa', 'plain']).optional(),
   }),
 
   get_section: z.object({

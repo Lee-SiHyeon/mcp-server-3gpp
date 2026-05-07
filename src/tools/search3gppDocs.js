@@ -1,5 +1,7 @@
 import { hybridSearch } from '../search/hybridRanker.js';
 import { initEmbedding, embedText } from '../embeddings/pipeline.js';
+import { getCitationSourcesBySectionIds } from '../citations/metadata.js';
+import { formatCitation } from '../citations/formatters.js';
 import { formatSuccess, formatError } from './helpers.js';
 
 export const search3gppDocsSchema = {
@@ -14,6 +16,8 @@ export const search3gppDocsSchema = {
       page: { type: 'number', description: 'Page number (default: 1)' },
       mode: { type: 'string', enum: ['auto', 'keyword', 'semantic', 'hybrid'], description: 'Search mode (default: auto)' },
       includeScores: { type: 'boolean', description: 'Show relevance scores (default: false)' },
+      includeCitations: { type: 'boolean', description: 'Include formatted citations for each result (default: false)' },
+      citationStyle: { type: 'string', enum: ['3gpp', 'ieee', 'apa', 'plain'], description: 'Citation style when includeCitations is true (default: 3gpp)' },
     },
     required: ['query'],
   },
@@ -50,7 +54,16 @@ async function embedQuery(text) {
 }
 
 export async function handleSearch3gppDocs(args) {
-  const { query, spec, maxResults = 5, page = 1, mode = 'auto', includeScores = false } = args;
+  const {
+    query,
+    spec,
+    maxResults = 5,
+    page = 1,
+    mode = 'auto',
+    includeScores = false,
+    includeCitations = false,
+    citationStyle = '3gpp',
+  } = args;
 
   if (!query || !query.trim()) {
     return formatError('Query is required');
@@ -66,6 +79,22 @@ export async function handleSearch3gppDocs(args) {
     includeScores,
     embedQueryFn: mode === 'keyword' ? null : embedQuery,
   });
+
+  if (includeCitations && Array.isArray(result.results) && result.results.length > 0) {
+    const sources = getCitationSourcesBySectionIds(result.results.map(row => row.section_id));
+    const byId = new Map(sources.map(source => [source.section_id, source]));
+
+    result.results = result.results.map((row, index) => {
+      const source = byId.get(row.section_id);
+      if (!source) return row;
+      return {
+        ...row,
+        citation: formatCitation(source, citationStyle, index + 1),
+        citation_style: citationStyle,
+        source_id: source.source_id,
+      };
+    });
+  }
 
   return formatSuccess(result);
 }

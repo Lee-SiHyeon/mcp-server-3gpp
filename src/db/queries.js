@@ -188,3 +188,30 @@ export function getSpecSuggestions(specId, limit = 5) {
     "SELECT id FROM specs WHERE id LIKE ? ESCAPE '^' LIMIT ?"
   ).all(`%${escaped}%`, limit).map(r => r.id);
 }
+
+/**
+ * Fetch citation source rows for section IDs.
+ * @param {string[]} sectionIds
+ * @returns {Array<object>}
+ */
+export function getCitationSourcesBySectionIds(sectionIds) {
+  if (!Array.isArray(sectionIds) || sectionIds.length === 0) return [];
+  const db = getConnection();
+  const placeholders = sectionIds.map(() => '?').join(',');
+  return db.prepare(`
+    SELECT
+      s.id AS section_id,
+      s.spec_id,
+      s.section_number,
+      s.section_title,
+      s.page_start,
+      s.page_end,
+      sp.title AS spec_title,
+      sp.version AS spec_version,
+      d.latest_version AS catalog_latest_version
+    FROM sections s
+    JOIN specs sp ON sp.id = s.spec_id
+    LEFT JOIN etsi_documents d ON d.mapped_3gpp_id = sp.id
+    WHERE s.id IN (${placeholders})
+  `).all(...sectionIds);
+}

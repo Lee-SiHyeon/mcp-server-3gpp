@@ -8,9 +8,14 @@ export function registerTool(name, schema, handler) {
 }
 
 export function getToolList() {
-  return [...tools.entries()].map(([name, { schema }]) => ({
-    name,
-    description: schema.description,
-    inputSchema: schema.inputSchema,
-  }));
+  return [...tools.entries()].map(([name, { schema }]) => {
+    const tool = {
+      name,
+      description: schema.description,
+      inputSchema: schema.inputSchema,
+    };
+    if (schema.outputSchema) tool.outputSchema = schema.outputSchema;
+    if (schema.annotations) tool.annotations = schema.annotations;
+    return tool;
+  });
 }

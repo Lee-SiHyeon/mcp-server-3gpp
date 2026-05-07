@@ -60,6 +60,7 @@ import { searchEtsiCatalogSchema, handleSearchEtsiCatalog } from "./tools/search
 import { getEtsiDocumentSchema, handleGetEtsiDocument } from "./tools/getEtsiDocument.js";
 import { getTestCaseStructureSchema, handleGetTestCaseStructure } from "./tools/getTestCaseStructure.js";
 import { listTestCasesSchema, handleListTestCases } from "./tools/listTestCases.js";
+import { generateCitationSchema, handleGenerateCitation } from "./tools/generateCitation.js";
 
 // Validation middleware
 import { validateArgs } from "./tools/validateArgs.js";
@@ -95,6 +96,7 @@ function registerAllTools() {
   registerTool(getEtsiDocumentSchema.name, getEtsiDocumentSchema, handleGetEtsiDocument);
   registerTool(getTestCaseStructureSchema.name, getTestCaseStructureSchema, handleGetTestCaseStructure);
   registerTool(listTestCasesSchema.name, listTestCasesSchema, handleListTestCases);
+  registerTool(generateCitationSchema.name, generateCitationSchema, handleGenerateCitation);
 }
 
 // ---------------------------------------------------------------------------
