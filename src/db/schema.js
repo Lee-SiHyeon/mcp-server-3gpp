@@ -17,6 +17,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { ensureEmbeddingMetadataTable } from '../embeddings/indexMetadata.js';
 import { ensureCatalogSchema } from './catalogSchema.js';
+import { migrateImportantKwd } from './migrations.js';
 
 // Resolve project root: this file lives at src/db/schema.js → go up two levels.
 const __filename = fileURLToPath(import.meta.url);
@@ -80,6 +81,8 @@ export function initDatabase(dbPath) {
   // Existing v1 databases predate the catalog layer. Keep this idempotent so
   // tools can open a prebuilt corpus and still expose catalog functionality.
   ensureCatalogSchema(db);
+
+  migrateImportantKwd(db);
 
   // --- Optional: sqlite-vec extension -------------------------------------
   const features = { vectorSearch: false, ftsSearch: true };

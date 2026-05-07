@@ -16,6 +16,7 @@ import * as sqliteVec from 'sqlite-vec';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { migrateImportantKwd } from './migrations.js';
 
 // Resolve project root: this file lives at src/db/connection.js → up two levels.
 const __filename = fileURLToPath(import.meta.url);
@@ -55,16 +56,15 @@ export function getConnection(dbPath) {
 
   _db = new Database(resolvedPath);
 
-  // Performance pragmas — match what schema.js applies.
   _db.pragma('journal_mode = WAL');
   _db.pragma('busy_timeout = 5000');
   _db.pragma('foreign_keys = ON');
 
-  // Load sqlite-vec extension for optional vector search support.
+  migrateImportantKwd(_db);
+
   try {
     sqliteVec.load(_db);
   } catch {
-    // sqlite-vec not available — vector search will be disabled.
   }
 
   return _db;

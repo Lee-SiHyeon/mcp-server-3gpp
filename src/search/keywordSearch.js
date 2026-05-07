@@ -1,6 +1,7 @@
 import { getConnection } from '../db/connection.js';
 
 const TITLE_WEIGHT = 10.0;
+const KWD_WEIGHT = 30.0;
 const CONTENT_WEIGHT = 1.0;
 
 /**
@@ -43,8 +44,8 @@ export function keywordSearch(parsed) {
       s.page_start,
       s.page_end,
       s.content_length,
-      bm25(sections_fts, ${TITLE_WEIGHT}, ${CONTENT_WEIGHT}) as raw_bm25,
-      snippet(sections_fts, 1, '<mark>', '</mark>', '...', 40) as snippet
+      bm25(sections_fts, ${TITLE_WEIGHT}, ${KWD_WEIGHT}, ${CONTENT_WEIGHT}) as raw_bm25,
+      snippet(sections_fts, 2, '<mark>', '</mark>', '...', 40) as snippet
     FROM sections_fts
     JOIN sections s ON s.rowid = sections_fts.rowid
     LEFT JOIN sections p ON p.id = s.parent_section
@@ -57,7 +58,7 @@ export function keywordSearch(parsed) {
     params.push(parsed.specFilter);
   }
 
-  sql += ` ORDER BY bm25(sections_fts, ${TITLE_WEIGHT}, ${CONTENT_WEIGHT}) LIMIT ?`;
+  sql += ` ORDER BY bm25(sections_fts, ${TITLE_WEIGHT}, ${KWD_WEIGHT}, ${CONTENT_WEIGHT}) LIMIT ?`;
   params.push(parsed.k * 3);
 
   try {

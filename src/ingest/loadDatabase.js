@@ -16,6 +16,23 @@ import {
   getParentSectionId,
 } from './sectionNormalizer.js';
 
+function extractImportantKeywords(sectionNumber, sectionTitle, content) {
+  const kws = new Set();
+
+  if (sectionNumber) kws.add(sectionNumber);
+
+  const camelCase = content.matchAll(/\b[A-Z][a-z]+(?:[A-Z][a-z]+)+\b/g);
+  for (const m of camelCase) kws.add(m[0]);
+
+  const acronyms = content.matchAll(/\b[A-Z]{3,6}\b/g);
+  for (const m of acronyms) kws.add(m[0]);
+
+  const procWords = (sectionTitle || '').matchAll(/\b\w+(?:tion|ure|ment|ing)\b/gi);
+  for (const m of procWords) kws.add(m[0].toLowerCase());
+
+  return [...kws].slice(0, 50).join(' ');
+}
+
 /**
  * @typedef {Object} LoadResults
  * @property {number} specs
@@ -53,8 +70,8 @@ export function loadStructuredSections(intermediateDir, dbPath, options = {}) {
 
   const insertSection = db.prepare(`
     INSERT OR REPLACE INTO sections
-      (id, spec_id, section_number, section_title, page_start, page_end, content, content_length, parent_section, depth)
-    VALUES (@id, @spec_id, @section_number, @section_title, @page_start, @page_end, @content, @content_length, @parent_section, @depth)
+      (id, spec_id, section_number, section_title, page_start, page_end, content, content_length, important_kwd, parent_section, depth)
+    VALUES (@id, @spec_id, @section_number, @section_title, @page_start, @page_end, @content, @content_length, @important_kwd, @parent_section, @depth)
   `);
 
   const insertIngestion = db.prepare(`
@@ -156,6 +173,11 @@ export function loadStructuredSections(intermediateDir, dbPath, options = {}) {
         const parentId = section.parent_section
           ? (section.parent_section.includes(':') ? section.parent_section : `${specId}:${section.parent_section}`)
           : getParentSectionId(sectionId);
+        const important_kwd = extractImportantKeywords(
+          section.section_number,
+          section.section_title || '',
+          content,
+        );
 
         try {
           insertSection.run({
@@ -167,6 +189,7 @@ export function loadStructuredSections(intermediateDir, dbPath, options = {}) {
             page_end: section.page_end || 0,
             content,
             content_length: content.length,
+            important_kwd,
             parent_section: parentId,
             depth,
           });

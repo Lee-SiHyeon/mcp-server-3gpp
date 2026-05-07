@@ -4,7 +4,7 @@
 -- FTS5 full-text search and optional vector search (sqlite-vec).
 -- =============================================================================
 
-PRAGMA user_version = 2;
+PRAGMA user_version = 3;
 
 -- ---------------------------------------------------------------------------
 -- Core tables
@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS sections (
   page_end INTEGER,
   content TEXT NOT NULL,
   content_length INTEGER,
+  important_kwd TEXT NOT NULL DEFAULT '',
   parent_section TEXT,              -- e.g., 'ts_24_301:5.3.2'
   depth INTEGER DEFAULT 0,
   UNIQUE(spec_id, section_number)
@@ -58,6 +59,7 @@ CREATE TABLE IF NOT EXISTS sections (
 -- Content-sync'd virtual table — kept in sync via triggers below.
 CREATE VIRTUAL TABLE IF NOT EXISTS sections_fts USING fts5(
   section_title,
+  important_kwd,
   content,
   content='sections',
   content_rowid='rowid'
@@ -65,20 +67,20 @@ CREATE VIRTUAL TABLE IF NOT EXISTS sections_fts USING fts5(
 
 -- Triggers to keep FTS index in sync with the sections table.
 CREATE TRIGGER sections_ai AFTER INSERT ON sections BEGIN
-  INSERT INTO sections_fts(rowid, section_title, content)
-  VALUES (new.rowid, new.section_title, new.content);
+  INSERT INTO sections_fts(rowid, section_title, important_kwd, content)
+  VALUES (new.rowid, new.section_title, new.important_kwd, new.content);
 END;
 
 CREATE TRIGGER sections_ad AFTER DELETE ON sections BEGIN
-  INSERT INTO sections_fts(sections_fts, rowid, section_title, content)
-  VALUES ('delete', old.rowid, old.section_title, old.content);
+  INSERT INTO sections_fts(sections_fts, rowid, section_title, important_kwd, content)
+  VALUES ('delete', old.rowid, old.section_title, old.important_kwd, old.content);
 END;
 
 CREATE TRIGGER sections_au AFTER UPDATE ON sections BEGIN
-  INSERT INTO sections_fts(sections_fts, rowid, section_title, content)
-  VALUES ('delete', old.rowid, old.section_title, old.content);
-  INSERT INTO sections_fts(rowid, section_title, content)
-  VALUES (new.rowid, new.section_title, new.content);
+  INSERT INTO sections_fts(sections_fts, rowid, section_title, important_kwd, content)
+  VALUES ('delete', old.rowid, old.section_title, old.important_kwd, old.content);
+  INSERT INTO sections_fts(rowid, section_title, important_kwd, content)
+  VALUES (new.rowid, new.section_title, new.important_kwd, new.content);
 END;
 
 -- ---------------------------------------------------------------------------
