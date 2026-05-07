@@ -17,11 +17,11 @@ after(() => closeConnection());
 
 describe('section navigation fallbacks', () => {
   test('get_section returns navigation guidance for structural procedure headings', () => {
-    const response = handleGetSection({ sectionId: 'ts_24_501:5.5.1' });
+    const response = handleGetSection({ sectionId: 'ts_24_501:5.4.1' });
     const data = parseResult(response);
 
     assert.ok(data.section, 'Expected section payload');
-    assert.strictEqual(data.section.section_id, 'ts_24_501:5.5.1');
+    assert.strictEqual(data.section.section_id, 'ts_24_501:5.4.1');
     assert.strictEqual(data.section.content_length, 0);
     assert.strictEqual(data.section.has_content, false);
     assert.strictEqual(data.section.navigation_only, true);
@@ -34,12 +34,12 @@ describe('section navigation fallbacks', () => {
     assert.ok(data.navigation.descendant_content_count > 0, 'Expected contentful descendants');
 
     const childIds = data.navigation.child_sections.map(section => section.section_id);
-    assert.ok(childIds.includes('ts_24_501:5.5.1.1'), 'Expected 5.5.1.1 in child guidance');
+    assert.ok(childIds.includes('ts_24_501:5.4.1.1'), 'Expected 5.4.1.1 in child guidance');
 
     const suggestedIds = data.navigation.suggested_sections.map(section => section.section_id);
     assert.ok(
-      suggestedIds.includes('ts_24_501:5.5.1.1') || suggestedIds.includes('ts_24_501:5.5.1.2.2'),
-      'Expected a useful descendant suggestion under 5.5.1',
+      suggestedIds.includes('ts_24_501:5.4.1.2.1') || suggestedIds.includes('ts_24_501:5.4.1.2.2'),
+      'Expected a useful descendant suggestion under 5.4.1',
     );
 
     assert.ok(
@@ -56,24 +56,24 @@ describe('section navigation fallbacks', () => {
   });
 
   test('get_section keeps direct-content sections unchanged apart from content flags', () => {
-    const response = handleGetSection({ sectionId: 'ts_24_501:5.5.1.1', maxChars: 400 });
+    const response = handleGetSection({ sectionId: 'ts_24_501:5.4.1.2.2', maxChars: 400 });
     const data = parseResult(response);
 
     assert.ok(data.section, 'Expected section payload');
-    assert.strictEqual(data.section.section_id, 'ts_24_501:5.5.1.1');
+    assert.strictEqual(data.section.section_id, 'ts_24_501:5.4.1.2.2');
     assert.strictEqual(data.section.has_content, true);
     assert.ok(typeof data.section.content === 'string' && data.section.content.length > 0, 'Expected direct content');
     assert.ok(!data.navigation, 'Contentful sections should not emit navigation fallback');
   });
 
   test('get_spec_toc marks empty focus nodes and points to contentful descendants', () => {
-    const response = handleGetSpecToc({ specId: 'ts_24_501', sectionPrefix: '5.5.1', maxDepth: 5 });
+    const response = handleGetSpecToc({ specId: 'ts_24_501', sectionPrefix: '5.4.1', maxDepth: 5 });
     const data = parseResult(response);
 
     assert.ok(Array.isArray(data.entries), 'Expected entries array');
     assert.ok(data.entries.length > 0, 'Expected subtree entries');
     assert.ok(data.focus_section, 'Expected focus section metadata');
-    assert.strictEqual(data.focus_section.section_number, '5.5.1');
+    assert.strictEqual(data.focus_section.section_number, '5.4.1');
     assert.strictEqual(data.focus_section.has_content, false);
     assert.strictEqual(data.focus_section.navigation_only, true);
 
@@ -84,12 +84,12 @@ describe('section navigation fallbacks', () => {
       'TOC navigation should prioritize substantive descendants ahead of generic "General" sections',
     );
 
-    const rootEntry = data.entries.find(entry => entry.section_number === '5.5.1');
+    const rootEntry = data.entries.find(entry => entry.section_number === '5.4.1');
     assert.ok(rootEntry, 'Expected root TOC entry in subtree');
     assert.strictEqual(rootEntry.has_content, false);
     assert.strictEqual(rootEntry.navigation_only, true);
 
-    const contentfulDescendant = data.entries.find(entry => entry.section_number === '5.5.1.2.2');
+    const contentfulDescendant = data.entries.find(entry => entry.section_number === '5.4.1.2.2');
     assert.ok(contentfulDescendant, 'Expected substantive descendant in subtree');
     assert.strictEqual(contentfulDescendant.has_content, true);
   });

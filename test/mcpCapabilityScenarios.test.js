@@ -15,8 +15,8 @@ import { handleListSpecs } from '../src/tools/listSpecs.js';
 import { validateArgs } from '../src/tools/validateArgs.js';
 
 const KNOWN_SPEC = 'ts_24_501';
-const KNOWN_STRUCTURAL_SECTION = 'ts_24_501:5.5.1';
-const KNOWN_CONTENT_SECTION = 'ts_24_501:5.5.1.1';
+const KNOWN_STRUCTURAL_SECTION = 'ts_24_501:5.4.1';
+const KNOWN_CONTENT_SECTION = 'ts_24_501:5.4.1.2.1';
 
 after(() => closeConnection());
 
@@ -263,12 +263,12 @@ describe('MCP capability scenarios - TOC and sections', () => {
   test('get_spec_toc focuses structural prefixes and suggests descendants', async () => {
     const { data } = await parseMcpJson(handleGetSpecToc({
       specId: KNOWN_SPEC,
-      sectionPrefix: '5.5.1',
+      sectionPrefix: '5.4.1',
       maxDepth: 5,
     }));
 
     assert.ok(data.focus_section, 'focused TOC query should expose focus_section');
-    assert.strictEqual(data.focus_section.section_number, '5.5.1');
+    assert.strictEqual(data.focus_section.section_number, '5.4.1');
     assert.strictEqual(data.focus_section.has_content, false);
     assert.ok(data.navigation, 'structural focus should include navigation');
     assert.ok(Array.isArray(data.navigation.child_sections));
@@ -307,7 +307,7 @@ describe('MCP capability scenarios - TOC and sections', () => {
   });
 
   test('get_section resolves specId plus sectionNumber', async () => {
-    const { data } = await parseMcpJson(handleGetSection({ specId: KNOWN_SPEC, sectionNumber: '5.5.1.1', maxChars: 80 }));
+    const { data } = await parseMcpJson(handleGetSection({ specId: KNOWN_SPEC, sectionNumber: '5.4.1.2.1', maxChars: 80 }));
 
     assertSectionShape(data.section);
     assert.strictEqual(data.section.section_id, KNOWN_CONTENT_SECTION);
@@ -367,7 +367,7 @@ describe('MCP capability scenarios - related sections', () => {
   test('search_related_sections accepts specId plus sectionNumber anchors', async () => {
     const { data } = await parseMcpJson(handleSearchRelatedSections({
       specId: KNOWN_SPEC,
-      sectionNumber: '5.5.1.1',
+      sectionNumber: '5.4.1.2.1',
       maxResults: 3,
     }));
 
