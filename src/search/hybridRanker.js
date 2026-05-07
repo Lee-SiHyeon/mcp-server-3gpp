@@ -3,6 +3,7 @@ import { keywordSearch } from './keywordSearch.js';
 import { semanticSearch, isVectorSearchAvailable } from './semanticSearch.js';
 import { anytxtSearch, isAnytxtAvailable, detectAnytxt } from './anytxtSearch.js';
 import { expandQuery, isHydeEnabled } from './hydeExpander.js';
+import { rerankCandidates, configureReranker, isRerankerEnabled, getRerankerConfig } from './reranker.js';
 import { queryCache } from './queryCache.js';
 import { getContentfulSectionsByTitle } from '../db/queries.js';
 import path from 'node:path';
@@ -497,6 +498,23 @@ export async function hybridSearch(query, options = {}) {
     applyStructureAwareRanking(row, parsed);
   }
 
+  // Optional reranking step (cross-encoder re-scoring after RRF fusion)
+  if (isRerankerEnabled()) {
+    const rerankPool = [...merged.values()]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, Math.min(maxResults * 5, 50));
+
+    const rerankQuery = parsed.normalizedText || query;
+    const reranked = await rerankCandidates(rerankQuery, rerankPool);
+
+    for (const row of reranked) {
+      if (row.reranker_score !== undefined) {
+        row.score = Math.max(0, Math.min(1, 0.6 * row.score + 0.4 * row.reranker_score));
+        if (!row.evidence.includes('reranker')) row.evidence.push('reranker');
+      }
+    }
+  }
+
   // Sort by score descending
   const ranked = [...merged.values()].sort((a, b) =>
     (b.rank_exactness ?? 0) - (a.rank_exactness ?? 0) ||
@@ -542,6 +560,9 @@ export async function hybridSearch(query, options = {}) {
       if (row.hyde_score !== undefined) {
         result.hyde_score = Math.round(row.hyde_score * 1000) / 1000;
       }
+      if (row.reranker_score !== undefined) {
+        result.reranker_score = Math.round(row.reranker_score * 1000) / 1000;
+      }
       if (row.rrf_raw !== undefined) {
         result.rrf_raw = Math.round(row.rrf_raw * 10000) / 10000;
       }
@@ -586,3 +607,4 @@ export { queryCache, getQueryCacheStats } from './queryCache.js';
 export { detectAnytxt, isAnytxtAvailable } from './anytxtSearch.js';
 export { getAnytxtStatus } from './anytxtSearch.js';
 export { configureHyde, isHydeEnabled, getHydeConfig } from './hydeExpander.js';
+export { configureReranker, isRerankerEnabled, getRerankerConfig } from './reranker.js';
