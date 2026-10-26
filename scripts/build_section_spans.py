@@ -169,12 +169,17 @@ def _find_heading_offset(page_text: str, section_number: str) -> int:
         line = raw_line.strip()
         if not line:
             continue
-        # Match numbered heading
-        m = re.match(r'^(\d+(?:\.\d+)*)\s', line)
+        # Match numbered heading (incl. letter suffixes like 6.2A.1 / 58a)
+        m = re.match(r'^(\d+[A-Za-z]{0,2}(?:_\d+)?(?:\.\d+[A-Za-z]{0,2}(?:_\d+)?)*)(?:\s|$)', line)
         if m and m.group(1) == section_number:
             # Return char offset of this line
             offset = page_text.find(raw_line)
             return max(0, offset)
+        # Match annex sub-clause heading ("C.1 ...", "A1.1.5 ...")
+        if not section_number[0].isdigit() and (
+                line == section_number or line.startswith(section_number + ' ')
+                or line.startswith(section_number + '\t')):
+            return max(0, page_text.find(raw_line))
         # Match annex heading
         if section_number.lower().startswith("annex"):
             if line.lower().startswith(section_number.lower()):

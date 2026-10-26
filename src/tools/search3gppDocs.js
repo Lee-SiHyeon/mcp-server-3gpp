@@ -70,6 +70,9 @@ export async function handleSearch3gppDocs(args) {
   }
 
   const clampedMax = Math.max(1, Math.min(20, maxResults));
+  // Small hosted instances can deliberately disable the embedding model. Keep
+  // the requested mode in the response so clients can see the fallback.
+  const semanticDisabled = process.env.THREEGPP_DISABLE_SEMANTIC === 'true';
 
   const result = await hybridSearch(query, {
     spec,
@@ -77,8 +80,12 @@ export async function handleSearch3gppDocs(args) {
     page: Math.max(1, page),
     mode,
     includeScores,
-    embedQueryFn: mode === 'keyword' ? null : embedQuery,
+    embedQueryFn: mode === 'keyword' || semanticDisabled ? null : embedQuery,
   });
+
+  if (semanticDisabled && mode !== 'keyword') {
+    result.warnings = [...(result.warnings || []), 'semantic_disabled_by_server'];
+  }
 
   if (includeCitations && Array.isArray(result.results) && result.results.length > 0) {
     const sources = getCitationSourcesBySectionIds(result.results.map(row => row.section_id));

@@ -317,6 +317,20 @@ def process_rfc(rfc_number: int, input_dir: Path, output_dir: Path) -> bool:
 
     # Extract sections
     sections = extract_sections(lines, spec_id, toc_entries)
+    if not sections:
+        # Old RFCs (e.g. 792, 822, 1144) have no numbered clauses; keep the
+        # whole text as one section so they are still searchable/citable.
+        content = "\n".join(lines).strip()
+        title = meta.get("title") or f"RFC {rfc_number}"
+        sections = [{
+            "section_id": f"{spec_id}:1", "spec_id": spec_id, "section_number": "1",
+            "section_title": f"{title} (full text)", "page_start": 1, "page_end": 0,
+            "depth": 0, "parent_section": "", "content": content,
+            "brief": " ".join(content.split())[:200],
+        }]
+        toc_entries = [{"section_number": "1", "section_title": sections[0]["section_title"],
+                        "depth": 0, "page_estimate": 1, "brief": sections[0]["brief"]}]
+        print("  No numbered sections; stored full text as section 1")
     print(f"  Sections found: {len(sections)}")
 
     # Back-fill briefs into TOC entries from section content

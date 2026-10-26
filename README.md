@@ -15,7 +15,7 @@ Search is a starting point, not the whole product. The model is expected to brow
 
 ## What ships today
 
-- DB-backed v2 server with 12 MCP tools
+- DB-backed v2 server with 13 MCP tools
 - Prebuilt corpus in `data/corpus/3gpp.db`
 - 207 specs total: 113 TS, 1 TR, 93 RFC
 - 66,109 full sections and 63,376 TOC rows
@@ -69,13 +69,62 @@ The bundled database is tracked with Git LFS. A healthy startup looks like:
 ```text
 [3GPP MCP] Database ready: .../data/corpus/3gpp.db
 [3GPP MCP] Features - FTS: true, Vector: true
-[3GPP MCP] Registered 12 tools (v2 DB mode)
+[3GPP MCP] Registered 13 tools (v2 DB mode)
 ```
 
 `npm run validate` now reports two separate states:
 
-- `Baseline keyword readiness`: the DB-backed 12-tool server is healthy and search/navigation work in keyword mode.
+- `Baseline keyword readiness`: the DB-backed 13-tool server is healthy and search/navigation work in keyword mode.
 - `Optional semantic readiness`: whether semantic prerequisites are installed and whether the live tool smoke test actually activated semantic/hybrid retrieval.
+
+## Streamable HTTP and Docker
+
+The HTTP transport serves MCP at `/mcp`. A production container requires an
+`API_KEY`; send it in an `Authorization: Bearer ...` header. The key is not
+accepted as a URL parameter. `/health` checks the process and `/ready` checks
+that the configured SQLite corpus is readable and has searchable data.
+
+Fetch the LFS corpus before building. The Docker build fails if the checkout
+contains only an LFS pointer, and validates the native SQLite dependency:
+
+```bash
+git lfs pull --include='data/corpus/3gpp.db'
+docker build -t mcp-server-3gpp:local .
+docker run --rm -p 127.0.0.1:3000:3000 \
+  -e API_KEY="your-long-random-secret" mcp-server-3gpp:local
+```
+
+Connect a Streamable HTTP MCP client to `http://127.0.0.1:3000/mcp` with the
+Bearer header. For an external service, put HTTPS in front of the container.
+Use `ALLOW_OPEN_HTTP=true` only when intentionally exposing anonymous reads.
+
+Browser requests with an `Origin` header are rejected by default. Set
+`CORS_ORIGIN` to a comma-separated list of explicit trusted origins if browser
+clients are required. A wildcard is not accepted. Non-browser MCP clients
+that omit `Origin` work without this setting. `MAX_SESSIONS` (default 64) and
+`SESSION_TTL_MS` (default 30 minutes) bound idle session resources; active event
+streams are not expired as idle sessions.
+
+For a 512 MB free hosting instance, set `THREEGPP_DISABLE_SEMANTIC=true`. Search
+then uses FTS/BM25 and reports `mode_actual=keyword`, even when the client asks
+for semantic or hybrid search. This avoids loading the embedding model; it does
+not remove TOC navigation, section lookup, citations, or reference traversal.
+The corpus path may be changed using `THREEGPP_DB_PATH`; when specified, a
+missing path is treated as unavailable rather than falling back to another DB.
+SQLite currently opens the corpus in WAL mode, so its parent directory must be
+writable by the container user.
+
+`render.yaml` is an optional free-instance configuration. It generates an API
+key in the host account and selects the keyword-only mode. The build context
+must contain the actual SQLite corpus; an unresolved LFS pointer is rejected.
+Auto-deploy is disabled so updates happen only when deliberately requested.
+Free instances can sleep, restart, or stop at account quota limits; a client
+may need to initialize a new MCP session after a restart.
+
+Free host allowances and billing safeguards depend on the hosting account.
+Check that exceeding bandwidth or build limits stops service rather than
+incurring charges before publishing a free-tier endpoint. Git LFS downloads
+consume the repository owner's separate LFS allowance.
 
 ## MCP client configuration
 
@@ -138,6 +187,7 @@ The server checks these DB locations in order:
 | `list_specs` | Compatibility alias with a smaller output shape; prefer `get_spec_catalog`. |
 | `get_test_case_structure` | Extract structured test case data (Test Purpose, Conformance Requirements, Test Procedure) from conformance specs. |
 | `list_test_cases` | List all test case sections within a spec. |
+| `generate_citation` | Format citations for one or more section IDs. |
 
 ## Recommended prompting pattern
 
@@ -197,7 +247,7 @@ npm run validate
 npm test
 ```
 
-`npm run validate` checks the package metadata, resolves the DB path, verifies the core schema and counts, confirms the v2 12-tool surface, runs the navigation smoke path, and reports semantic readiness separately from baseline keyword readiness.
+`npm run validate` checks the package metadata, resolves the DB path, verifies the core schema and counts, confirms the v2 13-tool surface, runs the navigation smoke path, and reports semantic readiness separately from baseline keyword readiness.
 
 ## Optional semantic readiness
 

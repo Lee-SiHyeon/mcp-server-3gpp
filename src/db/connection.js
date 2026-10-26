@@ -48,7 +48,7 @@ export function getConnection(dbPath) {
     }
   }
 
-  const resolvedPath = dbPath ?? DEFAULT_DB_PATH;
+  const resolvedPath = dbPath ?? (process.env.THREEGPP_DB_PATH || DEFAULT_DB_PATH);
   const dir = path.dirname(resolvedPath);
 
   // Ensure the parent directory exists (e.g., first run on a fresh clone).

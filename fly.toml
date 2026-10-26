@@ -24,8 +24,8 @@ primary_region = "sin"
   PORT = "3000"
   # API_KEY = "set-via-fly-secrets-set"
   # ALLOW_OPEN_HTTP = "true" # only for intentionally unauthenticated deployments
-  CORS_ORIGIN = "*"
   RATE_LIMIT_MAX = "100"
   RATE_LIMIT_WINDOW_MS = "60000"
   MAX_BODY_BYTES = "1048576"
-  TRUST_PROXY = "true"
+  # Set TRUST_PROXY only when your proxy sanitizes X-Forwarded-For.
+  TRUST_PROXY = "false"

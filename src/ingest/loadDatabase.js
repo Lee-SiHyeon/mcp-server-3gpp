@@ -46,13 +46,16 @@ function extractImportantKeywords(sectionNumber, sectionTitle, content) {
  *
  * @param {string} intermediateDir — Directory containing *_sections.jsonl files.
  * @param {string} dbPath          — Path to the SQLite database.
- * @param {{ strict?: boolean, specFilter?: string | null }} [options]
+ * @param {{ strict?: boolean, specFilter?: string | null, replaceExisting?: boolean }} [options]
+ *   replaceExisting — delete the spec's existing specs/toc/sections/vector/reference rows
+ *   first, so a re-ingest does not leave stale sections behind.
  * @returns {LoadResults}
  */
 export function loadStructuredSections(intermediateDir, dbPath, options = {}) {
   const db = getConnection(dbPath);
   const strict = options.strict || false;
   const specFilter = options.specFilter || null;
+  const replaceExisting = options.replaceExisting || false;
 
   // --- Prepared statements --------------------------------------------------
 
@@ -73,6 +76,27 @@ export function loadStructuredSections(intermediateDir, dbPath, options = {}) {
       (id, spec_id, section_number, section_title, page_start, page_end, content, content_length, important_kwd, parent_section, depth)
     VALUES (@id, @spec_id, @section_number, @section_title, @page_start, @page_end, @content, @content_length, @important_kwd, @parent_section, @depth)
   `);
+
+  const hasVecTable = !!db.prepare(
+    "SELECT 1 FROM sqlite_master WHERE name = 'vec_sections'"
+  ).get();
+
+  function deleteExistingSpec(specId, warnings) {
+    if (hasVecTable) {
+      try {
+        db.prepare(
+          'DELETE FROM vec_sections WHERE section_id IN (SELECT id FROM sections WHERE spec_id = ?)'
+        ).run(specId);
+      } catch (e) {
+        // sqlite-vec not loadable: the vector rows stay and the index reports stale
+        warnings.push(`vec_sections cleanup skipped: ${e.message}`);
+      }
+    }
+    db.prepare('DELETE FROM spec_references WHERE source_spec_id = ?').run(specId);
+    db.prepare('DELETE FROM sections WHERE spec_id = ?').run(specId);
+    db.prepare('DELETE FROM toc WHERE spec_id = ?').run(specId);
+    db.prepare('DELETE FROM specs WHERE id = ?').run(specId);
+  }
 
   const insertIngestion = db.prepare(`
     INSERT INTO ingestion_runs (spec_id, source_type, rows_inserted, warnings, completed_at)
@@ -126,13 +150,18 @@ export function loadStructuredSections(intermediateDir, dbPath, options = {}) {
         warnings.push(`Structure file not found: ${structFile}`);
       }
 
+      if (replaceExisting) deleteExistingSpec(specId, warnings);
+
       // --- Insert spec row ------------------------------------------------
+      const series = specId.match(/t[sr]_(\d+)_/)?.[1] || null;
+      // 3-digit series (ts_103_412) are ETSI-only documents, not 3GPP specs
+      const body = specId.replace(/_/g, ' ').toUpperCase();
       insertSpec.run({
         id: specId,
         title: specMeta?.title || specId,
         version: specMeta?.version || null,
-        series: specId.match(/ts_(\d+)_/)?.[1] || null,
-        description: `3GPP ${specId.replace(/_/g, ' ').toUpperCase()}`,
+        series,
+        description: series && series.length === 3 ? `ETSI ${body}` : `3GPP ${body}`,
         total_sections: sections.length,
         total_pages: specMeta?.total_pages || 0,
         source_pdf: specMeta?.source_pdf || null,
@@ -211,6 +240,11 @@ export function loadStructuredSections(intermediateDir, dbPath, options = {}) {
           updateBrief.run(brief, specId, section.section_number);
         }
       }
+
+      // Rows sharing a section_number collapse on REPLACE; record the real count.
+      db.prepare(
+        'UPDATE specs SET total_sections = (SELECT COUNT(*) FROM sections WHERE spec_id = ?) WHERE id = ?'
+      ).run(specId, specId);
 
       insertIngestion.run(specId, sectionCount, JSON.stringify(warnings));
     });

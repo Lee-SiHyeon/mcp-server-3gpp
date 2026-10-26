@@ -50,8 +50,14 @@ except ImportError:
 # 3GPP heading patterns
 # ---------------------------------------------------------------------------
 
+# Section number, including 3GPP letter-suffixed clauses such as
+# "6.2A.1", "6.1.2.3a", "15.1A.1" or "5.4.1.2.1B".
+# A letter on the first component is only accepted before a dot so that
+# lines like "5G NR ..." are not mistaken for headings.
+SECTION_NUMBER_RE = r'\d+(?:[A-Za-z]{1,2}(?=\.))?(?:\.\d+[A-Za-z]{0,2})*'
+
 # Numbered sections like "5.3.2 Some title"
-SECTION_PATTERN = re.compile(r'^(\d+(?:\.\d+)*)\s+(.+?)$', re.MULTILINE)
+SECTION_PATTERN = re.compile(r'^(' + SECTION_NUMBER_RE + r')\s+(.+?)$', re.MULTILINE)
 
 # Annex sections like "Annex A (normative): Foo bar"
 ANNEX_PATTERN = re.compile(
@@ -87,7 +93,8 @@ def derive_spec_id(filename: str) -> str:
 
     # Try "{type}_XX_YYY_v..." underscore-separated format (download_etsi_specs.py output)
     # Matches: ts_24_301_v18.9.0, tr_38_901_v18.2.0, ts_38_321_v18.3.0
-    m = re.match(r'(ts|tr)_(\d{2})_(\d{3})(?:_(\d+))?(?:_v[\d.]+)?', name)
+    # Also accepts 3-digit ETSI-only series: ts_103_412_v1.3.1 → ts_103_412
+    m = re.match(r'(ts|tr)_(\d{2,3})_(\d{3})(?:_(\d+))?(?:_v[\d.]+)?', name)
     if m:
         prefix = m.group(1)
         series = m.group(2)
@@ -137,12 +144,23 @@ def extract_version(filename: str) -> str:
 # TOC extraction with fallback
 # ---------------------------------------------------------------------------
 
+# Outline (bookmark) titles are known headings, so a laxer form is safe there:
+# top-level letter suffixes ("58a Latency reductions"), number-only titles
+# ("14.17") and annex sub-clauses ("C.1", "A1.1.5", "D.2.1").
+OUTLINE_NUMBER_RE = re.compile(r'^(\d+[A-Za-z]{0,2}(?:_\d+)?(?:\.\d+[A-Za-z]{0,2}(?:_\d+)?)*)(?:\s|$)')
+ANNEX_SUBCLAUSE_RE = re.compile(r'^([A-Z]\d{0,2}(?:\.\d+[A-Za-z]{0,2})+)(?:\s|$)')
+
+
 def extract_section_number(title: str) -> str:
     """Extract section number from title like '5.3.2 Some title' → '5.3.2'."""
-    m = re.match(r'^(\d+(?:\.\d+)*)\s', title)
+    title = title.strip()
+    m = OUTLINE_NUMBER_RE.match(title)
     if m:
         return m.group(1)
-    m = re.match(r'^(Annex\s+[A-Z](?:\.\d+)*)', title, re.IGNORECASE)
+    m = re.match(r'^(Annex\s+(?:[A-Z]|\d+)(?:\.\d+)*)', title, re.IGNORECASE)
+    if m:
+        return m.group(1)
+    m = ANNEX_SUBCLAUSE_RE.match(title)
     if m:
         return m.group(1)
     return ""

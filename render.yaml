@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: mcp-3gpp-free
+    runtime: docker
+    plan: free
+    autoDeployTrigger: "off"
+    healthCheckPath: /ready
+    envVars:
+      - key: API_KEY
+        generateValue: true
+      - key: THREEGPP_DISABLE_SEMANTIC
+        value: "true"

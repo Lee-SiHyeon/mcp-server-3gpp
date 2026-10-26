@@ -90,8 +90,11 @@ describe('hybridSearch — scoring and fusion', () => {
     const r = await hybridSearch('PDN', { mode: 'keyword', maxResults: 5, includeScores: true });
     assert.ok(r.results.length > 0, 'Expected at least one result');
     const result = r.results[0];
-    // In keyword mode, score should equal keyword_score (since alpha=1.0, semantic_score=0)
-    assert.strictEqual(result.score, result.keyword_score, 'In keyword mode, score must equal keyword_score');
+    // alpha=1.0 means no semantic contribution. score itself may differ from
+    // keyword_score because title/structure bonuses are applied after fusion
+    // (e.g. a section titled "UE requested PDN connectivity" gets +0.08).
+    assert.strictEqual(result.semantic_score ?? 0, 0, 'In keyword mode, semantic_score must be 0');
+    assert.ok(!(result.evidence || []).includes('semantic'), 'keyword mode must not report semantic evidence');
   });
 
   test('scores are clamped to [0, 1]', async () => {

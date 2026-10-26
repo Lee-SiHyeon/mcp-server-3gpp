@@ -13,6 +13,10 @@
  *   node src/ingest/loadRfcSections.js --rfc 3261 --rfc 6733 --rfc 8446
  *   node src/ingest/loadRfcSections.js --all
  *   node src/ingest/loadRfcSections.js --rfc 3261 --rebuild
+ *   node src/ingest/loadRfcSections.js --all --db staged.db --intermediate dir --rfcs-dir dir
+ *
+ * --db / THREEGPP_DB_PATH, --intermediate / THREEGPP_INTERMEDIATE_DIR and
+ * --rfcs-dir / THREEGPP_RFCS_DIR let a staged rebuild work outside the repo.
  */
 
 import { readFileSync, readdirSync, existsSync } from 'fs';
@@ -25,8 +29,14 @@ import { generateBrief, sectionDepth, getParentSectionId } from './sectionNormal
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = resolve(fileURLToPath(import.meta.url), '..', '..', '..');
 const PROJECT_ROOT = resolve(__dirname);
-const INTERMEDIATE_DIR = join(PROJECT_ROOT, 'data', 'intermediate');
-const RFCS_DIR = join(PROJECT_ROOT, 'data', 'rfcs');
+function cliValue(name) {
+  const i = process.argv.indexOf(name);
+  return i >= 0 ? process.argv[i + 1] : null;
+}
+const INTERMEDIATE_DIR = resolve(cliValue('--intermediate') || process.env.THREEGPP_INTERMEDIATE_DIR
+  || join(PROJECT_ROOT, 'data', 'intermediate'));
+const RFCS_DIR = resolve(cliValue('--rfcs-dir') || process.env.THREEGPP_RFCS_DIR || join(PROJECT_ROOT, 'data', 'rfcs'));
+const DB_PATH = cliValue('--db') ? resolve(cliValue('--db')) : undefined;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -308,8 +318,8 @@ function main() {
     process.exit(1);
   }
 
-  const db = getConnection();
-  console.log(`Database: data/corpus/3gpp.db`);
+  const db = getConnection(DB_PATH);
+  console.log(`Database: ${db.name}`);
   console.log(`Mode: ${rebuild ? 'rebuild' : 'incremental'}\n`);
 
   let totalSections = 0;

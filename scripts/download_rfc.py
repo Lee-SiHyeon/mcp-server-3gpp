@@ -7,13 +7,25 @@ Usage:
     python scripts/download_rfc.py --category SIP
     python scripts/download_rfc.py --all
     python scripts/download_rfc.py --all --output data/rfcs/
+    # RFCs cited by the non-RFC specs in the corpus but not yet ingested:
+    python scripts/download_rfc.py --from-citations --db data/corpus/3gpp.db --list-only
+    python scripts/download_rfc.py --from-citations --db data/corpus/3gpp.db \
+        --min-mentions 3 --min-specs 2 --output data/rfcs/
+
+Downloads are skipped when the TXT is already present; requests retry with
+backoff on 429/5xx/network errors and fall back to the ietf.org mirror.
+Metadata comes from rfc-editor.org/rfc/rfcNNNN.json (incl. obsoleted_by),
+falling back to the IETF Datatracker API.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
+import sqlite3
 import sys
 import time
+from collections import defaultdict
 from pathlib import Path
 
 try:
@@ -91,33 +103,74 @@ SESSION = requests.Session()
 SESSION.headers["User-Agent"] = "mcp-server-3gpp/1.0 (+https://github.com/Lee-SiHyeon/mcp-server-3gpp)"
 
 
-def _get_with_retry(url: str, timeout: int = 30) -> requests.Response | None:
-    """GET a URL, retry once on 503, return None on 404 or repeated failure."""
-    for attempt in range(2):
+RETRY_STATUS = {429, 500, 502, 503, 504}
+
+
+def _get_with_retry(url: str, timeout: int = 30, attempts: int = 4) -> requests.Response | None:
+    """GET a URL with exponential backoff; None on 404/410 or repeated failure."""
+    delay = 2.0
+    for attempt in range(1, attempts + 1):
         try:
             resp = SESSION.get(url, timeout=timeout)
-            if resp.status_code == 404:
+            if resp.status_code in (404, 410):
                 return None
-            if resp.status_code == 503:
-                if attempt == 0:
-                    print(f"  503 from {url}, retrying in 5s…")
-                    time.sleep(5)
-                    continue
-                return None
+            if resp.status_code in RETRY_STATUS and attempt < attempts:
+                wait = float(resp.headers.get("Retry-After", delay)) if resp.headers.get("Retry-After", "").isdigit() else delay
+                print(f"  {resp.status_code} from {url}, retry {attempt}/{attempts - 1} in {wait:.0f}s")
+                time.sleep(wait)
+                delay *= 2
+                continue
             resp.raise_for_status()
             return resp
         except requests.RequestException as exc:
-            if attempt == 0:
-                print(f"  Request error: {exc}, retrying…")
-                time.sleep(3)
+            if attempt < attempts:
+                print(f"  Request error: {exc}, retry {attempt}/{attempts - 1} in {delay:.0f}s")
+                time.sleep(delay)
+                delay *= 2
                 continue
-            print(f"  Failed after retry: {exc}")
+            print(f"  Failed after {attempts} attempts: {exc}")
             return None
     return None
 
 
+def _rfc_editor_json(rfc_number: int) -> dict:
+    resp = _get_with_retry(f"https://www.rfc-editor.org/rfc/rfc{rfc_number}.json")
+    if resp is None:
+        return {}
+    try:
+        data = resp.json()
+    except ValueError:
+        return {}
+    def _nums(values):
+        out = []
+        for v in values or []:
+            m = re.match(r"(?i)rfc\s*0*(\d+)", str(v).strip())
+            if m:
+                out.append(int(m.group(1)))
+        return out
+    try:
+        pages = int(data.get("page_count") or 0)
+    except ValueError:
+        pages = 0
+    return {
+        "rfc_number": rfc_number,
+        "title": (data.get("title") or f"RFC {rfc_number}").strip(),
+        "abstract": (data.get("abstract") or "").strip(),
+        "pages": pages,
+        "std_level": data.get("status") or "",
+        "date": data.get("pub_date") or "",
+        "url": f"https://www.rfc-editor.org/rfc/rfc{rfc_number}.txt",
+        "obsoleted_by": _nums(data.get("obsoleted_by")),
+        "obsoletes": _nums(data.get("obsoletes")),
+    }
+
+
 def fetch_metadata(rfc_number: int) -> dict:
-    """Fetch RFC metadata from IETF Datatracker API."""
+    """Fetch RFC metadata (rfc-editor JSON first, then IETF Datatracker)."""
+    meta = _rfc_editor_json(rfc_number)
+    if meta:
+        meta["category"] = PRIORITY_RFCS.get(rfc_number, "cited" if rfc_number not in PRIORITY_RFCS else "unknown")
+        return meta
     url = f"https://datatracker.ietf.org/api/v1/doc/document/rfc{rfc_number}/?format=json"
     resp = _get_with_retry(url)
     if resp is None:
@@ -148,10 +201,10 @@ def download_rfc(rfc_number: int, output_dir: Path) -> dict | None:
     txt_path = output_dir / f"rfc{rfc_number}.txt"
     meta_path = output_dir / f"rfc{rfc_number}_meta.json"
 
-    # Download TXT
-    if not txt_path.exists():
-        resp = _get_with_retry(txt_url)
-        if resp is None:
+    # Download TXT (rfc-editor first, ietf.org mirror as fallback)
+    if not txt_path.exists() or txt_path.stat().st_size == 0:
+        resp = _get_with_retry(txt_url) or _get_with_retry(f"https://www.ietf.org/rfc/rfc{rfc_number}.txt")
+        if resp is None or not resp.text.strip():
             print(f"  RFC {rfc_number}: TXT not available, skipping.")
             return None
         txt_path.write_text(resp.text, encoding="utf-8")
@@ -181,6 +234,32 @@ def download_rfc(rfc_number: int, output_dir: Path) -> dict | None:
         print(f"  {meta_path} already exists, skipping fetch.")
 
     return meta
+
+
+# Keep the acquisition grammar aligned with extract_cross_refs.js.  In
+# particular TS 33.210 spells RFC 2451 as "RFC-2451", and some specifications
+# pad the number ("RFC 0768"). int() below canonicalises those padded ids.
+CITATION_RE = re.compile(r"\bRFC[\s\-–]*(\d{3,5})\b", re.IGNORECASE)
+
+
+def cited_rfcs(db_path: Path) -> tuple[dict[int, dict], set[int]]:
+    """Scan non-RFC sections for RFC citations.
+
+    Returns ({rfc: {"mentions": n, "specs": {spec_id, ...}}}, rfcs_in_corpus).
+    """
+    con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    try:
+        in_corpus = {int(r[0][4:]) for r in con.execute("SELECT id FROM specs WHERE id LIKE 'rfc\\_%' ESCAPE '\\'")
+                     if r[0][4:].isdigit()}
+        stats: dict[int, dict] = defaultdict(lambda: {"mentions": 0, "specs": set()})
+        for spec_id, content in con.execute("SELECT spec_id, content FROM sections WHERE spec_id NOT LIKE 'rfc\\_%' ESCAPE '\\'"):
+            for m in CITATION_RE.finditer(content or ""):
+                n = int(m.group(1))
+                stats[n]["mentions"] += 1
+                stats[n]["specs"].add(spec_id)
+        return dict(stats), in_corpus
+    finally:
+        con.close()
 
 
 def update_manifest(output_dir: Path, all_meta: dict[int, dict]) -> None:
@@ -214,6 +293,17 @@ def main() -> None:
                         help="Download all priority RFCs")
     parser.add_argument("--output", default="data/rfcs/",
                         help="Output directory (default: data/rfcs/)")
+    parser.add_argument("--from-citations", action="store_true",
+                        help="Download RFCs cited by non-RFC sections of --db that the corpus lacks")
+    parser.add_argument("--db", default="data/corpus/3gpp.db", help="Corpus DB for --from-citations")
+    parser.add_argument("--min-mentions", type=int, default=1,
+                        help="--from-citations: keep RFCs cited at least N times (OR --min-specs)")
+    parser.add_argument("--min-specs", type=int, default=None,
+                        help="--from-citations: also keep RFCs cited by at least N distinct specs")
+    parser.add_argument("--list-only", action="store_true",
+                        help="Print the selected RFC list (TSV) without downloading")
+    parser.add_argument("--sleep", type=float, default=0.2,
+                        help="Pause between RFCs in seconds (default 0.2)")
     args = parser.parse_args()
 
     output_dir = Path(args.output)
@@ -221,7 +311,27 @@ def main() -> None:
 
     # Determine which RFCs to download
     to_download: list[int] = []
-    if args.all:
+    if args.from_citations:
+        stats, in_corpus = cited_rfcs(Path(args.db))
+        missing = {n: v for n, v in stats.items() if n not in in_corpus}
+        def keep(v):
+            if v["mentions"] >= args.min_mentions:
+                return True
+            return args.min_specs is not None and len(v["specs"]) >= args.min_specs
+        selected = sorted((n for n, v in missing.items() if keep(v)),
+                          key=lambda n: (-missing[n]["mentions"], n))
+        print(f"Cited RFCs: {len(stats)}; in corpus: {len(set(stats) & in_corpus)}; "
+              f"missing: {len(missing)}; selected: {len(selected)}", file=sys.stderr)
+        if args.list_only:
+            print("rfc\tmentions\tspecs")
+            for n in selected:
+                print(f"{n}\t{missing[n]['mentions']}\t{len(missing[n]['specs'])}")
+            return
+        to_download = selected
+        if not to_download:
+            print("No missing RFCs selected; cited RFCs are already in the corpus or below the requested thresholds.")
+            return
+    elif args.all:
         to_download = sorted(PRIORITY_RFCS.keys())
     else:
         if args.rfc:
@@ -234,15 +344,21 @@ def main() -> None:
         to_download = sorted(set(to_download))
 
     if not to_download:
-        parser.error("Specify --rfc, --category, or --all")
+        parser.error("Specify --rfc, --category, --all or --from-citations")
 
     print(f"Downloading {len(to_download)} RFCs to {output_dir}/")
     all_meta: dict[int, dict] = {}
 
+    failed: list[int] = []
     for rfc_number in to_download:
         meta = download_rfc(rfc_number, output_dir)
         if meta:
             all_meta[rfc_number] = meta
+        else:
+            failed.append(rfc_number)
+        time.sleep(args.sleep)
+    if failed:
+        print(f"Not available: {' '.join(map(str, failed))}")
 
     update_manifest(output_dir, all_meta)
     print(f"\nDone. Downloaded {len(all_meta)}/{len(to_download)} RFCs.")

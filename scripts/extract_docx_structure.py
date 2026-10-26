@@ -10,9 +10,14 @@ Supports:
   - .doc  (old binary format, via antiword command-line tool)
 
 Usage:
-    python scripts/extract_docx_structure.py <spec_id> <3gpp_ftp_url>
+    python scripts/extract_docx_structure.py <spec_id> <3gpp_ftp_url | local.zip> [--title T]
     python scripts/extract_docx_structure.py ts_34_229_1 \
         https://www.3gpp.org/ftp/Specs/archive/34_series/34.229-1/34229-1-j50.zip
+    python scripts/extract_docx_structure.py ts_38_521_1 ~/dl/38521-1-k00.zip \
+        --title "NR; UE conformance specification; Radio transmission and reception; Part 1: Range 1 standalone"
+
+Tables are emitted in document order as " | "-joined rows so that RF test
+requirement tables are searchable like the PDF path.
 
 Output:
     data/intermediate/{spec_id}_structure.jsonl
@@ -48,13 +53,16 @@ USER_AGENT = "Mozilla/5.0 (compatible; 3GPP-Downloader/1.0)"
 # 3GPP heading style names
 HEADING_STYLES = {
     "heading 1", "heading 2", "heading 3", "heading 4",
-    "heading 5", "heading 6", "heading 7", "heading 8",
+    "heading 5", "heading 6", "heading 7", "heading 8", "heading 9",
     "heading1", "heading2", "heading3", "heading4",
-    # 3GPP-specific style names sometimes seen
+    # 3GPP-specific style names sometimes seen ("H6" is used for deep
+    # test-case sub-clauses such as 6.2.1.4.1 in TS 38.521-x)
     "3gpp heading 1", "3gpp heading 2",
+    "h6", "h7", "h8", "h9",
 }
 
-SECTION_PATTERN = re.compile(r'^(\d+(?:\.\d+)*)\s+(.+)', re.DOTALL)
+# Accepts 3GPP letter-suffixed clauses (6.2A.1, 6.2D.1.1, 6.1.2.3a).
+SECTION_PATTERN = re.compile(r'^(\d+(?:[A-Za-z]{1,2}(?=\.))?(?:\.\d+[A-Za-z]{0,2})*)\s+(.+)', re.DOTALL)
 ANNEX_PATTERN = re.compile(
     r'^(Annex\s+[A-Z](?:\.\d+)*)\s*(?:\((?:normative|informative)\))?\s*:?\s*(.+)',
     re.DOTALL,
@@ -75,14 +83,62 @@ def _heading_level(style_name: str) -> int:
     return int(m.group(1)) if m else 1
 
 
+# Heading-styled paragraphs are known headings, so accept the laxer forms the
+# PDF outline path accepts: "58a Title", number-only "14.17", annex
+# sub-clauses "A.1"/"A1.1.5", and numeric annexes "Annex 3".
+# "_N" variants (6.2.1_1, 6.2B.1.4_1.1.1) are separate clauses in TS 38.521-x.
+_HEADING_NUMBER_RE = re.compile(r'^(\d+[A-Za-z]{0,2}(?:_\d+)?(?:\.\d+[A-Za-z]{0,2}(?:_\d+)?)*)(?:\s|$)')
+_ANNEX_HEADING_RE = re.compile(r'^(Annex\s+(?:[A-Z]|\d+)(?:\.\d+)*)', re.IGNORECASE)
+_ANNEX_SUBCLAUSE_RE = re.compile(r'^([A-Z]\d{0,2}(?:\.\d+[A-Za-z]{0,2})+)(?:\s|$)')
+
+
 def _extract_section_number(text: str) -> str:
-    m = SECTION_PATTERN.match(text.strip())
-    if m:
-        return m.group(1)
-    m = ANNEX_PATTERN.match(text.strip())
-    if m:
-        return m.group(1)
+    text = text.strip()
+    for rx in (_HEADING_NUMBER_RE, _ANNEX_HEADING_RE, _ANNEX_SUBCLAUSE_RE):
+        m = rx.match(text)
+        if m:
+            return m.group(1)
     return ""
+
+
+def iter_block_text(doc):
+    """Yield (style_name, text) for paragraphs and table rows in body order.
+
+    Table rows get style_name "" (never a heading) and cells joined by " | ".
+    """
+    from docx.table import Table
+    from docx.text.paragraph import Paragraph
+
+    body = doc.element.body
+    for child in body.iterchildren():
+        tag = child.tag.rsplit('}', 1)[-1]
+        if tag == 'p':
+            para = Paragraph(child, doc)
+            style_name = para.style.name if para.style is not None else ""
+            yield style_name, para.text.strip()
+        elif tag == 'tbl':
+            table = Table(child, doc)
+            for row in table.rows:
+                cells = []
+                prev = None
+                for cell in row.cells:
+                    # merged cells repeat the same object; keep one copy
+                    if prev is not None and cell._tc is prev:
+                        continue
+                    prev = cell._tc
+                    cells.append(" ".join(cell.text.split()))
+                line = " | ".join(c for c in cells if c)
+                if line:
+                    yield "", line
+
+
+def load_zip(source: str) -> bytes:
+    """Read a ZIP from a local path or download it from a URL."""
+    if re.match(r'^https?://', source):
+        return download_zip(source)
+    data = Path(source).expanduser().read_bytes()
+    print(f"  Read local {source} ({len(data) / 1024:.0f} KB)")
+    return data
 
 
 def download_zip(url: str) -> bytes:
@@ -186,7 +242,9 @@ def parse_version_from_filename(filename: str) -> str:
     # 3GPP naming: NNNNN-P-xYZ.docx or NNNNN-P-xYZ.doc
     # x = letter indicating release (f=15, g=16, h=17, i=18, j=19, k=20)
     # YZ = version digits
-    m = re.search(r'-([a-z])(\d{2})\.(docx?|zip)$', filename.lower())
+    # Anchor on the spec number so split files such as
+    # '38521-1-k00_s00-s05.docx' are not read as release 's' (→ v0.0.5).
+    m = re.search(r'\d{4,5}(?:-\d+)?-([a-k])(\d{2})(?=[_.\-]|$)', Path(filename).name.lower())
     if m:
         rel_letter = m.group(1)
         ver_digits = m.group(2)
@@ -206,6 +264,8 @@ def extract_docx(
     spec_id: str,
     docx_bytes: bytes,
     source_filename: str,
+    title: str | None = None,
+    source_archive: str | None = None,
 ) -> Path:
     """
     Parse a .docx file and produce a _structure.jsonl in data/intermediate/.
@@ -215,8 +275,8 @@ def extract_docx(
     doc = docx.Document(io.BytesIO(docx_bytes))
     version = parse_version_from_filename(source_filename)
 
-    # Collect paragraphs with style info
-    paragraphs = doc.paragraphs
+    # Collect paragraphs (and table rows) with style info, in body order
+    blocks = list(iter_block_text(doc))
 
     # Build TOC entries and virtual "pages" from the document body
     # Strategy: each heading starts a new virtual page.
@@ -237,9 +297,7 @@ def extract_docx(
                 "headings_found": headings[:],
             })
 
-    for para in paragraphs:
-        style_name = para.style.name if para.style else ""
-        text = para.text.strip()
+    for style_name, text in blocks:
         if not text:
             continue
 
@@ -279,8 +337,7 @@ def extract_docx(
         current_page_lines = []
         current_page_headings = []
 
-        for para in paragraphs:
-            text = para.text.strip()
+        for _style, text in blocks:
             if not text:
                 continue
 
@@ -337,10 +394,12 @@ def extract_docx(
     records.append({
         "type": "spec_meta",
         "spec_id": spec_id,
-        "title": spec_id,
+        "title": title or spec_id,
         "version": version,
         "total_pages": total_pages,
         "source_docx": source_filename,
+        # loader stores this in specs.source_pdf (provenance of the original file)
+        "source_pdf": source_archive or source_filename,
     })
     records.extend(toc_entries)
     records.extend(page_texts)
@@ -354,7 +413,12 @@ def extract_docx(
     return output_path
 
 
-def extract_merged_docx(spec_id: str, docs: list[tuple[bytes, str]]) -> Path:
+def extract_merged_docx(
+    spec_id: str,
+    docs: list[tuple[bytes, str]],
+    title: str | None = None,
+    source_archive: str | None = None,
+) -> Path:
     """Merge multiple .docx/.doc files and produce a single structure JSONL."""
     all_toc_entries: list[dict] = []
     all_page_texts: list[dict] = []
@@ -421,7 +485,6 @@ def extract_merged_docx(spec_id: str, docs: list[tuple[bytes, str]]) -> Path:
 
         # .docx format: use python-docx
         doc = docx.Document(io.BytesIO(doc_bytes))
-        paragraphs = doc.paragraphs
 
         current_page = page_offset + 1
         current_page_lines: list[str] = []
@@ -437,9 +500,7 @@ def extract_merged_docx(spec_id: str, docs: list[tuple[bytes, str]]) -> Path:
                     "headings_found": headings[:],
                 })
 
-        for para in paragraphs:
-            style_name = para.style.name if para.style else ""
-            text = para.text.strip()
+        for style_name, text in iter_block_text(doc):
             if not text:
                 continue
 
@@ -478,10 +539,11 @@ def extract_merged_docx(spec_id: str, docs: list[tuple[bytes, str]]) -> Path:
     records.append({
         "type": "spec_meta",
         "spec_id": spec_id,
-        "title": spec_id,
+        "title": title or spec_id,
         "version": version,
         "total_pages": total_pages,
         "source_docx": f"{len(docs)}_merged_files",
+        "source_pdf": source_archive or f"{len(docs)}_merged_files",
     })
     records.extend(all_toc_entries)
     records.extend(all_page_texts)
@@ -495,9 +557,10 @@ def extract_merged_docx(spec_id: str, docs: list[tuple[bytes, str]]) -> Path:
     return output_path
 
 
-def process(spec_id: str, zip_url: str) -> Path:
-    """Download ZIP, extract all .docx files, merge and produce structure JSONL."""
-    zip_bytes = download_zip(zip_url)
+def process(spec_id: str, zip_url: str, title: str | None = None) -> Path:
+    """Read/download ZIP, extract all .docx files, merge and produce structure JSONL."""
+    zip_bytes = load_zip(zip_url)
+    archive_name = Path(zip_url.rstrip('/')).name
 
     all_docs = extract_all_docx_from_zip(zip_bytes)
     print(f"  Found {len(all_docs)} docx file(s) in ZIP")
@@ -505,22 +568,23 @@ def process(spec_id: str, zip_url: str) -> Path:
     if len(all_docs) == 1:
         docx_bytes, docx_name = all_docs[0]
         print(f"  Extracted: {docx_name} ({len(docx_bytes) / 1024:.0f} KB)")
-        return extract_docx(spec_id, docx_bytes, docx_name)
+        return extract_docx(spec_id, docx_bytes, docx_name, title=title, source_archive=archive_name)
 
     # Multiple docx files: merge them into one structure.jsonl
-    return extract_merged_docx(spec_id, all_docs)
+    return extract_merged_docx(spec_id, all_docs, title=title, source_archive=archive_name)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Extract 3GPP Word doc structure from 3GPP FTP ZIP.",
+        description="Extract 3GPP Word doc structure from a 3GPP FTP ZIP (URL or local file).",
         epilog="Output: data/intermediate/{spec_id}_structure.jsonl",
     )
     parser.add_argument("spec_id", help="Spec ID, e.g. ts_34_229_1")
-    parser.add_argument("zip_url", help="3GPP FTP ZIP URL")
+    parser.add_argument("zip_url", help="3GPP FTP ZIP URL or local .zip path")
+    parser.add_argument("--title", default=None, help="Spec title for specs.title (default: spec_id)")
     args = parser.parse_args()
 
-    process(args.spec_id, args.zip_url)
+    process(args.spec_id, args.zip_url, title=args.title)
 
 
 if __name__ == "__main__":

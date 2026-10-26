@@ -73,7 +73,12 @@ import { initDatabase } from "./db/schema.js";
 // ---------------------------------------------------------------------------
 // Resolve the database path (first candidate that exists on disk)
 // ---------------------------------------------------------------------------
-function resolveDbPath() {
+export function resolveDbPath() {
+  // An explicit deployment path is authoritative. Do not silently serve an
+  // unrelated bundled corpus if the operator's chosen file is missing.
+  if (process.env.THREEGPP_DB_PATH) {
+    return fs.existsSync(process.env.THREEGPP_DB_PATH) ? process.env.THREEGPP_DB_PATH : null;
+  }
   for (const candidate of DB_CANDIDATES) {
     if (fs.existsSync(candidate)) return candidate;
   }

@@ -47,13 +47,18 @@ function normaliseSpecId(type, num) {
 const PATTERNS = [
   // 3GPP TS / TR with optional full spec number "3GPP TS 24.301" or "TS 24.301"
   {
-    re: /(?:3GPP\s+)?(TS|TR)\s+(\d{2,3}\.\d{3})/gi,
-    extract: (m) => ({ ref_type: '3gpp', target_id: normaliseSpecId(m[1], m[2]), citation_text: m[0].trim() }),
+    // keeps the multi-part suffix: "TS 36.523-1" → ts_36_523_1
+    re: /(?:3GPP\s+)?(TS|TR)\s+(\d{2,3}\.\d{3})(?:-(\d{1,2})\b)?/gi,
+    extract: (m) => ({
+      ref_type: '3gpp',
+      target_id: normaliseSpecId(m[1], m[3] ? `${m[2]}_${m[3]}` : m[2]),
+      citation_text: m[0].trim(),
+    }),
   },
-  // RFC NNNN or RFC-NNNN
+  // RFC NNNN, RFC-NNNN or RFCNNNN
   {
-    re: /\bRFC[\s\-–](\d{3,5})\b/gi,
-    extract: (m) => ({ ref_type: 'rfc', target_id: `rfc_${m[1]}`, citation_text: m[0].trim() }),
+    re: /\bRFC[\s\-–]*(\d{3,5})\b/gi,
+    extract: (m) => ({ ref_type: 'rfc', target_id: `rfc_${Number.parseInt(m[1], 10)}`, citation_text: m[0].trim() }),
   },
 ];
 

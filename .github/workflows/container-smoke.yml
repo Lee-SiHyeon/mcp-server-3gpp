@@ -1,0 +1,44 @@
+name: Container smoke
+
+on:
+  push:
+    branches: [codex/free-mcp-hosting-20261027]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Docker smoke (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - name: Make an isolated synthetic corpus
+        run: python3 .github/scripts/make-smoke-corpus.py
+      - name: Build container
+        run: docker build --tag 3gpp-mcp-smoke .
+      - name: Check native vector extension
+        run: |
+          docker run --rm --entrypoint node 3gpp-mcp-smoke --input-type=module -e "import Database from 'better-sqlite3'; import * as vec from 'sqlite-vec'; const db=new Database(':memory:'); vec.load(db); console.log('sqlite-vec ready'); db.close()"
+      - name: Start and exercise MCP
+        run: |
+          docker run --detach --name 3gpp-mcp-smoke -p 127.0.0.1:39273:3000 -e API_KEY=ci-only-key -e THREEGPP_DISABLE_SEMANTIC=true 3gpp-mcp-smoke
+          node .github/scripts/smoke-container.mjs
+      - name: Show container logs on failure
+        if: failure()
+        run: docker logs 3gpp-mcp-smoke || true
+      - name: Stop the temporary container
+        if: always()
+        run: docker rm --force 3gpp-mcp-smoke || true
