@@ -7,6 +7,11 @@ on:
 
 permissions:
   contents: read
+  packages: write
+
+concurrency:
+  group: free-mcp-runtime-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   smoke:
@@ -29,6 +34,8 @@ jobs:
         run: python3 .github/scripts/make-smoke-corpus.py
       - name: Build container
         run: docker build --tag 3gpp-mcp-smoke .
+      - name: Validate free VM Compose configuration
+        run: API_KEY=ci-only-key MCP_PUBLIC_HOST=localhost docker compose config --quiet
       - name: Check native vector extension
         run: |
           docker run --rm --entrypoint node 3gpp-mcp-smoke --input-type=module -e "import Database from 'better-sqlite3'; import * as vec from 'sqlite-vec'; const db=new Database(':memory:'); vec.load(db); console.log('sqlite-vec ready'); db.close()"
@@ -42,3 +49,50 @@ jobs:
       - name: Stop the temporary container
         if: always()
         run: docker rm --force 3gpp-mcp-smoke || true
+
+  publish-amd64:
+    if: github.event_name == 'push'
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - name: Verify and publish runtime-only image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash .github/scripts/publish-runtime.sh
+
+  publish-arm64:
+    if: github.event_name == 'push'
+    needs: publish-amd64
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - name: Verify and publish runtime-only image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash .github/scripts/publish-runtime.sh
+
+  publish-manifest:
+    if: github.event_name == 'push'
+    needs: publish-arm64
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Publish multi-architecture manifest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          image=ghcr.io/lee-sihyeon/mcp-server-3gpp-runtime
+          tag="runtime-${GITHUB_SHA:0:12}"
+          printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          docker manifest create "${image}:${tag}" --amend "${image}:${tag}-x64" --amend "${image}:${tag}-arm64"
+          docker manifest push "${image}:${tag}"
+          echo "Published runtime-only multi-architecture image: ${image}:${tag}"

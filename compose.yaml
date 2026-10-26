@@ -1,0 +1,28 @@
+services:
+  mcp:
+    build: .
+    image: mcp-server-3gpp:local
+    restart: unless-stopped
+    environment:
+      API_KEY: ${API_KEY:?Set API_KEY in your environment or .env}
+      CORS_ORIGIN: ${CORS_ORIGIN:-}
+      THREEGPP_DISABLE_SEMANTIC: ${THREEGPP_DISABLE_SEMANTIC:-false}
+      # Caddy is the only public entry point and sanitizes forwarded headers.
+      TRUST_PROXY: "true"
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      MCP_PUBLIC_HOST: ${MCP_PUBLIC_HOST:?Set MCP_PUBLIC_HOST to your DNS name}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - mcp
+volumes:
+  caddy_data:
+  caddy_config:

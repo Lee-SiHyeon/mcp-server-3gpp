@@ -94,6 +94,13 @@ docker run --rm -p 127.0.0.1:3000:3000 \
   -e API_KEY="your-long-random-secret" mcp-server-3gpp:local
 ```
 
+To build a runtime-only image without bundling or downloading any corpus, use
+`docker build --build-arg BUNDLE_CORPUS=false -t mcp-server-3gpp:runtime .`.
+At runtime, mount a directory containing `3gpp.db` at `/app/data/corpus`; the
+directory must be writable by UID 1000 for SQLite WAL files. `/ready` remains
+unavailable until a usable corpus is present. Supply a corpus whose use and
+distribution are permitted for the intended deployment.
+
 Connect a Streamable HTTP MCP client to `http://127.0.0.1:3000/mcp` with the
 Bearer header. For an external service, put HTTPS in front of the container.
 Use `ALLOW_OPEN_HTTP=true` only when intentionally exposing anonymous reads.
@@ -125,6 +132,21 @@ Free host allowances and billing safeguards depend on the hosting account.
 Check that exceeding bandwidth or build limits stops service rather than
 incurring charges before publishing a free-tier endpoint. Git LFS downloads
 consume the repository owner's separate LFS allowance.
+
+For a separate VM such as an Always Free instance, `compose.yaml` starts the
+MCP container behind Caddy, which obtains HTTPS certificates for a public DNS
+name. Fetch the corpus before building, point DNS to the VM, open TCP ports 80
+and 443, then provide a strong API key and hostname in a private `.env` file:
+
+```bash
+cp .env.example .env
+# Set API_KEY and MCP_PUBLIC_HOST in .env; do not commit this file.
+docker compose up --build -d
+```
+
+Only Caddy publishes ports. The MCP service trusts forwarded addresses from
+Caddy; if another proxy or CDN is placed in front of Caddy, configure trusted
+proxy addresses before relying on per-client rate limits.
 
 ## MCP client configuration
 

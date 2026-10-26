@@ -27,21 +27,30 @@ import http from "node:http";
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
-const PORT = parseInt(process.env.PORT || "3000", 10);
+function integerSetting(name, fallback, minimum = 1, maximum = Number.MAX_SAFE_INTEGER) {
+  const raw = process.env[name] ?? String(fallback);
+  const value = Number(raw);
+  if (!/^\d+$/.test(raw) || !Number.isSafeInteger(value) || value < minimum || value > maximum) {
+    throw new Error(`${name} must be an integer between ${minimum} and ${maximum}`);
+  }
+  return value;
+}
+
+const PORT = integerSetting("PORT", 3000, 0, 65535);
 const HOST = process.env.HOST || "0.0.0.0";
 const API_KEY = process.env.API_KEY || "";
 // Requests without Origin are accepted (typical non-browser MCP clients).
 // Browser origins must be explicitly configured; a wildcard is not validation.
 const ALLOWED_ORIGINS = new Set((process.env.CORS_ORIGIN || "")
   .split(",").map((origin) => origin.trim()).filter(Boolean));
-const RATE_LIMIT_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS || "60000", 10);
-const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || "100", 10);
-const MAX_BODY_BYTES = parseInt(process.env.MAX_BODY_BYTES || "1048576", 10);
+const RATE_LIMIT_WINDOW_MS = integerSetting("RATE_LIMIT_WINDOW_MS", 60000);
+const RATE_LIMIT_MAX = integerSetting("RATE_LIMIT_MAX", 100);
+const MAX_BODY_BYTES = integerSetting("MAX_BODY_BYTES", 1048576);
 const TRUST_PROXY = process.env.TRUST_PROXY === "true";
 const ALLOW_OPEN_HTTP = process.env.ALLOW_OPEN_HTTP === "true";
 const REQUIRE_API_KEY = process.env.NODE_ENV === "production" && !ALLOW_OPEN_HTTP;
-const MAX_SESSIONS = Math.max(1, parseInt(process.env.MAX_SESSIONS || "64", 10));
-const SESSION_TTL_MS = Math.max(1000, parseInt(process.env.SESSION_TTL_MS || "1800000", 10));
+const MAX_SESSIONS = integerSetting("MAX_SESSIONS", 64);
+const SESSION_TTL_MS = integerSetting("SESSION_TTL_MS", 1800000, 1000);
 
 // ---------------------------------------------------------------------------
 // Rate limiter (in-memory, per-IP)

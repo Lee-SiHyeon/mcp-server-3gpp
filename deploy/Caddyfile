@@ -1,0 +1,3 @@
+{$MCP_PUBLIC_HOST} {
+    reverse_proxy mcp:3000
+}

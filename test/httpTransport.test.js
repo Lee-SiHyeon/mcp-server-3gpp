@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import net from 'node:net';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -175,5 +175,14 @@ describe('Streamable HTTP deployment', () => {
     }
     const limited = await fetch(`${base}/mcp`, { method: 'POST', headers: { ...headers, Authorization: 'Bearer wrong' }, body: JSON.stringify(init) });
     assert.equal(limited.status, 429);
+  });
+
+  test('invalid session limits fail closed at startup', () => {
+    const result = spawnSync(process.execPath, [path.join(root, 'src/http.js')], {
+      cwd: root, encoding: 'utf8', timeout: 5000,
+      env: { PATH: process.env.PATH, NODE_ENV: 'production', API_KEY: key, MAX_SESSIONS: 'invalid' },
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /MAX_SESSIONS must be an integer/);
   });
 });

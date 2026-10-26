@@ -12,6 +12,7 @@ RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund \
 
 FROM node:22-bookworm-slim
 WORKDIR /app
+LABEL org.opencontainers.image.source="https://github.com/Lee-SiHyeon/mcp-server-3gpp"
 COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
 COPY --chown=node:node package*.json ./
 COPY --chown=node:node src/ src/
@@ -19,8 +20,13 @@ COPY --chown=node:node db/ db/
 COPY --chown=node:node data/corpus/3gpp.db data/corpus/3gpp.db
 RUN chown -R node:node /app/data
 
-# Fail the image build if checkout left a Git LFS pointer instead of SQLite.
-RUN node -e "const fs=require('fs');const fd=fs.openSync('data/corpus/3gpp.db','r');const b=Buffer.alloc(16);fs.readSync(fd,b,0,16,0);fs.closeSync(fd);if(!b.equals(Buffer.from('SQLite format 3\\0')))throw Error('Corpus is not a SQLite database; fetch the Git LFS object first')"
+# A bundled image must have SQLite, not an LFS pointer. A runtime-only image
+# removes the pointer and expects a writable corpus directory to be mounted.
+ARG BUNDLE_CORPUS=true
+RUN if [ "$BUNDLE_CORPUS" = "true" ]; then \
+      node -e "const fs=require('fs');const fd=fs.openSync('data/corpus/3gpp.db','r');const b=Buffer.alloc(16);fs.readSync(fd,b,0,16,0);fs.closeSync(fd);if(!b.equals(Buffer.from('SQLite format 3\\0')))throw Error('Corpus is not a SQLite database; fetch the Git LFS object first')"; \
+    elif [ "$BUNDLE_CORPUS" = "false" ]; then rm -f data/corpus/3gpp.db; \
+    else echo 'BUNDLE_CORPUS must be true or false' >&2; exit 1; fi
 
 ENV NODE_ENV=production PORT=3000
 USER node
